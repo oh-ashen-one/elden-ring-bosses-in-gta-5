@@ -26,3 +26,5 @@
 **/__pycache__/
 *.py[cod]
 .venv/
+/gta/asset-tools/CodeWalkerBridge/bin/
+/gta/asset-tools/CodeWalkerBridge/obj/

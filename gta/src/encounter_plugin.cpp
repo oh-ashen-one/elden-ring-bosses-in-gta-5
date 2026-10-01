@@ -1,0 +1,320 @@
+#include <atomic>
+#include <array>
+#include <cstdio>
+#include <cwchar>
+#include <cstring>
+#include "scripthook.hpp"
+#include "combat.hpp"
+
+extern "C" __declspec(dllimport) int ergt_runtime_dependency();
+
+namespace {
+ergt::ScriptHook hook;
+HMODULE module_handle = nullptr;
+FILE* log_file = nullptr;
+bool registered = false;
+std::atomic<unsigned> commands{0};
+enum : unsigned { select_next=1, spawn=2, clear_all=4, toggle_combat=8, loadout=16, helicopter=32 };
+int selected = 0;
+bool fighting = false;
+char notice[192] = "F5 select | F6 spawn | F7 clear | F8 combat | F9 loadout | F10 helicopter";
+
+struct Actor {
+    int entity = 0;
+    const ergt::CreatureSpec* spec = nullptr;
+    ergt::Combat combat;
+    ergt::CombatState previous_state = ergt::CombatState::idle;
+    int native_health = 0;
+    std::uint32_t last_fallback = 0;
+    std::uint32_t last_log = 0;
+    float damage_since_log = 0;
+    bool animation_failed = false;
+};
+std::array<Actor, 3> actors;
+struct Pending {
+    bool active = false;
+    bool vehicle = false;
+    int preset = 0;
+    std::uint32_t hash = 0;
+    std::uint32_t started = 0;
+} pending;
+int owned_helicopter = 0;
+
+bool exists(int entity) { return entity && hook.invoke<int>(0x7239B21A38F536BAULL, entity); }
+ergt::Vec3 coords(int entity) {
+    auto p = hook.invoke<ergt::NativeVector>(0x3FEF770D40960D5AULL, entity, true);
+    return {p.x,p.y,p.z};
+}
+bool finite(ergt::Vec3 p) { return std::isfinite(p.x) && std::isfinite(p.y) && std::isfinite(p.z); }
+std::uint32_t hash(const char* name) { return hook.invoke<std::uint32_t>(0xD24D37CC275948CCULL, name); }
+
+void record(const char* event, int entity=0, float value=0) {
+    if (!log_file) return;
+    std::fprintf(log_file, "tick=%llu event=%s entity=%d value=%.2f\n",
+                 static_cast<unsigned long long>(GetTickCount64()),event,entity,value);
+    std::fflush(log_file);
+}
+void initialize_log() {
+    wchar_t path[32768]{};
+    auto length=GetModuleFileNameW(module_handle,path,32768);
+    if (!length || length>=32768) return;
+    auto slash=std::wcsrchr(path,L'\\');
+    if (!slash || slash-path>32700) return;
+    std::wcscpy(slash+1,L"EldenLosSantos.log");
+    log_file=_wfopen(path,L"a");
+    record("loaded_owner_gameplay_verification_pending");
+}
+void text(float x,float y,const char* line,float scale=0.32f) {
+    hook.invoke(0x66E0276CC5F6B9DAULL,0);
+    hook.invoke(0x07C837F9A01C34C9ULL,0.0f,scale);
+    hook.invoke(0xBE6B23FFA53FB442ULL,255,255,255,235);
+    hook.invoke(0xC02F4DBFB51D988BULL,false);
+    hook.invoke(0x2513DFB0FB8400FEULL);
+    hook.invoke(0x25FBB336DF1804CBULL,"STRING");
+    hook.invoke(0x6C188BE134E074AAULL,line);
+    hook.invoke(0xCD015E5BB0D96A57ULL,x,y);
+}
+void marker(ergt::Vec3 p) {
+    hook.invoke(0x28477EC23D892089ULL,28,p.x,p.y,p.z,
+                0.0f,0.0f,0.0f,0.0f,0.0f,0.0f,3.5f,3.5f,3.5f,
+                255,55,40,90,false,false,2,false,static_cast<const char*>(nullptr),static_cast<const char*>(nullptr),false);
+}
+void animate(Actor& actor,const char* clip,bool loop) {
+    if (!hook.invoke<int>(0xD031A9162D01088CULL,actor.spec->dictionary)) return;
+    if (!hook.invoke<int>(0x7FB218262B810701ULL,actor.entity,clip,actor.spec->dictionary,4.0f,loop,true,false,0.0f,0)) {
+        if (!actor.animation_failed) record("animation_call_failed",actor.entity);
+        actor.animation_failed=true;
+    }
+}
+void remove_actor(Actor& actor) {
+    if (exists(actor.entity) && actor.spec &&
+        hook.invoke<std::uint32_t>(0x9F47B058362C84B5ULL,actor.entity)==hash(actor.spec->model)) {
+        int entity=actor.entity;
+        hook.invoke(0x539E0AE3E6634B9FULL,&entity);
+    }
+    actor=Actor{};
+}
+void clear() {
+    if (pending.active) { hook.invoke(0xE532F5D78798DAABULL,pending.hash); pending={}; }
+    for (auto& actor:actors) remove_actor(actor);
+    std::snprintf(notice,sizeof(notice),"Creatures cleared. Your helicopter is kept.");
+    record("clear_creatures");
+}
+void begin_spawn(bool vehicle,std::uint32_t now) {
+    if (pending.active) return;
+    if (vehicle && exists(owned_helicopter)) {
+        std::snprintf(notice,sizeof(notice),"Your helicopter already exists nearby."); return;
+    }
+    if (!vehicle && std::all_of(actors.begin(),actors.end(),[](const Actor& a){return a.entity!=0;})) {
+        std::snprintf(notice,sizeof(notice),"Three creatures are active. F7 clears them."); return;
+    }
+    const auto& spec=ergt::creatures[selected];
+    const auto model_hash=hash(vehicle?"buzzard":spec.model);
+    if (!hook.invoke<int>(0xC0296A2EDF545E92ULL,model_hash) || !hook.invoke<int>(0x35B9E0803292B641ULL,model_hash)) {
+        std::snprintf(notice,sizeof(notice),"Model %s unavailable. Check the ERGT DLC installation.",vehicle?"buzzard":spec.model);
+        record("model_unavailable",0,static_cast<float>(selected)); return;
+    }
+    pending={true,vehicle,selected,model_hash,now};
+    hook.invoke(0x963D27A58DF860ACULL,model_hash);
+    if (!vehicle) hook.invoke(0xD3BD40951412FEF6ULL,spec.dictionary);
+    std::snprintf(notice,sizeof(notice),"Loading %s...",vehicle?"helicopter":spec.label);
+}
+void finish_spawn(int player,std::uint32_t now) {
+    if (!pending.active) return;
+    const auto& spec=ergt::creatures[pending.preset];
+    if (now-pending.started>12000) {
+        hook.invoke(0xE532F5D78798DAABULL,pending.hash); pending={};
+        std::snprintf(notice,sizeof(notice),"Asset streaming timed out. See EldenLosSantos.log."); record("streaming_timeout"); return;
+    }
+    if (!hook.invoke<int>(0x98A4EB5D89A0C952ULL,pending.hash)) return;
+    if (!pending.vehicle && !hook.invoke<int>(0xD031A9162D01088CULL,spec.dictionary)) return;
+    auto p=hook.invoke<ergt::NativeVector>(0x1899F328B0E12848ULL,player,pending.vehicle?12.0f:0.0f,18.0f,0.0f);
+    float ground=0;
+    if (!hook.invoke<int>(0xC906A7DAB05C8D2BULL,p.x,p.y,p.z+100.0f,&ground,false)) {
+        hook.invoke(0xE532F5D78798DAABULL,pending.hash); pending={};
+        std::snprintf(notice,sizeof(notice),"No ground found. Move to a clear outdoor area."); return;
+    }
+    if (pending.vehicle) {
+        owned_helicopter=hook.invoke<int>(0xAF35D0D2583051B0ULL,pending.hash,p.x,p.y,ground+1.0f,0.0f,false,true);
+        if (exists(owned_helicopter)) hook.invoke(0xAD738C3085FE7E11ULL,owned_helicopter,true,true);
+        std::snprintf(notice,sizeof(notice),"Armed helicopter placed nearby.");
+        record("helicopter_created",owned_helicopter);
+    } else {
+        auto slot=std::find_if(actors.begin(),actors.end(),[](const Actor& a){return a.entity==0;});
+        if (slot!=actors.end()) {
+            int entity=hook.invoke<int>(0x9A294B2138ABB884ULL,pending.hash,p.x,p.y,ground-spec.minimum_z+0.05f,false,true,true);
+            if (exists(entity)) {
+                slot->entity=entity; slot->spec=&spec; slot->combat.reset(&spec);
+                hook.invoke(0xAD738C3085FE7E11ULL,entity,true,true);
+                hook.invoke(0x1A9205C1B9EE827FULL,entity,true,true);
+                hook.invoke(0x1718DE8E3F2823CAULL,entity,true);
+                hook.invoke(0x4A4722448F18EEF5ULL,entity,true);
+                hook.invoke(0x3882114BDE571AD4ULL,entity,false);
+                hook.invoke(0x1760FFA8AB074D66ULL,entity,true);
+                hook.invoke(0x166E7CF68597D8B5ULL,entity,10000);
+                hook.invoke(0x6B76DC1F3AE6E6A3ULL,entity,10000);
+                slot->native_health=hook.invoke<int>(0xEEF059FAD016D209ULL,entity);
+                animate(*slot,spec.idle_clip,true);
+                std::snprintf(notice,sizeof(notice),"%s spawned. Combat %s (F8).",spec.label,fighting?"ON":"OFF");
+                record("creature_created",entity,slot->native_health);
+            } else { std::snprintf(notice,sizeof(notice),"GTA could not create the creature."); record("create_object_failed"); }
+        }
+    }
+    hook.invoke(0xE532F5D78798DAABULL,pending.hash); pending={};
+}
+
+void observe_damage(Actor& actor,int player,std::uint32_t now) {
+    int health=hook.invoke<int>(0xEEF059FAD016D209ULL,actor.entity);
+    float loss=static_cast<float>(std::max(0,actor.native_health-health));
+    const bool weapon=hook.invoke<int>(0x131D401334815E94ULL,actor.entity,0u,2)!=0;
+    const bool vehicle=hook.invoke<int>(0xDFD5033FDBA0A9C8ULL,actor.entity)!=0;
+    if (loss<=0 && (weapon || vehicle) && now-actor.last_fallback>=80) {
+        // Some drawable objects report hit flags without reducing native HP.
+        // Keep this explicitly logged fallback distinct from measured HP loss.
+        if (weapon) {
+            auto weapon_hash=hook.invoke<std::uint32_t>(0x0A6DB4965674D243ULL,player);
+            std::uint32_t vehicle_weapon=0;
+            if (hook.invoke<int>(0x1017582BCD3832DCULL,player,&vehicle_weapon) && vehicle_weapon) weapon_hash=vehicle_weapon;
+            loss=hook.invoke<float>(0x3133B907D8B32053ULL,weapon_hash,0u);
+            if (!std::isfinite(loss) || loss<=0) loss=200.0f;
+        } else loss=180.0f;
+        actor.last_fallback=now;
+        record(weapon?"weapon_hit_fallback":"vehicle_hit_fallback",actor.entity,loss);
+    }
+    if (std::isfinite(loss) && loss>0) {
+        const float applied=std::min(loss,900.0f);
+        actor.combat.damage(applied); actor.damage_since_log+=applied;
+        if (now-actor.last_log>=200) {
+            record("damage_applied",actor.entity,actor.damage_since_log);
+            actor.damage_since_log=0; actor.last_log=now;
+        }
+    }
+    hook.invoke(0xAC678E40BE7C74D2ULL,actor.entity);
+    hook.invoke(0xA72CD9CA74A5ECBAULL,actor.entity);
+    if (actor.native_health>0 && actor.combat.state()!=ergt::CombatState::defeated)
+        hook.invoke(0x6B76DC1F3AE6E6A3ULL,actor.entity,actor.native_health);
+}
+void update_actor(Actor& actor,int player,int vehicle,std::uint32_t now,int dt) {
+    if (!actor.entity) return;
+    if (!exists(actor.entity)) {
+        record("actor_lost_not_a_confirmed_kill",actor.entity); actor=Actor{};
+        std::snprintf(notice,sizeof(notice),"A creature disappeared. See the log, then respawn."); return;
+    }
+    const auto position=coords(actor.entity),target=coords(player);
+    if (!finite(position) || !finite(target)) { record("invalid_native_position",actor.entity); return; }
+    if (ergt::horizontal_distance(position,target)>500) { remove_actor(actor); return; }
+    if (actor.combat.state()!=ergt::CombatState::defeated) observe_damage(actor,player,now);
+    const bool alive=!hook.invoke<int>(0x3317DEDB88C95038ULL,player,true);
+    const bool clear_sight=hook.invoke<int>(0xFCDFF7B72D23A1ACULL,actor.entity,vehicle?vehicle:player,17)!=0;
+    const bool airborne=hook.invoke<int>(0x298B91AE825E5705ULL,player)!=0;
+    auto decision=actor.combat.tick(dt,{position,target,alive,clear_sight,fighting,airborne});
+    auto state=actor.combat.state();
+    if (state!=actor.previous_state) {
+        if (state==ergt::CombatState::chasing) animate(actor,actor.spec->move_clip,true);
+        else if (state==ergt::CombatState::melee_windup || state==ergt::CombatState::ranged_windup) animate(actor,actor.spec->attack_clip,false);
+        else if (state==ergt::CombatState::idle || state==ergt::CombatState::recovering) animate(actor,actor.spec->idle_clip,true);
+        else if (state==ergt::CombatState::defeated) {
+            animate(actor,actor.spec->death_clip,false);
+            hook.invoke(0x428CA6DBD1094446ULL,actor.entity,true);
+            hook.invoke(0x1A9205C1B9EE827FULL,actor.entity,false,false);
+            std::snprintf(notice,sizeof(notice),"%s defeated. F7 clears the arena.",actor.spec->label);
+            record("defeated",actor.entity);
+        }
+        actor.previous_state=state;
+    }
+    if (fighting && state!=ergt::CombatState::defeated && alive) {
+        float heading=std::atan2(position.x-target.x,target.y-position.y)*57.2957795f;
+        hook.invoke(0x8E2530AA8ADA980EULL,actor.entity,heading);
+    }
+    if (decision.movement.x!=0 || decision.movement.y!=0) {
+        const float x=position.x+decision.movement.x,y=position.y+decision.movement.y;
+        float ground=0;
+        if (hook.invoke<int>(0xC906A7DAB05C8D2BULL,x,y,position.z+4.0f,&ground,false)) {
+            const float z=ground-actor.spec->minimum_z+0.05f;
+            if (std::abs(z-position.z)<1.5f)
+                hook.invoke(0x239A3351AC1DA385ULL,actor.entity,x,y,z,true,true,false);
+        }
+    }
+    if (decision.telegraph) { marker(decision.aim); text(0.35f,0.65f,"Incoming blast - move!",0.5f); }
+    if (decision.melee_strike) {
+        if (vehicle) {
+            const float engine=hook.invoke<float>(0xC45D23BAF168AAB8ULL,vehicle);
+            hook.invoke(0x45F6D8EEF34ABEF1ULL,vehicle,engine-actor.spec->melee_damage*5.0f);
+        } else hook.invoke(0x697157CED63F18D4ULL,player,actor.spec->melee_damage,true);
+        record("melee_strike",actor.entity);
+    }
+    if (decision.ranged_strike) {
+        // GTA effect/area damage; original ER projectile/VFX behavior is not ported.
+        const auto p=decision.aim;
+        hook.invoke(0xE3AD2BDBAEE269ACULL,p.x,p.y,p.z,0,0.35f,true,false,0.15f);
+        record("ranged_strike",actor.entity);
+    }
+}
+
+void keyboard(DWORD key,WORD,BYTE,BOOL,BOOL alt,BOOL repeated,BOOL up) {
+    if (alt || repeated || up) return;
+    unsigned flag=0;
+    if (key==VK_F5) flag=select_next;
+    else if(key==VK_F6) flag=spawn;
+    else if(key==VK_F7) flag=clear_all;
+    else if(key==VK_F8) flag=toggle_combat;
+    else if(key==VK_F9) flag=loadout;
+    else if(key==VK_F10) flag=helicopter;
+    commands.fetch_or(flag);
+}
+void run() {
+    initialize_log();
+    std::uint32_t last=hook.invoke<std::uint32_t>(0x9CD27B0045628463ULL);
+    for (;;) {
+        const auto now=hook.invoke<std::uint32_t>(0x9CD27B0045628463ULL);
+        const int dt=static_cast<int>(std::min<std::uint32_t>(250,now-last)); last=now;
+        if (hook.invoke<int>(0x9DE624D2FC4B603FULL) || hook.invoke<int>(0xB0034A223497FFCBULL) ||
+            hook.invoke<int>(0x991251AFC3981F84ULL)) {
+            commands.store(0); hook.wait(0); continue;
+        }
+        const int player=hook.invoke<int>(0xD80958FC74E988A6ULL);
+        if (!exists(player)) { commands.store(0); hook.wait(0); continue; }
+        const unsigned command=commands.exchange(0);
+        if (command&select_next) selected=(selected+1)%static_cast<int>(ergt::creatures.size());
+        if (command&clear_all) clear();
+        else if (command&spawn) begin_spawn(false,now);
+        if (command&toggle_combat) fighting=!fighting;
+        if (command&helicopter) begin_spawn(true,now);
+        if (command&loadout) {
+            hook.invoke(0xBF0FD6E56C964FCBULL,player,hash("WEAPON_CARBINERIFLE"),360,false,true);
+            hook.invoke(0xBF0FD6E56C964FCBULL,player,hash("WEAPON_RPG"),20,false,false);
+            std::snprintf(notice,sizeof(notice),"Carbine and RPG supplied.");
+        }
+        finish_spawn(player,now);
+        const int vehicle=hook.invoke<int>(0x9A9112A0FE9A4713ULL,player,false);
+        for (auto& actor:actors) update_actor(actor,player,vehicle,now,dt);
+        char title[160];
+        std::snprintf(title,sizeof(title),"ELDEN LOS SANTOS | Selected: %s | Combat %s",ergt::creatures[selected].label,fighting?"ON":"OFF");
+        text(0.02f,0.02f,title,0.4f); text(0.02f,0.057f,notice);
+        text(0.02f,0.085f,"F5 select | F6 spawn | F7 clear | F8 combat | F9 loadout | F10 helicopter",0.28f);
+        int row=0;
+        for (const auto& actor:actors) if (actor.entity) {
+            float y=0.78f+row*0.06f;
+            const char* phase=actor.combat.state()==ergt::CombatState::defeated?"  DEFEATED":actor.combat.enraged()?"  ENRAGED":"";
+            char label[128];std::snprintf(label,sizeof(label),"%s  %.0f / %.0f%s",actor.spec->label,actor.combat.health(),actor.spec->maximum_health,phase);
+            text(0.25f,y,label);
+            hook.invoke(0x3A618A217E5154F0ULL,0.5f,y+0.038f,0.5f,0.009f,30,25,25,225);
+            float width=0.5f*actor.combat.ratio();
+            hook.invoke(0x3A618A217E5154F0ULL,0.25f+width/2,y+0.038f,width,0.009f,180,30,35,245);row++;
+        }
+        hook.wait(0);
+    }
+}
+}
+
+BOOL APIENTRY DllMain(HMODULE module,DWORD reason,LPVOID) {
+    if (reason==DLL_PROCESS_ATTACH) {
+        module_handle=module;
+        if (ergt_runtime_dependency()<0 || !hook.bind()) return FALSE;
+        hook.register_script(module,run);hook.register_keyboard(keyboard);registered=true;
+    } else if (reason==DLL_PROCESS_DETACH && registered) {
+        hook.unregister_keyboard(keyboard);hook.unregister_script(module);
+        if(log_file) { std::fclose(log_file);log_file=nullptr; }
+    }
+    return TRUE;
+}

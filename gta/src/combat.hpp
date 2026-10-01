@@ -1,0 +1,132 @@
+#pragma once
+
+#include <algorithm>
+#include <array>
+#include <cmath>
+#include <cstdint>
+
+namespace ergt {
+struct Vec3 { float x = 0, y = 0, z = 0; };
+inline float horizontal_distance(Vec3 a, Vec3 b) {
+    return std::hypot(a.x - b.x, a.y - b.y);
+}
+
+struct CreatureSpec {
+    const char* label;
+    const char* model;
+    const char* dictionary;
+    const char* idle_clip;
+    const char* move_clip;
+    const char* attack_clip;
+    const char* death_clip;
+    float maximum_health;
+    float speed;
+    float melee_range;
+    int melee_damage;
+    int windup_ms;
+    int recovery_ms;
+    float minimum_z;
+};
+
+// Initial balance and clip-role hypotheses; owner gameplay review is pending.
+inline constexpr std::array<CreatureSpec, 3> creatures{{
+    {"Malenia", "ergt_malenia", "ergt_malenia_anims", "a000_000020", "a000_002000", "a000_003000", "a000_005000",
+     3600, 3.2f, 3.5f, 28, 750, 1500, -0.40835f},
+    {"Red Wolf of Radagon", "ergt_redwolf", "ergt_redwolf_anims", "a000_000000", "a000_001020", "a000_003000", "a000_005000",
+     2800, 5.0f, 4.5f, 32, 850, 1300, -0.09578f},
+    {"Giant Crab", "ergt_crab", "ergt_crab_anims", "a000_000000", "a000_001020", "a000_003000", "a000_005000",
+     4500, 2.0f, 5.2f, 40, 1200, 1900, -0.86392f},
+}};
+
+enum class CombatState { idle, chasing, melee_windup, ranged_windup, recovering, staggered, defeated };
+struct Observation {
+    Vec3 actor;
+    Vec3 target;
+    bool target_alive = true;
+    bool line_of_sight = true;
+    bool combat_enabled = false;
+    bool airborne_target = false;
+};
+struct Decision {
+    Vec3 movement;
+    bool melee_strike = false;
+    bool ranged_strike = false;
+    bool telegraph = false;
+    Vec3 aim;
+};
+
+class Combat {
+public:
+    Combat() : Combat(&creatures[0]) {}
+    explicit Combat(const CreatureSpec* spec) : spec_(spec), health_(spec->maximum_health) {}
+    void reset(const CreatureSpec* spec) { *this = Combat(spec); }
+    float health() const { return health_; }
+    float ratio() const { return std::clamp(health_ / spec_->maximum_health, 0.0f, 1.0f); }
+    bool enraged() const { return ratio() <= 0.5f; }
+    CombatState state() const { return state_; }
+
+    void damage(float value) {
+        if (!std::isfinite(value) || value <= 0 || state_ == CombatState::defeated) return;
+        health_ = std::max(0.0f, health_ - value);
+        if (health_ == 0) { state_ = CombatState::defeated; remaining_ms_ = 0; }
+        else if (value >= 250) { state_ = CombatState::staggered; remaining_ms_ = 500; }
+    }
+
+    Decision tick(int elapsed_ms, const Observation& observation) {
+        Decision out{};
+        if (state_ == CombatState::defeated) return out;
+        if (!observation.target_alive || !observation.combat_enabled) {
+            // Turning combat off cancels queued attacks instead of banking a hit.
+            state_ = CombatState::idle; remaining_ms_ = 0; return out;
+        }
+        const int dt = std::clamp(elapsed_ms, 0, 250);
+        if (dt == 0) return out;
+        if (remaining_ms_ > 0) remaining_ms_ = std::max(0, remaining_ms_ - dt);
+        if (state_ == CombatState::ranged_windup) {
+            out.aim = locked_target_; out.telegraph = remaining_ms_ > 0;
+            if (remaining_ms_ == 0) {
+                out.ranged_strike = observation.line_of_sight;
+                state_ = CombatState::recovering; remaining_ms_ = 2200;
+            }
+            return out;
+        }
+        if (state_ == CombatState::melee_windup) {
+            if (remaining_ms_ == 0) {
+                out.melee_strike = observation.line_of_sight &&
+                    horizontal_distance(observation.actor, observation.target) <= spec_->melee_range + 0.5f &&
+                    std::abs(observation.actor.z - observation.target.z) < 4.0f;
+                state_ = CombatState::recovering;
+                remaining_ms_ = enraged() ? spec_->recovery_ms * 3 / 4 : spec_->recovery_ms;
+            }
+            return out;
+        }
+        if (state_ == CombatState::recovering || state_ == CombatState::staggered) {
+            if (remaining_ms_ > 0) return out;
+            state_ = CombatState::idle;
+        }
+        const float distance = horizontal_distance(observation.actor, observation.target);
+        if (!observation.line_of_sight || distance > 200.0f) { state_ = CombatState::idle; return out; }
+        if (observation.airborne_target || std::abs(observation.actor.z - observation.target.z) > 6.0f || distance > 28.0f) {
+            locked_target_ = observation.target;
+            state_ = CombatState::ranged_windup; remaining_ms_ = 1500;
+            out.telegraph = true; out.aim = locked_target_;
+        } else if (distance <= spec_->melee_range) {
+            state_ = CombatState::melee_windup; remaining_ms_ = spec_->windup_ms;
+        } else {
+            state_ = CombatState::chasing;
+            const float speed = spec_->speed * (enraged() ? 1.25f : 1.0f);
+            const float step = std::min(speed * dt / 1000.0f, distance - spec_->melee_range);
+            out.movement = {(observation.target.x - observation.actor.x) / distance * step,
+                            (observation.target.y - observation.actor.y) / distance * step, 0};
+        }
+        return out;
+    }
+
+private:
+    const CreatureSpec* spec_;
+    float health_;
+    CombatState state_ = CombatState::idle;
+    int remaining_ms_ = 0;
+    Vec3 locked_target_{};
+};
+} // namespace ergt

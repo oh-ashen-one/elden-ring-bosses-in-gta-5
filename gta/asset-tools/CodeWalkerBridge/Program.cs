@@ -9,9 +9,9 @@ using CodeWalker.GameFiles;
 
 CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
 CultureInfo.CurrentUICulture = CultureInfo.InvariantCulture;
-if (args.Length != 3 || args[0] != "convert")
+if (args.Length != 3 || (args[0] != "convert" && args[0] != "pack" && args[0] != "prepare-dlclist"))
 {
-    Console.Error.WriteLine("Usage: CodeWalkerBridge convert INPUT.ydr.xml|INPUT.ycd.xml NEW_OUTPUT");
+    Console.Error.WriteLine("Usage: CodeWalkerBridge convert INPUT.ydr.xml|INPUT.ycd.xml|INPUT.ytyp.xml NEW_OUTPUT, or pack SOURCE_DIRECTORY NEW_RPF");
     return 2;
 }
 try
@@ -19,6 +19,74 @@ try
     string source = Path.GetFullPath(args[1]);
     string destination = Path.GetFullPath(args[2]);
     if (File.Exists(destination)) throw new IOException("Refusing to overwrite an existing asset");
+    if (args[0] == "prepare-dlclist")
+    {
+        // Asset archive decoding only. Never run or patch the game executable,
+        // persist key material, or read account/authentication stores.
+        GTA5Keys.GenerateV2(File.ReadAllBytes(Path.Combine(source,"GTA5.exe")), null);
+        if (GTA5Keys.PC_AES_KEY == null) throw new InvalidDataException("Could not identify this game's archive format key");
+        GTA5Keys.LoadFromPath("", false, Convert.ToBase64String(GTA5Keys.PC_AES_KEY));
+        var archive = new RpfFile(Path.Combine(source,"update","update.rpf"), "update\\update.rpf");
+        var errors = new List<string>();
+        archive.ScanStructure(_ => { }, message => errors.Add(message));
+        if (errors.Count != 0) throw new InvalidDataException(string.Join("; ",errors));
+        var entry = archive.AllEntries.OfType<RpfFileEntry>().Single(e =>
+            e.Path.Replace('\\','/').EndsWith("/common/data/dlclist.xml",StringComparison.OrdinalIgnoreCase));
+        var dlcListBytes = archive.ExtractFile(entry);
+        var document = new XmlDocument { XmlResolver = null };
+        using (var input = new MemoryStream(dlcListBytes))
+        using (var reader = XmlReader.Create(input,new XmlReaderSettings { DtdProcessing=DtdProcessing.Prohibit })) document.Load(reader);
+        var paths = document.SelectSingleNode("/SMandatoryPacksData/Paths") ?? throw new InvalidDataException("Unknown DLC list schema");
+        const string addon = "dlcpacks:/ergt/";
+        if (!paths.ChildNodes.OfType<XmlElement>().Any(e => e.InnerText.Trim().Equals(addon,StringComparison.OrdinalIgnoreCase)))
+        {
+            var item=document.CreateElement("Item"); item.InnerText=addon; paths.AppendChild(item);
+        }
+        Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
+        using (var output=new FileStream(destination,FileMode.CreateNew,FileAccess.Write))
+        using (var writer=XmlWriter.Create(output,new XmlWriterSettings { Indent=true, Encoding=new System.Text.UTF8Encoding(false) })) document.Save(writer);
+        Console.WriteLine("Prepared local DLC-list overlay; original game archives unchanged; no keys persisted.");
+        return 0;
+    }
+    if (args[0] == "pack")
+    {
+        if (!Directory.Exists(source)) throw new DirectoryNotFoundException(source);
+        Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
+        string temporary = Path.Combine(Path.GetDirectoryName(destination)!, ".ergt-pack-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(temporary);
+        string oldDirectory = Directory.GetCurrentDirectory();
+        byte[] archiveBytes;
+        int count = 0;
+        try
+        {
+            Directory.SetCurrentDirectory(temporary);
+            // CodeWalker's root creation API uses Windows separators. Keeping
+            // its temporary name relative works on macOS; copy out only after
+            // all library operations and structural checks have completed.
+            var archive = RpfFile.CreateNew(".", "package.rpf", RpfEncryption.OPEN);
+            void AddDirectory(string folder, RpfDirectoryEntry target)
+            {
+                foreach (string child in Directory.EnumerateFileSystemEntries(folder).Order())
+                {
+                    if ((File.GetAttributes(child) & FileAttributes.ReparsePoint) != 0)
+                        throw new IOException("Refusing symlink/reparse point in archive input");
+                    if (Directory.Exists(child)) AddDirectory(child, RpfFile.CreateDirectory(target, Path.GetFileName(child)));
+                    else { RpfFile.CreateFile(target, Path.GetFileName(child), File.ReadAllBytes(child), false); count++; }
+                }
+            }
+            AddDirectory(source, archive.Root);
+            var errors = new List<string>();
+            var check = new RpfFile(archive.FilePath, "package.rpf");
+            check.ScanStructure(_ => { }, message => errors.Add(message));
+            if (errors.Count != 0 || check.Root == null) throw new InvalidDataException(string.Join("; ", errors));
+            archiveBytes = File.ReadAllBytes(archive.FilePath);
+        }
+        finally { Directory.SetCurrentDirectory(oldDirectory); Directory.Delete(temporary, true); }
+        using (var output = new FileStream(destination, FileMode.CreateNew, FileAccess.Write)) output.Write(archiveBytes);
+        Console.WriteLine(JsonSerializer.Serialize(new { archive_structure_verified = true, gta_runtime_verified = false,
+            files = count, bytes = archiveBytes.Length, sha256 = Convert.ToHexString(SHA256.HashData(archiveBytes)).ToLowerInvariant() }));
+        return 0;
+    }
     var xml = new XmlDocument { XmlResolver = null };
     using (var reader = XmlReader.Create(source, new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit }))
         xml.Load(reader);
@@ -33,7 +101,8 @@ try
         loaded.Load(data);
         if (loaded.Drawable?.Skeleton?.BonesCount != original.Drawable?.Skeleton?.BonesCount)
             throw new InvalidDataException("Skeleton count changed during binary round-trip");
-        details = new { bones = loaded.Drawable?.Skeleton?.BonesCount, drawable_present = loaded.Drawable != null };
+        details = new { bones = loaded.Drawable?.Skeleton?.BonesCount, drawable_present = loaded.Drawable != null,
+                        collision_present = loaded.Drawable?.Bound != null };
     }
     else if (source.EndsWith(".ycd.xml", StringComparison.OrdinalIgnoreCase))
     {
@@ -44,6 +113,15 @@ try
         if (loaded.ClipMap.Count == 0 || loaded.AnimMap.Count == 0)
             throw new InvalidDataException("Binary animation dictionary is empty");
         details = new { clips = loaded.ClipMap.Count, animations = loaded.AnimMap.Count };
+    }
+    else if (source.EndsWith(".ytyp.xml", StringComparison.OrdinalIgnoreCase))
+    {
+        data = XmlMeta.GetData(xml, MetaFormat.RSC, source);
+        var loaded = new YtypFile();
+        RpfFile.LoadResourceFile(loaded, data, 2);
+        if (loaded.AllArchetypes == null || loaded.AllArchetypes.Length == 0)
+            throw new InvalidDataException("Archetype dictionary is empty");
+        details = new { archetypes = loaded.AllArchetypes.Length };
     }
     else throw new ArgumentException("Unsupported input asset extension");
     Directory.CreateDirectory(Path.GetDirectoryName(destination)!);

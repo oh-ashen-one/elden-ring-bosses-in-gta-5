@@ -33,6 +33,7 @@ from Sollumz.tools.meshhelper import get_color_attr_name, get_uv_map_name
 from Sollumz.ycd.ycdimport import create_clip_dictionary_template, create_anim_obj
 from Sollumz.ycd.ycdexport import export_ycd
 from Sollumz.tools.animationhelper import get_action_duration_secs, get_action_duration_frames
+from Sollumz.ybn.collision_materials import collisionmats, create_collision_material_from_index
 from szio.gta5 import AssetTarget, AssetFormat, AssetVersion
 
 out = args.out.resolve()
@@ -103,7 +104,8 @@ for obj in mesh_objects:
         color = obj.data.color_attributes.get(name) or obj.data.color_attributes.new(name=name, type="BYTE_COLOR", domain="CORNER")
         color.data.foreach_set("color", [1.0] * (len(color.data) * 4))
     source = source_materials.get(original.name, source_materials.get(original.name.rsplit(".", 1)[0], {}))
-    cutout = any(word in original.name.lower() for word in ("hair", "fur", "butterfly"))
+    material_kind = (original.name + " " + (source.get("source_shader") or "")).lower()
+    cutout = any(word in material_kind for word in ("hair", "fur", "butterfly"))
     material = create_shader("ped_default_cutout.sps" if cutout else "ped_default.sps")
     material.name = original.name + "_gta"
     resolved = source.get("resolved", {})
@@ -137,6 +139,8 @@ collision_mesh.from_pydata(corners, [], [(0,2,3,1),(4,5,7,6),(0,1,5,4),(2,6,7,3)
 collision = bpy.data.objects.new(args.name + "_body_box", collision_mesh)
 bpy.context.collection.objects.link(collision)
 collision.sollum_type = SollumType.BOUND_BOX; collision.parent = composite
+collision_index = next(i for i, material in enumerate(collisionmats) if material.name == "ANIMAL_DEFAULT")
+collision_mesh.materials.append(create_collision_material_from_index(collision_index))
 collision.composite_flags1.object = True
 for flag in ("map_weapon", "map_dynamic", "map_vehicle", "vehicle_not_bvh", "vehicle_bvh", "vehicle_box",
              "ped", "ragdoll", "animal", "object", "projectile", "explosion", "test_weapon", "test_script"):

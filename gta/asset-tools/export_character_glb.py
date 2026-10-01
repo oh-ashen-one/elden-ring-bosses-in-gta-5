@@ -163,12 +163,15 @@ def combined_vertices(mesh):
     return result
 
 
-def export(root, char, destination, masks, max_animations):
+def export(root, char, destination, masks, max_animations, clip_names=None):
     raw = root / "raw" / char
     flver = load_flver(raw / f"{char}.chrbnd")
     original_rest = rest_matrices(flver)
     materials = {material_key(k): v for k, v in json.loads((root / "materials.json").read_text()).items()}
-    textures = {p.stem.lower(): p for p in (root / "textures" / char).glob("*.dds")}
+    textures = {p.stem.lower(): p for p in (root / "textures/common").glob("*.dds")}
+    textures.update({p.stem.lower(): p for p in (root / "textures" / char).glob("*.dds")})
+    override_file = root / "material-overrides.json"
+    overrides = json.loads(override_file.read_text()) if override_file.exists() else {}
     glb = GLB()
     glb.doc["nodes"][0]["name"] = char
     selected = []
@@ -257,6 +260,8 @@ def export(root, char, destination, masks, max_animations):
         resolved = {}
         for role, token in [("base", "albedo"), ("normal", "normal")]:
             candidates = [s for s in samplers if token in s["type"].lower() and s["path"]]
+            override = overrides.get(material_key(mesh.material.mat_def_path), {})
+            if role in override: candidates.insert(0, {"path": override[role]})
             for sampler in candidates:
                 texture = textures.get(PureWindowsPath(sampler["path"]).stem.lower())
                 if not texture: continue
@@ -270,7 +275,8 @@ def export(root, char, destination, masks, max_animations):
         if any(word in mesh.material.name.lower() for word in ["hair", "fur", "butterfly"]):
             material["alphaMode"] = "MASK"; material["alphaCutoff"] = 0.25
         exported_materials.append({"name": mesh.material.name, "resolved": resolved,
-                                   "source_shader": source_material.get("shader"), "samplers": samplers})
+                                   "source_shader": source_material.get("shader"), "samplers": samplers,
+                                   "override": overrides.get(material_key(mesh.material.mat_def_path))})
         glb.doc["materials"].append(material)
         primitive = {"attributes": attributes,
                      "indices": glb.array(triangles.reshape(-1), "SCALAR", 5125, 34963),
@@ -297,6 +303,7 @@ def export(root, char, destination, masks, max_animations):
             for entry in sorted(binder.entries, key=lambda e: e.name):
                 animation_name = PureWindowsPath(entry.name).stem
                 if not re.fullmatch(r"a\d+_\d+", animation_name) or not entry.name.endswith(".hkx"): continue
+                if clip_names and animation_name not in clip_names: continue
                 if len(animations) >= max_animations: break
                 source_animation = AnimationHKX.from_bytes(entry.get_uncompressed_data(), compendium=compendium)
                 container = source_animation.animation_container
@@ -346,6 +353,8 @@ def export(root, char, destination, masks, max_animations):
                                    "mapped_tracks": len(mapped_tracks), "semantic_role_verified": False})
                 print(f"Decoded {char} {animation_name}: {len(frames)} frames", flush=True)
             if len(animations) >= max_animations: break
+        if clip_names and set(clip_names) != {a["name"] for a in animations}:
+            raise ValueError(f"Requested clips not exported: {set(clip_names) - {a['name'] for a in animations}}")
 
     position = np.vstack(all_positions)
     report = {"character": char, "gameplay_verified": False, "gta_ready": False,
@@ -371,8 +380,9 @@ if __name__ == "__main__":
     parser.add_argument("--out", required=True, type=Path)
     parser.add_argument("--masks", nargs="*", type=int)
     parser.add_argument("--animations", type=int, default=3)
+    parser.add_argument("--clip-names", nargs="*")
     args = parser.parse_args()
     if not re.fullmatch(r"c[0-9]{4}", args.character): parser.error("Invalid character ID")
     if not 0 <= args.animations <= 20: parser.error("Choose 0-20 clips per bounded export")
     export(args.root.resolve(), args.character, args.out.resolve(),
-           set(args.masks) if args.masks is not None else None, args.animations)
+           set(args.masks) if args.masks is not None else None, args.animations, args.clip_names)
