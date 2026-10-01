@@ -5,7 +5,7 @@ Updated: 2026-10-01 (GTA V × Elden Ring priority and setup audit).
 ## Current priority and setup audit
 
 - Active goal: GTA V × Elden Ring, with a boss damaged by native GTA firearms, explosives, vehicle impacts and helicopter weapons. See docs/CROSSOVER-BACKLOG.md.
-- Windows Steam is installed and authenticated sufficiently to download games in the CrossOver Steam bottle. Rosetta is installed. No GTA or Elden Ring gameplay has been verified.
+- Windows Steam is installed and authenticated sufficiently to download games in the CrossOver Steam bottle. Rosetta is installed. Hari has confirmed GTA V Story Mode works and is currently playing the opening robbery/tutorial. Elden Ring gameplay and the crossover mod remain unverified.
 - Latest audit: GTA V Legacy has StateFlags 4 with all 129,049,797,551 bytes staged; MW2, Escape the Backrooms and Phasmophobia also report installed. Elden Ring and Dark Souls Remastered remain pending. Recheck live manifests and queue before use.
 - Storage: 512 GB writable exFAT SD card named memory, mounted at /Volumes/memory, UUID AB55E1EC-D2BD-38BD-961F-56347E0F5C9D; CrossOver maps it as D:. Initial inventory showed roughly 512 GB free. Reserved logical game files total roughly 274 GB; live totals may grow.
 - All six games and shared redistributables finished downloading. The owner then CANCELLED the SD-card migration because the sustained copy speed was too slow. Keep all games in the existing internal CrossOver Steam library. The task-owned rsync was stopped cleanly with SIGTERM (exit 20); no source files were removed and neither Steam library configuration was changed. Partial SD copies were removed and Windows Steam was reopened successfully (verified process). No storage migration is authorized now.
@@ -18,7 +18,8 @@ Updated: 2026-10-01 (GTA V × Elden Ring priority and setup audit).
 
 - Hari explicitly asked to handle game launching and playtesting himself to avoid spending agent credits on runtime testing. Do not launch or automate GTA/other game playtests unless he asks again. Focus this session on source, asset conversion and building reviewable artifacts, then give short owner test steps.
 - No GTA game was launched by this session. The latest attempted baseline launch stopped at read-only safety checks when the owner changed this workflow. Other sessions' Unreal processes were untouched.
-- Immediate owner check: launch GTA V Legacy through Windows Steam/CrossOver and reach Story Mode; provide whether it works or the exact visible error. Boss/probe runtime behavior remains unverified until evidence is supplied.
+- Baseline owner check PASSED for launch: Hari reports GTA V Legacy Story Mode working and is playing the opening robbery/tutorial. A live GTA5.exe process was also observed. This is owner-reported baseline gameplay, not a mod test or performance measurement. Let him finish; do not close or restart GTA/Steam/Rockstar or change the running game files. Boss/probe behavior remains unverified.
+- At his request, quit our unused Modern Warfare 2 AI setup preview (verified exited), and dismissed the CrossOver manager window. Other sessions' Unreal/terminal work and GTA dependencies stay running.
 
 ## Source groundwork saved when the owner cancelled the follow-up
 
