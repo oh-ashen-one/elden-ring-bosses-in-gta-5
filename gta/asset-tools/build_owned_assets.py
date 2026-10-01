@@ -60,8 +60,9 @@ def main():
         run(args.blender,"--background","--factory-startup","--disable-autoexec","--python",tools/"blender_to_gta.py","--",
             "--repo",repo,"--input",glb,"--textures",output/"textures"/character,"--out",output/"gta"/character,"--name",name,env=env)
         if not (output/"gta"/character/(name+".conversion.json")).is_file():raise RuntimeError("Blender conversion did not complete")
+    run(sys.executable,tools/"upgrade_visuals.py","--converted",output/"gta","--root",output,"--out",output/"gta-object-materials")
     dotnet=cache/"dotnet/dotnet";bridge=repo/"build/cw-bridge/CodeWalkerBridge.dll"
-    run(sys.executable,tools/"build_dlc.py","--converted",output/"gta","--out",output/"dlc-build","--dotnet",dotnet,"--bridge",bridge)
+    run(sys.executable,tools/"build_dlc.py","--converted",output/"gta-object-materials","--out",output/"dlc-build","--dotnet",dotnet,"--bridge",bridge)
     run(dotnet,bridge,"prepare-dlclist",args.gta_game.resolve(),output/"newmods/common/data/dlclist.xml")
     print("Private owned-asset DLC prepared. No game launched. Runtime verification is still required.")
 

@@ -85,7 +85,7 @@ def main():
         value(item,"lodDist",250); value(item,"flags",131072 | 512); value(item,"specialAttribute",0)
         for tag, vector in [("bbMin",low),("bbMax",high),("bsCentre",centre)]:
             ET.SubElement(item,tag,{axis:format(v,".9g") for axis,v in zip("xyz",vector)})
-        value(item,"bsRadius",radius); value(item,"hdTextureDist",10)
+        value(item,"bsRadius",radius); value(item,"hdTextureDist",150)
         ET.SubElement(item,"name").text=name
         ET.SubElement(item,"textureDictionary").text=name
         ET.SubElement(item,"clipDictionary").text=name+"_anims"

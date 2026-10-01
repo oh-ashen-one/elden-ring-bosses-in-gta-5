@@ -1,12 +1,12 @@
 # Elden Los Santos — owner preview
 
-**v7: Dynamic archetype repair installed.** The import-isolation check successfully created the full rigged Malenia model with its original collision and textures when the Dynamic flag was enabled. That setting now applies to Malenia, Red Wolf and Giant Crab. One approved technical creation check runs after Story Mode loads and removes its samples; then press **2** to create a persistent creature. Visuals, animation, combat and performance still need your review.
+**v8: aggressive creatures, object materials and redesigned boss bars.** v7's visible imports and bullet damage were confirmed by the owner; the owner also reported crumpled geometry, poor hair/materials and stationary creatures. This patch changes the shader path, repairs packed normal maps and Malenia's hair opacity, enables aggression by default, targets nearby NPCs/drivers, adds speed-based vehicle impact damage and logs animation playback. The improvements still need actual gameplay/visual review.
 
 ## Start
 
 1. Launch **GTA V Legacy** from **Steam inside CrossOver**, as usual.
 2. Choose **Story Mode** and load your free-roam save. The owner has completed the tutorial.
-3. Look for **ELDEN LOS SANTOS** at the top left. Combat starts **OFF** so you can inspect the creatures first.
+3. Look for **ELDEN LOS SANTOS** at the top left. Creatures now start **AGGRESSIVE**. Press **4** before spawning to inspect them with combat paused.
 
 Use the **top-row number keys 1–6**. No Fn key is needed. These keys are reserved for the mod while playing; use GTA’s weapon wheel to change weapons. Numpad flight controls are left alone.
 
@@ -15,7 +15,7 @@ Use the **top-row number keys 1–6**. No Fn key is needed. These keys are reser
 | 1 | Select Malenia, Red Wolf of Radagon, or Giant Crab. |
 | 2 | Spawn the selected creature ahead of you. Maximum three at once. |
 | 3 | Remove this mod's creatures. Keeps your helicopter. |
-| 4 | Toggle creature attacks/pursuit. Starts OFF. |
+| 4 | Pause/resume creature aggression. Starts ON. |
 | 5 | Receive a carbine and RPG with ammunition. |
 | 6 | Place an armed Buzzard nearby. Enter/fly it normally. |
 
@@ -23,10 +23,10 @@ Use a clear outdoor area for the first test. These are animated creature objects
 
 ## Short first test
 
-1. Start with **Malenia** (the default selection), keep combat OFF and press **2 once** outdoors. If she fails to appear, stop here; don’t cycle through other creatures or repeatedly retry. The log now distinguishes model loading, animation loading and creation. A failed creature is locked for that session.
+1. Start with **Malenia** (the default selection), press **4** to pause combat and press **2 once** outdoors. If she fails to appear, stop here; don’t cycle through other creatures or repeatedly retry. The log now distinguishes model loading, animation loading and creation. A failed creature is locked for that session.
 2. Shoot it while combat is OFF. Confirm the health bar drops.
-3. Toggle combat ON. Check pursuit, close attacks and the red warning sphere before a ranged blast.
-4. Use the RPG, a vehicle collision, then the helicopter weapons. Check each damage channel separately.
+3. Press **4** to resume aggression. Check pursuit and attacks against you and nearby NPCs/drivers; movement and animation should both be visible. The red warning sphere marks a ranged blast targeting you.
+4. Use the RPG, a moving-car impact, then helicopter weapons. A parked car touching the creature should not repeatedly drain its health. Check each damage channel separately.
 5. Defeat the creature, clear it with 3, then spawn another one.
 
 A failure at an earlier step is useful feedback; you do not need to repeat the rest. If anything fails, send the visible error and `EldenLosSantos.log` from the active profile directory. No header usually means the ASI loader/plugin did not load; “Model unavailable” means the creature DLC was not registered.
@@ -52,12 +52,12 @@ The command restores the exact original directory to Steam's path and restores t
 
 ## Known limits
 
-- Script Hook V, the ASI loader and this script ran under CrossOver on GTA 1.0.3889.0. The v2 package failed creature creation and later crashed after a crab request. The v3 texture repair still failed object creation. v4 proved stock-object creation works, while the custom model still failed. v5 registration alone still failed. Runtime isolation then identified the Dynamic archetype flag; v7 applies it to the originals.
+- Script Hook V, the ASI loader and this script ran under CrossOver on GTA 1.0.3889.0. The v2 package failed creature creation and later crashed after a crab request. The v3 texture repair still failed object creation. v4 proved stock-object creation works, while the custom model still failed. v5 registration alone still failed. Runtime isolation then identified the Dynamic archetype flag; v7 applied it and the owner confirmed all three visible imports. v8 appearance, animation and aggressive combat are still unverified.
 - Malenia uses selected phase-one meshes. The AI is custom: chase, melee wind-up, stagger, increased aggression below half health and telegraphed ranged blasts.
 - Ranged effects and damage use GTA explosions; original Elden Ring VFX, spell systems, AI, sounds and cloth simulation are not ported.
 - Collision uses whole-body boxes. Direct line-of-sight movement is simple, with no pathfinding around buildings. Animation-role choices and strike timing need owner review.
 - Native health loss is preferred for incoming damage. Hit flags provide a logged fallback where drawable objects do not reduce native health. Weapon/explosion/vehicle balance still needs calibration.
-- Materials use original textures with approximated layered shaders; Malenia's procedural hair tint is baked from source data. Optional source mesh variants may need visibility tuning.
+- Materials preserve source image dimensions and use GTA's skinned-object normal/specular shader. Hair opacity comes from the HairLong material's actual normal atlas. Specular response, layered shading and shell fur remain approximations; this is not yet Elden Ring visual parity. Optional meshes may need visibility tuning.
 - No FPS, controller compatibility or completed ten-minute gameplay claim is made.
 - Story Mode only. The plugin guards network sessions; Script Hook V itself does not support GTA Online.
 

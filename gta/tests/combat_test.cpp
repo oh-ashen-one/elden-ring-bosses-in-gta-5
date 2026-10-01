@@ -34,5 +34,16 @@ int main() {
     require(std::hypot(step.movement.x,step.movement.y)<=creatures[1].speed*0.25f+0.001f,"stale frame cannot teleport creature");
     o.line_of_sight=false;require(boss.tick(16,o).movement.x==0,"blocked sight does not move through walls");
     o.target_alive=false;require(boss.tick(16,o).movement.x==0,"dead player stops pursuit");
+    require(impact_damage(0)==0 && impact_damage(2)==0,"parked/creeping cars cannot drain HP");
+    require(impact_damage(20)>impact_damage(8),"faster impacts deal greater damage");
+    require(impact_damage(1000)==1400,"impact damage has a finite ceiling");
+    require(impact_damage(std::numeric_limits<float>::infinity())==0,"invalid physics sample rejected");
+    require(target_score(10,true,false)<target_score(10,false,false),"current target hysteresis prevents thrashing");
+    require(target_score(20,false,true)<target_score(10,false,false),"nearby attacker gets retaliation priority");
+    boss.reset(&creatures[0]);o={{0,0,0},{1,0,0},true,true,true,false};
+    boss.tick(16,o);boss.tick(250,o);boss.cancel_attack();
+    require(!boss.tick(250,o).melee_strike,"changing target cannot transfer a banked strike");
+    boss.damage(10000);boss.cancel_attack();
+    require(boss.state()==CombatState::defeated,"target selection cannot revive a defeated creature");
     std::cout << "Combat scenarios passed; no GTA runtime executed\n";
 }

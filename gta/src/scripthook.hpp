@@ -19,6 +19,8 @@ struct ScriptHook {
     void (*init)(std::uint64_t) = nullptr;
     void (*push)(std::uint64_t) = nullptr;
     std::uint64_t* (*call)() = nullptr;
+    int (*get_all_peds)(int*, int) = nullptr;
+    int (*get_all_vehicles)(int*, int) = nullptr;
 
     template<class T> static bool resolve(HMODULE dll, const char* name, T& out) {
         const FARPROC address = GetProcAddress(dll, name);
@@ -31,6 +33,10 @@ struct ScriptHook {
         // Do not search arbitrary directories or load a second runtime.
         const HMODULE dll = GetModuleHandleW(L"ScriptHookV.dll");
         if (!dll) return false;
+        // Optional SDK pool enumerators; unavailable exports leave the player
+        // path working. Never read undocumented game pool memory.
+        resolve(dll, "?worldGetAllPeds@@YAHPEAHH@Z", get_all_peds);
+        resolve(dll, "?worldGetAllVehicles@@YAHPEAHH@Z", get_all_vehicles);
         return resolve(dll, "?scriptRegister@@YAXPEAUHINSTANCE__@@P6AXXZ@Z", register_script)
             && resolve(dll, "?scriptUnregister@@YAXPEAUHINSTANCE__@@@Z", unregister_script)
             && resolve(dll, "?keyboardHandlerRegister@@YAXP6AXKGEHHHH@Z@Z", register_keyboard)

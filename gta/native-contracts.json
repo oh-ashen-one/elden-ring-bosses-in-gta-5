@@ -38,6 +38,10 @@
       "name": "GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS",
       "arguments": 4
     },
+    "0x18FF00FC7EFF559E": {
+      "name": "APPLY_FORCE_TO_ENTITY_CENTER_OF_MASS",
+      "arguments": 9
+    },
     "0x19AAC8F07BFEC53E": {
       "name": "IS_MODEL_A_VEHICLE",
       "arguments": 1
@@ -45,6 +49,10 @@
     "0x1A9205C1B9EE827F": {
       "name": "SET_ENTITY_COLLISION",
       "arguments": 3
+    },
+    "0x1F0B79228E461EC9": {
+      "name": "IS_ENTITY_PLAYING_ANIM",
+      "arguments": 4
     },
     "0x239A3351AC1DA385": {
       "name": "SET_ENTITY_COORDS_NO_OFFSET",
@@ -62,6 +70,10 @@
       "name": "DRAW_MARKER",
       "arguments": 24
     },
+    "0x28D1A16553C51776": {
+      "name": "SET_ENTITY_ANIM_SPEED",
+      "arguments": 4
+    },
     "0x298B91AE825E5705": {
       "name": "IS_PED_IN_ANY_HELI",
       "arguments": 1
@@ -73,6 +85,10 @@
     "0x3317DEDB88C95038": {
       "name": "IS_PED_DEAD_OR_DYING",
       "arguments": 2
+    },
+    "0x346D81500D088F42": {
+      "name": "GET_ENTITY_ANIM_CURRENT_TIME",
+      "arguments": 3
     },
     "0x35B9E0803292B641": {
       "name": "IS_MODEL_IN_CDIMAGE",
@@ -90,6 +106,14 @@
       "name": "GET_ENTITY_COORDS",
       "arguments": 2
     },
+    "0x406137F8EF90EAF5": {
+      "name": "SET_ACTIVATE_OBJECT_PHYSICS_AS_SOON_AS_IT_IS_UNFROZEN",
+      "arguments": 2
+    },
+    "0x40FDEDB72F8293B2": {
+      "name": "FORCE_ENTITY_AI_AND_ANIMATION_UPDATE",
+      "arguments": 1
+    },
     "0x428CA6DBD1094446": {
       "name": "FREEZE_ENTITY_POSITION",
       "arguments": 2
@@ -105,6 +129,10 @@
     "0x539E0AE3E6634B9F": {
       "name": "DELETE_OBJECT",
       "arguments": 1
+    },
+    "0x5927F96A78577363": {
+      "name": "SET_ENTITY_LOD_DIST",
+      "arguments": 2
     },
     "0x5F9532F3B5CC2551": {
       "name": "IS_ENTITY_DEAD",
@@ -194,6 +222,10 @@
       "name": "CLEAR_ENTITY_LAST_WEAPON_DAMAGE",
       "arguments": 1
     },
+    "0xACAD101E1FB66689": {
+      "name": "SET_ENTITY_ALWAYS_PRERENDER",
+      "arguments": 2
+    },
     "0xAD738C3085FE7E11": {
       "name": "SET_ENTITY_AS_MISSION_ENTITY",
       "arguments": 3
@@ -230,6 +262,10 @@
       "name": "GET_VEHICLE_ENGINE_HEALTH",
       "arguments": 1
     },
+    "0xC86D67D52A707CF8": {
+      "name": "HAS_ENTITY_BEEN_DAMAGED_BY_ENTITY",
+      "arguments": 3
+    },
     "0xC906A7DAB05C8D2B": {
       "name": "GET_GROUND_Z_FOR_3D_COORD",
       "arguments": 6
@@ -253,6 +289,10 @@
     "0xD49F9B0955C367DE": {
       "name": "CREATE_PED",
       "arguments": 8
+    },
+    "0xD5037BA82E12416F": {
+      "name": "GET_ENTITY_SPEED",
+      "arguments": 1
     },
     "0xD80958FC74E988A6": {
       "name": "PLAYER_PED_ID",

@@ -11,6 +11,16 @@ inline float horizontal_distance(Vec3 a, Vec3 b) {
     return std::hypot(a.x - b.x, a.y - b.y);
 }
 
+// Contact alone must not drain health. Only a new moving-vehicle impact counts.
+inline float impact_damage(float speed) {
+    if (!std::isfinite(speed) || speed < 2.5f) return 0;
+    return std::clamp(speed * speed * 2.4f, 25.0f, 1400.0f);
+}
+
+inline float target_score(float distance, bool current, bool attacker) {
+    return distance * (current ? 0.72f : 1.0f) * (attacker ? 0.35f : 1.0f);
+}
+
 struct CreatureSpec {
     const char* label;
     const char* model;
@@ -64,6 +74,11 @@ public:
     float ratio() const { return std::clamp(health_ / spec_->maximum_health, 0.0f, 1.0f); }
     bool enraged() const { return ratio() <= 0.5f; }
     CombatState state() const { return state_; }
+    void cancel_attack() {
+        if (state_ != CombatState::defeated && state_ != CombatState::staggered) {
+            state_ = CombatState::idle; remaining_ms_ = 0;
+        }
+    }
 
     void damage(float value) {
         if (!std::isfinite(value) || value <= 0 || state_ == CombatState::defeated) return;

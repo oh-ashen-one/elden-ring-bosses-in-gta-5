@@ -1,6 +1,6 @@
 # Elden Ring asset extraction (GPL-3.0-or-later)
 
-These standalone conversion tools are separate from the Apache-2.0 GTA gameplay plugin. The C/Python adapters link to or import GPL libraries and are distributed under GPL-3.0-or-later; see LICENSE. Exceptions: CodeWalkerBridge, build_dlc.py, normalize_dds.py, dlc_manifest.py and bootstrap_tools.py are original Apache-2.0 API/packaging adapters, as stated in their source headers and the root LICENSE. No proprietary assets, game libraries, archive keys, or converted models are distributed here.
+These standalone conversion tools are separate from the Apache-2.0 GTA gameplay plugin. The C/Python adapters link to or import GPL libraries and are distributed under GPL-3.0-or-later; see LICENSE. Exceptions: CodeWalkerBridge, build_dlc.py, normalize_dds.py, dlc_manifest.py, upgrade_visuals.py and bootstrap_tools.py are original Apache-2.0 API/packaging adapters, as stated in their source headers and the root LICENSE. No proprietary assets, game libraries, archive keys, or converted models are distributed here.
 
 ## Verified on the Studio
 
@@ -72,3 +72,13 @@ The owner-triggered v4 test proved that the full native spawn call creates/delet
 ## Runtime result: Dynamic archetypes
 
 On 2026-10-01 the bounded owner-approved import test created the complete Malenia variant with flags 131584 repeatedly; the original flags 512 and static/animated variants returned zero. Stock GTA objects also succeeded, isolating the issue from the native invocation layer. The production packager now includes Dynamic (131072) alongside Has Anim (512). Setting entity dynamics after a failed creation cannot repair the archetype used by that creation. v7 preserves the six original native mesh/animation files byte-for-byte and changes the three archetype flags. This native creation evidence does not itself prove visual fidelity or combat.
+
+## Object material repair (v8)
+
+The owner confirmed v7 assets appeared and bullets reduced health, but reported crumpled shapes, bald Malenia and poor image detail. The initial converter selected `ped_default.sps`, whose extra pedestrian palette/volume/body-shaping inputs were left unbound. `upgrade_visuals.py` instead selects the generic `normal_spec` skinned-object layout, generates unit tangent bases, and preserves the original geometry, weights, indices, UVs, skeleton and animation XML. This is a candidate repair; shader selection alone is not proof that deformation is resolved in GTA.
+
+The original HairLong material references the shared PCHair normal/opacity atlas. The earlier fallback borrowed `c2120_hair2_a`, an unrelated 512-square atlas. The repair uses the referenced 2048×1024 atlas and local material tint parameters. ER packed normal RG is reconstructed into an RGB normal instead of interpreting its packed B/A material channels as XYZ. New maps retain source dimensions and receive complete RGBA8 mip chains; no artificial texture upscaling. Source textures stay unchanged. GTA specular response and shell-fur rendering remain approximate.
+
+Run `upgrade_visuals.py --converted /private/old-gta-xml --root /private/extraction --out /private/new-gta-xml`, then package the new directory with `build_dlc.py`. The full owned-assets orchestrator now includes this step. For editable sources, retain both the original Blender scenes and the derived XML/script; these post-export material changes are not saved back into the old Blender scenes.
+
+Schema references: [Sollumz shader conversion](https://github.com/Sollumz/Sollumz/blob/82817d1211e7769bf3b9eb45866b6f8b802864fe/ydr/shader_materials.py) and szio 1.4.0.dev1 `gta5/Shaders.xml`. Runtime motion telemetry uses the pinned native database already listed in `gta/native-contracts.json`; phase advancement is evidence of playback, not human acceptance of the pose or attack timing.

@@ -2,7 +2,7 @@
 
 Original GTA V Story Mode mod code and a local conversion pipeline for owned Elden Ring creatures. Current characters: **Malenia, Red Wolf of Radagon, Giant Crab**.
 
-**Status: the full Malenia asset created successfully in runtime isolation; the Dynamic archetype repair is installed for all three original creatures.** v6 proved that flags `131072 | 512` are accepted while the other tested setups returned zero. v7 applies that setting without replacing the real meshes, rigs or collisions. Creation checks for the original names and owner visual/combat review remain the next gate. See [owner guide](OWNER-TEST.md).
+**Status: all three original creatures are visible in GTA; the owner confirmed bullet damage.** The v7 test exposed poor materials/deformation and stationary presentation. v8 addresses the material path, hair/normal maps, aggressive NPC targeting, car impacts and boss HUD. The new candidate's visuals, animation and gameplay await owner review. See [owner guide](OWNER-TEST.md).
 
 ## What is implemented
 
@@ -14,7 +14,7 @@ Original GTA V Story Mode mod code and a local conversion pipeline for owned Eld
 
 ## Build original code
 
-Requires CMake and C++17. For the Windows target on Mac, install MinGW-w64 from Homebrew.
+Requires CMake and C++17. Visual conversion tests additionally require Python with NumPy and Pillow (included in the asset-tool requirements). For the Windows target on Mac, install MinGW-w64 from Homebrew.
 
 ```sh
 cmake -S gta -B build/gta-native -DCMAKE_BUILD_TYPE=Release

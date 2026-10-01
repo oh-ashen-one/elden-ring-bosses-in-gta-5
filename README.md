@@ -8,7 +8,7 @@ An open source experiment in combining **MW2, Minecraft, Skate 3 and Skyrim** th
 
 ## GTA V × Elden Ring owner preview
 
-Original source and setup tools are now under [gta/](gta/README.md). A private local preview contains converted Malenia, Red Wolf and Giant Crab assets, custom GTA-side combat, and a reversible profile. **Mod gameplay is not verified yet; the owner handles game launches and playtesting.** Read the [owner guide](gta/OWNER-TEST.md) for controls and known limits. Retail-derived assets and third-party runtime files are not distributed in this repository.
+Original source and setup tools are now under [gta/](gta/README.md). A private local preview contains converted Malenia, Red Wolf and Giant Crab assets, custom GTA-side combat, and a reversible profile. **The owner confirmed all three imports are visible and take bullet damage. Visual fidelity, animation and the full encounter are still in development; the owner handles gameplay review.** Read the [owner guide](gta/OWNER-TEST.md) for controls and known limits. Retail-derived assets and third-party runtime files are not distributed in this repository.
 
 ## Mac setup preview
 
