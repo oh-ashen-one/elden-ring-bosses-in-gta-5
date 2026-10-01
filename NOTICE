@@ -1,0 +1,28 @@
+Modern Warfare 2 AI
+Copyright 2026 Modern Warfare 2 AI contributors
+
+Original contributions in this repository are licensed under Apache License 2.0.
+
+The initial publication contains original planning and reference documents only.
+No upstream engine or game implementation code has been imported.
+
+Primary technical references:
+- IW4L, by vladtrc and contributors:
+  https://github.com/vladtrc/iw4L
+- 2010 Rust Rewrite Mashup, by chasmlol and contributors:
+  https://github.com/chasmlol/2010-rust-rewrite-mashup
+- Skate 3 Rust Engine, by SK8-ENGINE and contributors:
+  https://github.com/SK8-ENGINE/skate-3-rust-engine
+- SkyCraft, by chasmlol and contributors:
+  https://github.com/chasmlol/SkyCraft
+
+Further references and source revisions are recorded in docs/SOURCES.md and
+UPSTREAMS.json. Upstream authors retain their copyrights. Listing a project
+as a reference neither incorporates its code nor grants additional rights.
+
+When importing implementation code, retain its applicable license and NOTICE
+files and document the exact source revision and local modifications.
+
+Commercial game content and trademarks remain the property of their owners.
+No commercial game assets, executables or account data are distributed here.
+

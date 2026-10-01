@@ -1,0 +1,26 @@
+# Machine-local configuration
+.DS_Store
+.env
+.env.*
+!.env.example
+
+# Proprietary source data and generated conversions
+/game-data/
+/assets/private/
+/skate-data/
+/iw4l-artifacts/
+*.iso
+*.xex
+*.bsa
+*.ba2
+*.iwd
+*.ff
+
+# Regenerable outputs
+/target/
+/build/
+/dist/
+/captures/
+/scratch/
+/.cache/
+

@@ -1,0 +1,108 @@
+{
+  "observed_date": "2026-09-30",
+  "observation_scope": "GitHub default branches and root license metadata. This is a research snapshot, not a dependency lockfile or a complete license audit.",
+  "code_imported": false,
+  "repositories": [
+    {
+      "repository": "vladtrc/iw4L",
+      "url": "https://github.com/vladtrc/iw4L",
+      "role": "runtime_reference",
+      "branch": "master",
+      "revision": "11514ea37d1e80d75bf2c1ba332bbd68fac5db4e",
+      "root_license_reported_by_github": "Apache-2.0",
+      "license_note": "Review actual license files, NOTICE and nested components before copying code.",
+      "imported": false
+    },
+    {
+      "repository": "chasmlol/2010-rust-rewrite-mashup",
+      "url": "https://github.com/chasmlol/2010-rust-rewrite-mashup",
+      "role": "candidate_base",
+      "branch": "main",
+      "revision": "ab43b8a9e923bdc4ad7effb874f6efec155577f1",
+      "root_license_reported_by_github": "Apache-2.0",
+      "license_note": "Review actual license files, NOTICE and nested components before copying code.",
+      "imported": false
+    },
+    {
+      "repository": "SK8-ENGINE/skate-3-rust-engine",
+      "url": "https://github.com/SK8-ENGINE/skate-3-rust-engine",
+      "role": "skating_reference",
+      "branch": "main",
+      "revision": "60efdef86600d8d8d4feb4b7c608fa0efd0643d7",
+      "root_license_reported_by_github": null,
+      "license_note": "GitHub did not identify a root license. Public visibility does not establish reuse permission.",
+      "imported": false
+    },
+    {
+      "repository": "chasmlol/SkyCraft",
+      "url": "https://github.com/chasmlol/SkyCraft",
+      "role": "skyrim_bridge_reference",
+      "branch": "main",
+      "revision": "0f0a953181cc1d2eccec31e4941b3f01a9f173cf",
+      "root_license_reported_by_github": "MIT",
+      "license_note": "Review actual license files, NOTICE and nested components before copying code.",
+      "imported": false
+    },
+    {
+      "repository": "in0finite/SanAndreasUnity",
+      "url": "https://github.com/in0finite/SanAndreasUnity",
+      "role": "related_reference",
+      "branch": "dev",
+      "revision": "f685c437f48721afc0787f27d22c85d96e8684c7",
+      "root_license_reported_by_github": "MIT",
+      "license_note": "Review actual license files, NOTICE and nested components before copying code.",
+      "imported": false
+    },
+    {
+      "repository": "coop-deluxe/sm64coopdx",
+      "url": "https://github.com/coop-deluxe/sm64coopdx",
+      "role": "related_reference",
+      "branch": "main",
+      "revision": "8cd6e5977d9f920d51ca71f2c61801d019ed79c6",
+      "root_license_reported_by_github": null,
+      "license_note": "GitHub did not identify a root license. Public visibility does not establish reuse permission.",
+      "imported": false
+    },
+    {
+      "repository": "open-goal/jak-project",
+      "url": "https://github.com/open-goal/jak-project",
+      "role": "related_reference",
+      "branch": "master",
+      "revision": "efb21c3e8c5a40a74f2e86510f915da55eaeba34",
+      "root_license_reported_by_github": "ISC",
+      "license_note": "Review actual license files, NOTICE and nested components before copying code.",
+      "imported": false
+    },
+    {
+      "repository": "Interkarma/daggerfall-unity",
+      "url": "https://github.com/Interkarma/daggerfall-unity",
+      "role": "related_reference",
+      "branch": "master",
+      "revision": "2343305d1d83ccc0de57a81e3b1e61188a997e34",
+      "root_license_reported_by_github": "MIT",
+      "license_note": "Review actual license files, NOTICE and nested components before copying code.",
+      "imported": false
+    },
+    {
+      "repository": "OpenMW/openmw",
+      "url": "https://github.com/OpenMW/openmw",
+      "role": "related_reference",
+      "branch": "master",
+      "revision": "46bd4599203ee52ffc0f3e8edb3fc159a0303a49",
+      "root_license_reported_by_github": "GPL-3.0",
+      "license_note": "Review actual license files, NOTICE and nested components before copying code.",
+      "imported": false
+    },
+    {
+      "repository": "hedge-dev/UnleashedRecomp",
+      "url": "https://github.com/hedge-dev/UnleashedRecomp",
+      "role": "related_reference",
+      "branch": "main",
+      "revision": "cf829a9eca8fb680fba4b0409ddeb6ca92f22e3c",
+      "root_license_reported_by_github": "GPL-3.0",
+      "license_note": "Review actual license files, NOTICE and nested components before copying code.",
+      "imported": false
+    }
+  ]
+}
+
