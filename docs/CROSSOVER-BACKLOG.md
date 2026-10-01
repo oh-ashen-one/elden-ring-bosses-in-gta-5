@@ -33,4 +33,15 @@ References: [Script Hook V](https://www.dev-c.com/gtav/scripthookv/), [universal
 - **Pokémon Emerald Arena:** reference for changing mechanics within an existing game; no code imported. https://github.com/GBurgardt/pokemon-emerald-arena
 - Other famous-game combinations remain ideas until a host, asset route and bounded playable loop are selected.
 
-The owner plans separate showcase work with Midir. No task was dispatched and no parallel worker was started by this session.
+## Ownership and parallel work
+
+Owner confirmed this split on 2026-10-01:
+
+- **This game-combines session:** the main GTA V × Elden Ring playable mod, Studio/CrossOver integration and verification, and the already scheduled post-download SD-card migration.
+- **Midir dot:** separate crossover showcase builds; propose two feasible combinations, build one bounded playable demo first, keep the second queued. A Zombies-style Elden Ring enemies/MW2 guns demo is a candidate, not a confirmed implementation choice.
+- **Additional sessions:** may inherit chat context, but use separate repositories for different host engines, or distinct worktrees and branches for reusable shared code. Never share a dirty working directory or a mutable game/mod profile.
+
+A coordination brief was successfully sent through the supported task API to the dot conversation connected to its earlier Review game combines project task. Delivery is verified; acceptance, a new side-build task and implementation progress are not yet verified. No extra session was created from this thread.
+
+Each showcase needs actual player input, one clear crossover interaction, a short objective and restart. Do not describe an unverified combination as never done before. Keep proprietary assets local, preserve upstream attribution, and verify performance/gameplay separately from successful compilation.
+

@@ -14,6 +14,13 @@ Updated: 2026-10-01 (GTA V × Elden Ring priority and setup audit).
 - No mod loader installed, no boss converted, no GTA gameplay verified. Current independent work can cover the encounter specification, original boss rules and tests, and investigation of the asset conversion route. GTA adapter and visible gameplay require the installed game.
 - Working branch: codex/gta-elden-ring-plan, based on the preserved codex/mac-prototype branch.
 
+## Midir coordination
+
+- On 2026-10-01 Hari explicitly authorized this session to own the main GTA V × Elden Ring game and Midir to own one or two separate showcase builds.
+- Sent the updated scope, candidate side-demo brief, repository/branch pointer, and strict checkout/bottle/download/process ownership boundaries using send_message_to_thread to the dot conversation 01a0f57b-1eee-7674-9735-1ab9034fe0f7 on host durable. The API confirmed delivery; do not claim acceptance or a running side build until observed.
+- That dot previously spawned Review game combines project (01a0f57f-2350-7535-a601-3d6186da00c2), which had read an older mac-prototype snapshot. The new brief corrects its outdated target and setup status.
+- We did not create an additional fork/session. Recommend separate repositories for different game hosts, or isolated worktrees/branches when sharing code. Do not mix active game/mod profiles.
+
 ## Previous Terminal goal and owner decisions
 
 - Public open source project with a ten-minute Terminal crossover demo for a video.
