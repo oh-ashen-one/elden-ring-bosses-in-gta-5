@@ -47,8 +47,10 @@ def blockers(table, gpu, console, owner, limit=15):
 
 def owner_reservation(gpu_root):
     pause = gpu_root / 'PAUSED'
-    return pause.exists() and bool(re.match(
-        r'^owner (?:opening|reopening) GTA(?: V)? \d{1,2}:\d{2} - renders paused\b', pause.read_text()))
+    if not pause.exists(): return False
+    reason = pause.read_text()
+    return bool(re.match(r'^owner (?:opening|reopening) GTA(?: V)? \d{1,2}:\d{2} - renders paused\b', reason) or
+                re.fullmatch(r'OWNER PAUSE \d{1,2}:\d{2}: everything stopped until the owner says resume \(GTA for a few hours\)\s*', reason))
 
 
 def preflight(gpu_root, reserved=False):
@@ -82,7 +84,8 @@ def main():
     check = preflight(root, args.owner_reservation)
     print(json.dumps(check), flush=True)
     if args.check: return 0 if not check['blockers'] else 75
-    if check['blockers']: return 75
+    gpu_only = check['blockers'] and all(reason.startswith('GPU must be readable') for reason in check['blockers'])
+    if check['blockers'] and not (args.owner_reservation and not args.inside_slot and gpu_only): return 75
     if not args.inside_slot:
         env = dict(os.environ)
         for key in list(env):
@@ -102,9 +105,16 @@ def main():
                           'since_epoch':time.time(),'cmd':'GTA owner test; exclusive reservation, not a performance measurement'}
                 holder.write_text(json.dumps(record))
                 try:
-                    for _ in range(6):
+                    deadline=time.monotonic()+60; calm_since=None
+                    while True:
                         check = preflight(root, True)
-                        if check['blockers']: print(json.dumps(check),flush=True); return 75
+                        if any(not reason.startswith('GPU must be readable') for reason in check['blockers']):
+                            print(json.dumps(check),flush=True); return 75
+                        if check['blockers']: calm_since=None
+                        elif calm_since is None: calm_since=time.monotonic()
+                        elif time.monotonic()-calm_since>=12: break
+                        if time.monotonic()>=deadline:
+                            print(json.dumps({'status':'no_stable_gpu_headroom','last_check':check}),flush=True);return 75
                         time.sleep(2)
                     record['state']='running';holder.write_text(json.dumps(record))
                     env['GPU_SLOT_HELD']='perf'

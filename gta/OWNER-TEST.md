@@ -1,6 +1,6 @@
 # Elden Los Santos — owner preview
 
-**Experimental v5: prop-registration repair installed.** The v4 test successfully created/deleted a normal GTA object but still rejected Malenia. This package adds the missing `CONTENTS_PROPS` declaration to the creature DLC. The plugin and all seven native model/animation/archetype files are unchanged. The next owner test is still Malenia, once, with combat off. Creature visuals/combat remain unverified.
+**Diagnostic build v6.** Creature spawning is still unresolved. Hari approved one automatic, model-only import check once Story Mode is loaded. It creates and immediately removes test objects and writes results; these are not playable bosses. Key **7** starts the same check manually; **3** cancels it. No controller, tutorial or combat automation is performed.
 
 ## Start
 

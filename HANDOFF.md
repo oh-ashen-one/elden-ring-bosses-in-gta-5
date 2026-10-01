@@ -1,6 +1,6 @@
 # Handoff
 
-Updated: 2026-10-01 (v5 prop registration after successful stock-object diagnostic).
+Updated: 2026-10-01 (v6 import-isolation diagnostics; native creatures still unresolved).
 
 ## Current priority and verified state
 
@@ -23,7 +23,20 @@ Updated: 2026-10-01 (v5 prop registration after successful stock-object diagnost
 - Eight source-only launch guard tests pass, including the previous 97% GPU case, low-util live renderer, unknown GPU, logged-out desktop, stuck exiting headless engine and emergency pause. A current read-only check refused launch until the owner reservation existed and other rendering stopped.
 - Lower-resolution v3 launch succeeded under that reservation at 14:53 America/New_York: GTA5.exe PID 50731, Script Hook initialization and DirectX initialization confirmed. A 20-second startup check sampled GPU values 0–31% (mostly 20–21%); desktop console remained midir. This is startup evidence, not sustained gameplay/FPS or creature verification. The exclusive slot remains held until the actual game process exits; the other coordinator owns its pause/auto-lift. Hari retains gameplay control.
 
-## Current installed candidate: prop-registration-v5
+## Current installed candidate: import-diagnostics-v6
+
+- v5 also FAILED for all three custom creatures; stock reference object still succeeded (2306). Do not repeat claims that arity/texture/CONTENTS_PROPS corrections completed spawning. Root custom-asset failure remains unresolved.
+- Hari explicitly approved the model-only technical import check: briefly create/remove six model variants and log acceptance. This authorizes the fixed file command for this diagnostic, not tutorial/combat/controller automation. One request is queued at `Game/EldenLosSantos.import-check.request` containing `CHECK_IMPORTS_ONCE` plus newline. It waits for Story Mode (scripts skip pause/cutscenes/network), then is consumed once. Key **7** triggers the same check; **3** cancels it. No listener/server.
+- Models tested: stock `prop_box_wood01a`, baseline `ergt_malenia`, full rig+collision/static-animation/default clip `ergt_test_sta`, full rig+collision/dynamic-animation `ergt_test_dyn`, rig without collision `ergt_test_nocol`, and unskinned ordinary-shader/no-collision `ergt_test_rigid`. Each tries the native creation dynamic argument false and true, logging `import_check`. Successful diagnostic objects are deleted in the same tick below the player. They are not playable bosses or visual acceptance.
+- The static animated probe includes an additional default clip keyed to its model name, backed by CodeWalker's renderer lookup (`ycd.ClipMap.TryGetValue(arche.Hash,...)`). Existing dictionaries only had the ER clip names. Other original clips remain. Native YCD round-trip: 5 Malenia dictionary clips, 4 animations; no animation data was regenerated.
+- Offline format checks: 7 archetypes, 11 native resource entries of correct versions, textures validated. Static/dynamic/collisionless probes retain 96 bones; rigid probe has no skeleton and removes only skinning channels while retaining vertex positions/UVs. This is a diagnostic package, not a finished repair.
+- ASI SHA-256: `b14d1ae35f51d1977e2f13b785fcc9ef9bd2ceb261806e7cc7b4d7cd709cca8e`.
+- DLC SHA-256: `fb3092a8faeab8c5ac0859416b4b87054241801a6d16ade411654ca5eb281fa9`, 73,625,088 bytes. Build at `SourceAssets/dlc-build/v6-default-clip-checks/`.
+- v6 script marker: `loaded_import_diagnostics_v6_owner_verification_pending`. Await `import_diagnostics_complete` and all `import_check` lines. Failed load stage/creation must remain distinguished.
+- Owner says he paused ALL Unreal work. Live GPU registry confirmed no Unreal engines/holders, with an explicit marker: `OWNER PAUSE 15:41: everything stopped until the owner says resume (GTA for a few hours)`. Launcher recognizes this exact owner reservation, never an emergency pause, and leaves the marker untouched. One initial v6 launch attempt was refused before launching due to a GPU spike (84%). The guard now waits up to 60 seconds for the same below-30% condition to hold for 12 seconds; it does not relax the limit. No game was started by that refused attempt.
+- A new guarded v6 launch is requested, with the approved one-shot import check queued. Check launch status and the runtime log. Hari must enter Story Mode himself if at the menu; no automatic menu clicks.
+
+## Previous prop-registration-v5 checkpoint
 
 - v4 owner test FAILED to create Malenia, but its stock-object A/B probe returned entity 2050 and deleted it immediately. This proves the native object factory works after the signature corrections and isolates custom asset setup. Owner confirmed the visible failure and then saved/closed GTA for replacement.
 - Found missing `<contents>CONTENTS_PROPS</contents>` on this project's DLC_ITYP_REQUEST, present in prop-pack declaration references. v5 adds only that field to content.xml. Nested ergt_assets.rpf is byte-identical, and the v4 ASI remains installed. This is a focused registration test, not another model/texture rewrite.

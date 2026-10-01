@@ -64,3 +64,7 @@ The captured crash is an access violation in Wine’s `RtlVirtualUnwind2` during
 ## Prop registration (v5)
 
 The owner-triggered v4 test proved that the full native spawn call creates/deletes the stock reference object (handle 2050), while Malenia still returned zero after model/animation streaming. This isolates the remaining failure to the custom asset path. The DLC request lacked `<contents>CONTENTS_PROPS</contents>`, present in the [prop-pack declaration reference](https://gist.github.com/Stuyk/44a717390854b2a0614c868efab200fa). v5 adds only this declaration to `content.xml`: plugin, nested native asset RPF, models, textures, skeletons and clips are unchanged. The native archive verifier also confirms all seven entries are resource entries with the correct Legacy versions (YDR 165, YCD 46, YTYP 2). The new manifest validator rejects the prior missing classification and files not enabled at startup. Gameplay retest determines whether this is sufficient.
+
+## Import isolation tools
+
+`build_import_diagnostics.py` (original Apache-2.0 adapter) produces private variants of the same owned Malenia source: static/dynamic archetype flags, collisionless, and unskinned/default shader. It preserves original inputs. The static animated variant includes a default clip alias matching its model hash, following [CodeWalker's default-clip lookup](https://github.com/dexyfex/CodeWalker/blob/485d56bec00262ed7fa472261cce7bbc6202b96e/CodeWalker/Rendering/Renderer.cs#L3688). This is a diagnostic tool, not a verified game conversion. Its outputs must stay private.

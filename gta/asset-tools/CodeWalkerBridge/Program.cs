@@ -9,7 +9,7 @@ using CodeWalker.GameFiles;
 
 CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
 CultureInfo.CurrentUICulture = CultureInfo.InvariantCulture;
-if (args.Length != 3 || (args[0] != "convert" && args[0] != "pack" && args[0] != "prepare-dlclist" && args[0] != "inspect-ydr"))
+if (args.Length != 3 || (args[0] != "convert" && args[0] != "pack" && args[0] != "prepare-dlclist" && args[0] != "inspect-ydr" && args[0] != "inspect-ytyp"))
 {
     Console.Error.WriteLine("Usage: CodeWalkerBridge convert INPUT.ydr.xml|INPUT.ycd.xml|INPUT.ytyp.xml NEW_OUTPUT, or pack SOURCE_DIRECTORY NEW_RPF");
     return 2;
@@ -19,6 +19,15 @@ try
     string source = Path.GetFullPath(args[1]);
     string destination = Path.GetFullPath(args[2]);
     if (File.Exists(destination)) throw new IOException("Refusing to overwrite an existing asset");
+    if (args[0] == "inspect-ytyp")
+    {
+        var file = new YtypFile(); RpfFile.LoadResourceFile(file, File.ReadAllBytes(source), 2);
+        var report = file.AllArchetypes.Select(a => new { name_hash = (uint)a.Hash,
+            asset_name = (uint)a.BaseArchetypeDef.assetName, asset_type = a.BaseArchetypeDef.assetType.ToString(),
+            flags = a.BaseArchetypeDef.flags, special = a.BaseArchetypeDef.specialAttribute }).ToArray();
+        File.WriteAllText(destination,JsonSerializer.Serialize(report,new JsonSerializerOptions { WriteIndented=true }));
+        Console.WriteLine(JsonSerializer.Serialize(report)); return 0;
+    }
     if (args[0] == "inspect-ydr")
     {
         var drawable = new YdrFile();

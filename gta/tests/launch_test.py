@@ -42,6 +42,8 @@ class LaunchPreflight(unittest.TestCase):
             self.assertTrue(module.owner_reservation(root))
             p.write_text('owner reopening GTA 15:02 - renders paused by game_watch.sh (pre-emptive)')
             self.assertTrue(module.owner_reservation(root))
+            p.write_text('OWNER PAUSE 15:41: everything stopped until the owner says resume (GTA for a few hours)\n')
+            self.assertTrue(module.owner_reservation(root))
 
 
 if __name__ == '__main__': unittest.main()
