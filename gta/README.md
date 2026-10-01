@@ -23,9 +23,9 @@ cmake --build build/gta-win64
 
 The output is `build/gta-win64/EldenLosSantosProbe.asi`. No vendor SDK or runtime is required to compile the original dynamic ABI wrapper. A separately obtained compatible Script Hook V runtime and ASI loader are required to use it in a dedicated GTA Story Mode mod profile. Runtime compatibility through CrossOver has not been tested. Do not modify the original installation to test this draft.
 
-## Known loader issue before an in-game trial
+## Loader dependency
 
-The current draft binds only to an already-loaded ScriptHookV.dll. Since this ASI does not yet declare a static runtime import, loading it alone may fail when the runtime has not already been loaded. Add a proper loader dependency before installation; do not use unsafe loader-lock workarounds. This is a compile-verified draft awaiting integration, not an install-ready release.
+The build generates a small import library from the original `tools/runtime.def`. Its C alias resolves to Script Hook V's game-version export, ensuring the Windows loader loads the runtime before our DllMain binds the other APIs. The resulting PE import table and all eight dynamic export names were checked against the official runtime. No vendor library is copied into the repository. The verified Windows build uses MinGW-w64; MSVC support is not implemented.
 
 ## Runtime contract and remaining checks
 

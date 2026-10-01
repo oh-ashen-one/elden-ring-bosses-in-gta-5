@@ -1,0 +1,3 @@
+LIBRARY ScriptHookV.dll
+EXPORTS
+  ergt_runtime_dependency == "?getGameVersion@@YA?AW4eGameVersion@@XZ"

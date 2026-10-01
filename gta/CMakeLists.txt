@@ -15,7 +15,18 @@ enable_testing()
 add_test(NAME probe_state_and_native_abi COMMAND probe_test)
 
 if(WIN32)
+  if(NOT MINGW)
+    message(FATAL_ERROR "The verified Windows build currently requires MinGW-w64/dlltool")
+  endif()
+  find_program(DLLTOOL NAMES x86_64-w64-mingw32-dlltool dlltool REQUIRED)
+  set(RUNTIME_IMPORT "${CMAKE_CURRENT_BINARY_DIR}/scripthook-import.a")
+  add_custom_command(OUTPUT "${RUNTIME_IMPORT}"
+    COMMAND "${DLLTOOL}" -d "${CMAKE_CURRENT_SOURCE_DIR}/tools/runtime.def" -l "${RUNTIME_IMPORT}"
+    DEPENDS tools/runtime.def VERBATIM)
+  add_custom_target(runtime_import DEPENDS "${RUNTIME_IMPORT}")
   add_library(EldenLosSantosProbe SHARED src/plugin.cpp)
+  add_dependencies(EldenLosSantosProbe runtime_import)
+  target_link_libraries(EldenLosSantosProbe PRIVATE "${RUNTIME_IMPORT}")
   target_include_directories(EldenLosSantosProbe PRIVATE src)
   set_target_properties(EldenLosSantosProbe PROPERTIES PREFIX "" SUFFIX ".asi")
   if(MINGW)

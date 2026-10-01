@@ -4,6 +4,10 @@
 #include "scripthook.hpp"
 #include "probe.hpp"
 
+// A normal Windows import ensures the runtime is loaded before DllMain.
+// The generated import library maps this C symbol to the vendor's C++ export.
+extern "C" __declspec(dllimport) int ergt_runtime_dependency();
+
 namespace {
 ergt::ScriptHook hook;
 ergt::Probe probe;
@@ -171,6 +175,7 @@ void run() {
 BOOL APIENTRY DllMain(HMODULE module, DWORD reason, LPVOID) {
     if (reason == DLL_PROCESS_ATTACH) {
         own_module = module;
+        if (ergt_runtime_dependency() < 0) return FALSE;
         if (!hook.bind()) return FALSE;
         hook.register_script(module, run);
         hook.register_keyboard(keyboard);
