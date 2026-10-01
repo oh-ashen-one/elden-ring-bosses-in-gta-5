@@ -1,6 +1,6 @@
 # Handoff
 
-Updated: 2026-10-01 (Dynamic archetype setting proven in runtime; v7 applied to originals).
+Updated: 2026-10-01 (v7 runtime creation checks passed for all three original creatures).
 
 ## Current priority and verified state
 
@@ -11,7 +11,7 @@ Updated: 2026-10-01 (Dynamic archetype setting proven in runtime; v7 applied to 
 - The `move-steam-games-after-downloads-finish` automation was deleted at Hari's request. Do not recreate it.
 - Latest standing instruction: **open GTA V Legacy after installing patches**, without asking again. Hari owns gameplay, rendering review and performance testing. Use the shared renderer slot and verified Studio desktop; do not interrupt active unsaved gameplay or enter a crash/relaunch loop. No tutorial/combat input automation is authorized.
 - Hari now reports the tutorial completed. The previous window was saved at 800×600; he was given in-game window/resolution steps. Mac and Windows Steam both recognized DualSense; an empty GTA mapping was observed and Steam Input instructions supplied. Controller resolution is not independently confirmed.
-- Actual GTA build is 1.0.3889.0. Script Hook V initialized successfully, registered and executed `EldenLosSantos.asi`; ASI loader also loaded RageOpenV. The mod received two owner spawn commands but logged `create_object_failed` after its model and animation streaming gates. No visible creature or combat success is established.
+- Actual GTA build is 1.0.3889.0. Script Hook V initialized successfully, registered and executed `EldenLosSantos.asi`; ASI loader also loaded RageOpenV. Earlier candidates failed creature creation after streaming. The current v7 technical check successfully creates all three original creatures; persistent visible spawns and combat still require owner review.
 
 ## Launch recovery after the computer restart
 
@@ -25,9 +25,10 @@ Updated: 2026-10-01 (Dynamic archetype setting proven in runtime; v7 applied to 
 
 ## Current installed candidate: dynamic-creatures-v7
 
+- On the owner-requested reopen, GTA5.exe PID 49563 remained running beyond three minutes under the exclusive reservation. The v7 log records valid existing entities for Malenia (2562/2818), Red Wolf (3074/3330) and Giant Crab (3586/3842), with native dynamic=false/true respectively. Stock reference also passed; `import_diagnostics_complete value=0`. This verifies object creation for every production model, not their appearance, animation, damage or encounter quality. Do not repeat the diagnostic unless a new failure warrants it.
 - **Runtime isolation found the decisive setting:** the full Malenia asset with Dynamic+HasAnim flags (`131584`) created valid objects in every v6 run, with both native dynamic arguments. Examples: handles 2306/2562, 3586/3842, 9218/9474. The baseline (flags 512), static+animation/default-clip variant (544), collisionless variant and unskinned/static variant returned zero. This is native creation proof for the real rigged/collidable Malenia asset, not visual/gameplay acceptance.
 - v7 applies `Dynamic (131072) | HasAnim (512)` to ALL THREE original archetypes. Original YDR/YCD mesh, rig, texture, collision and animation resources are byte-identical to the texture-corrected v3 originals. No placeholder/proxy/ped replacement is used. Experimental aliases and the default-clip alias were removed from the production DLC.
-- Normal controls are restored to **1–6**. Temporary key 7 removed; file-only, fixed-command technical verification remains. A one-shot check of stock object + original Malenia/Wolf/Crab is queued as part of the owner-approved import verification, to confirm the repair on their real model names. It deletes the technical samples immediately. Press 2 afterward for a persistent normal creature with combat OFF.
+- Normal controls are restored to **1–6**. Temporary key 7 removed; file-only, fixed-command technical verification remains. The owner-approved one-shot check of stock object + original Malenia/Wolf/Crab has run and passed on their real model names. It deleted the technical samples immediately and consumed the request file. Press 2 for a persistent normal creature with combat OFF.
 - ASI SHA-256: `6971f83a331654d8b79aaabe9c2bb240f3ce0917b038a8dbcdf53706a6bb62df`.
 - DLC SHA-256: `ccad3b6a638074c46edcdf478ba96458b6612f2c89086f301c3ee6e6f321c28b`, 27,295,744 bytes; build `SourceAssets/dlc-build/v7-dynamic-creatures/`.
 - v7 script marker: `loaded_dynamic_creatures_v7_owner_verification_pending`; technical sweep completion has `value=0` if the production native call succeeded for every model. Normal persistent spawns log `creature_created` and native HP; animation failures are separate events.
