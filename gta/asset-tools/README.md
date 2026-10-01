@@ -1,6 +1,6 @@
 # Elden Ring asset extraction (GPL-3.0-or-later)
 
-These standalone conversion tools are separate from the Apache-2.0 GTA gameplay plugin. They link to or import GPL libraries and are distributed under GPL-3.0-or-later; see LICENSE. No proprietary assets, game libraries, archive keys, or converted models are distributed here.
+These standalone conversion tools are separate from the Apache-2.0 GTA gameplay plugin. The C/Python adapters link to or import GPL libraries and are distributed under GPL-3.0-or-later; see LICENSE. Exception: the original CodeWalkerBridge C# API adapter is Apache-2.0 as stated in its source header and the root LICENSE. No proprietary assets, game libraries, archive keys, or converted models are distributed here.
 
 ## Verified on the Studio
 
@@ -8,7 +8,9 @@ These standalone conversion tools are separate from the Apache-2.0 GTA gameplay 
 - Selective Data3 extraction succeeded for Malenia (c2120), Red Wolf of Radagon (c3181), and Giant Crab (c2270): models, animation binders including Malenia's split binders, and high-resolution texture binders.
 - Source headers and each output are recorded with SHA-256 hashes in a LOCAL extraction manifest.
 - Native Mac Python can parse Malenia's FLVER and Havok skeleton. A compressed animation was decoded with its companion Havok compendium.
-- None of this establishes GTA asset compatibility or in-game gameplay. Conversion to GTA formats, material adaptation, animation retargeting and collision still require implementation/verification.
+- Exported all three characters to rigged glTF with three source clips each. Latest interchange files have zero errors/warnings in Khronos glTF Validator 2.0.0-dev.3.10. This verifies format structure, not visual fidelity or gameplay.
+- Data-only Blender 5.2/Sollumz conversion created local editable .blend files and GTA CodeWalker XML. Malenia converted to native YDR/YCD and loaded back through CodeWalker.Core: 96 bones and three clips preserved. Red Wolf/Crab XML includes initial whole-body box collision, with a missing collision-material warning still to resolve.
+- None of this establishes in-game compatibility. No game, renderer or gameplay/performance test was launched. Materials are approximations, collision is coarse, animation roles need review, and DLC packaging/runtime integration remain in progress.
 
 ## Dependencies and provenance
 
@@ -36,3 +38,13 @@ python gta/asset-tools/extract_characters.py \
 ```
 
 The output must be separate from the game installation. Existing outputs are reused only when they match the recorded digest. If an archive changes, use a new output directory. Never publish the output directory.
+
+## Additional private conversion dependencies
+
+- Sollumz (GPL-3.0-or-later), pinned `82817d1211e7769bf3b9eb45866b6f8b802864fe`; szio 1.4.0.dev1 (MIT), installed only into the task's isolated Python path.
+- CodeWalker.Core, pinned `485d56bec00262ed7fa472261cce7bbc6202b96e`: separately obtained/built in the ignored tool cache. No root license was found in the inspected repository. Its code and binaries are NOT copied into our published source or distributed/relicensed by this project. The original C# adapter calls its public conversion API locally.
+- Portable Microsoft .NET SDK 10.0.401 (macOS arm64) was installed into the ignored tool cache from Microsoft's official download, without changing system PATH or accounts.
+
+`export_character_glb.py` is the rigged interchange converter. `blender_to_gta.py` runs in background/factory startup without rendering or saving user preferences. `CodeWalkerBridge` converts XML to native GTA resources and checks a format round-trip. Binary/output receipts explicitly set `gta_runtime_verified` to false.
+
+All .blend, .glb, .dds, .ydr, .ycd and game-derived metadata stay under the ignored private asset directory. They are not redistributable project source.
