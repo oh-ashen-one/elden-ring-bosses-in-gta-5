@@ -9,10 +9,18 @@ Updated: 2026-10-01 (GTA V × Elden Ring priority and setup audit).
 - Latest audit: GTA V Legacy has StateFlags 4 with all 129,049,797,551 bytes staged; MW2, Escape the Backrooms and Phasmophobia also report installed. Elden Ring and Dark Souls Remastered remain pending. Recheck live manifests and queue before use.
 - Storage: 512 GB writable exFAT SD card named memory, mounted at /Volumes/memory, UUID AB55E1EC-D2BD-38BD-961F-56347E0F5C9D; CrossOver maps it as D:. Initial inventory showed roughly 512 GB free. Reserved logical game files total roughly 274 GB; live totals may grow.
 - Owner explicitly chose to let downloads finish BEFORE moving games to the SD card. Do not interrupt, pause, stop or relocate active downloads. An earlier shutdown request did not stop the client; no files have been moved or deleted.
-- Active thread heartbeat move-steam-games-after-downloads-finish checks every 15 minutes. Hari explicitly authorized it to continue from queue completion to verified SD-card migration, then GTA V × Elden Ring setup and implementation. Its updated name is Finish downloads, move games, build GTA Elden Ring. Migration is once only; runtime work must follow the current Studio slot/ownership/desktop rules and stop for required login, license, OS permission or owner playtest input. It disables after delivering the first verified playable boss encounter and reproducible open-source setup for owner review.
+- Owner cancelled the automatic follow-up on 2026-10-01 and will report when all games finish installing. The automation move-steam-games-after-downloads-finish was deleted successfully. No further automatic polling, migration or runtime launches are scheduled. Wait for the owner to resume.
 - CrossOver and Steam client/account data stay internal. Only game data moves; no reformat is authorized or needed.
 - Product scope is real GTA V Story Mode with Elden Ring bosses in an open-ended Los Santos sandbox. One roughly ten-minute encounter is the first verification milestone, not a playtime limit or a replacement for the larger game. No mod loader installed, no boss converted, no GTA gameplay verified. Current independent work can cover the encounter specification, original boss rules and tests, and investigation of the asset conversion route. GTA adapter and visible gameplay require the installed game.
-- Working branch: codex/gta-elden-ring-plan, based on the preserved codex/mac-prototype branch.
+- Working branch: codex/gta-damage-probe, based on codex/gta-elden-ring-plan; earlier mac-prototype remains preserved.
+
+## Source groundwork saved when the owner cancelled the follow-up
+
+- Added original GTA diagnostic ASI source under gta/: a dormant F6/F7 test-actor probe, raw native health/death observation, HUD, local log, Script Hook V dynamic ABI wrapper, portable checks and CMake/Mingw build configuration. Read gta/README.md.
+- Native unit checks passed. Windows x64 ASI cross-compilation also passed, with only KERNEL32.dll and msvcrt.dll imports. Known next fix: the draft only binds an already-loaded ScriptHookV.dll; add a proper runtime import dependency before any installation. No plugin installed or executed in GTA; no game launched and no Elden Ring assets imported.
+- Official SDK/runtime downloads were inspected in ignored scratch only; archive redistribution is prohibited, so they are not published. Native hashes/signatures and runtime exports were used as API interoperability references. GTA5.exe version 1.0.3889.0 matches the runtime's advertised supported Legacy build.
+- Homebrew mingw-w64 14.0.0_3 installed (compiler reports GCC 16.2.0); dependency isl upgraded by Homebrew. No tap trust settings changed.
+- Steam downloads were left running. Latest content log showed Elden Ring downloading at about 986 Mbps, despite the on-disk manifest's stale zero-byte progress. Never treat that manifest counter alone as a stuck download.
 
 ## Midir coordination
 
