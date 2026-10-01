@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-10-01T11:07:26.967026-04:00",
+  "checked_at": "2026-10-01T14:01:10.209501-04:00",
   "gameplay_verified": false,
   "rendering_verified": false,
   "performance_verified": false,
@@ -18,12 +18,21 @@
   "native_resource_roundtrips": "passed",
   "archetype_count": 3,
   "dlc_structure_check": "passed",
-  "fresh_output_rebuild": "passed",
-  "dlc_sha256": "48500df2c04e3e57103a086f4fd75dea54c238aaa743ec78beee80b9e0801018",
+  "fresh_output_rebuild": "original full pipeline passed; revised DLC package rebuilt from preserved conversion sources",
+  "dlc_sha256": "27d1ec032b91e2fb49b6df3f596d87e1efebd235f9da3cca53615a9d06a9e8a6",
   "dlc_bytes": 27295744,
-  "original_code_checks": "passed",
+  "original_code_checks": "passed: two native scenario suites",
   "windows_x64_build": "passed",
   "apfs_profile_fixture_checks": "passed",
-  "games_launched_by_agent": 0,
-  "renders_run_by_agent": 0
+  "games_launched_by_agent": 1,
+  "renders_run_by_agent": 0,
+  "current_candidate": "number-keys-spawn-v2",
+  "owner_tutorial_complete": true,
+  "loader_verified": true,
+  "first_creature_spawn": "failed: native object creation returned no entity after asset streaming",
+  "current_candidate_creature_spawn_verified": false,
+  "archetype_animation_collision_texture_bindings": "passed: all three verified after native round-trip",
+  "native_models_and_clips_preserved": "six YDR/YCD files unchanged byte-for-byte from first candidate",
+  "plugin_sha256": "074d1bfa71fea1b3e82316de289a2008e3e33af7a691f3d0bce8fd5cb9dc54b6",
+  "installed_payload_checksums": "passed: six files in active profile and private package"
 }

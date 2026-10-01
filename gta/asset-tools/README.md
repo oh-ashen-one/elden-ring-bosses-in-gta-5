@@ -48,3 +48,7 @@ The output must be separate from the game installation. Existing outputs are reu
 `export_character_glb.py` is the rigged interchange converter. `blender_to_gta.py` runs in background/factory startup without rendering or saving user preferences. `CodeWalkerBridge` converts XML to native GTA resources and checks a format round-trip. Binary/output receipts explicitly set `gta_runtime_verified` to false.
 
 All .blend, .glb, .dds, .ydr, .ycd and game-derived metadata stay under the ignored private asset directory. They are not redistributable project source.
+
+## Animated creature archetypes
+
+The DLC packager declares `Has Anim (YCD)` (512), links each clip dictionary and embedded texture dictionary, and sets `physicsDictionary` to the model name for embedded YDR collision. It does not mark moving creatures as static scenery. The native round-trip verifier checks these bindings, not just the archetype count. Sources: [Sollumz archetype flags](https://docs.sollumz.org/documentation/archetype-definition.ytyp/archetype-flags) and [CodeWalker embedded-bound binding](https://github.com/dexyfex/CodeWalker/blob/485d56bec00262ed7fa472261cce7bbc6202b96e/CodeWalker/Project/ProjectForm.cs#L3480). These format checks do not establish a successful GTA spawn.

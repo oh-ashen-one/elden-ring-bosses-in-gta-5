@@ -121,7 +121,24 @@ try
         RpfFile.LoadResourceFile(loaded, data, 2);
         if (loaded.AllArchetypes == null || loaded.AllArchetypes.Length == 0)
             throw new InvalidDataException("Archetype dictionary is empty");
-        details = new { archetypes = loaded.AllArchetypes.Length };
+        var inputs = xml.SelectNodes("/CMapTypes/archetypes/Item")!.OfType<XmlElement>().ToArray();
+        if (inputs.Length != loaded.AllArchetypes.Length) throw new InvalidDataException("Archetype count changed");
+        var bindings = inputs.Select(input =>
+        {
+            string name = input["name"]!.InnerText;
+            uint nameHash = JenkHash.GenHash(name);
+            var def = loaded.AllArchetypes.Single(a => a.Hash == nameHash)._BaseArchetypeDef;
+            uint flags = uint.Parse(input["flags"]!.GetAttribute("value"));
+            string physics = input["physicsDictionary"]?.InnerText ?? "";
+            string clips = input["clipDictionary"]?.InnerText ?? "";
+            string textures = input["textureDictionary"]?.InnerText ?? "";
+            if (def.flags != flags || (uint)def.physicsDictionary != (physics.Length == 0 ? 0 : JenkHash.GenHash(physics)) ||
+                (uint)def.clipDictionary != (clips.Length == 0 ? 0 : JenkHash.GenHash(clips)) ||
+                (uint)def.textureDictionary != (textures.Length == 0 ? 0 : JenkHash.GenHash(textures)))
+                throw new InvalidDataException("Archetype bindings changed during round-trip: " + name);
+            return new { model = name, flags = def.flags, physics_dictionary = physics, clip_dictionary = clips, texture_dictionary = textures };
+        }).ToArray();
+        details = new { archetypes = loaded.AllArchetypes.Length, bindings };
     }
     else throw new ArgumentException("Unsupported input asset extension");
     Directory.CreateDirectory(Path.GetDirectoryName(destination)!);

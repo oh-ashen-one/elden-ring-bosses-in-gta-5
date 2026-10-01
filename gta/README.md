@@ -2,7 +2,7 @@
 
 Original GTA V Story Mode mod code and a local conversion pipeline for owned Elden Ring creatures. Current characters: **Malenia, Red Wolf of Radagon, Giant Crab**.
 
-**Status: experimental owner-preview profile prepared; gameplay unverified.** The vanilla GTA baseline was confirmed by the owner. No agent game launch, render, input automation or performance test was performed for this build. See [owner launch/test guide](OWNER-TEST.md).
+**Status: loader confirmed; creature spawn repair awaiting owner retest.** The owner finished the tutorial. The script received its spawn hotkey and streamed assets, but GTA returned no object. A revised candidate uses top-row keys 1–6, corrected animation/collision archetype bindings and a bounded alternate spawn path. Creature rendering, combat and performance remain unverified. See [owner launch/test guide](OWNER-TEST.md).
 
 ## What is implemented
 

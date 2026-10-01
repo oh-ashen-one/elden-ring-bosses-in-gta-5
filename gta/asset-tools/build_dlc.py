@@ -58,14 +58,16 @@ def main():
         centre = [(a+b)/2 for a,b in zip(low,high)]
         radius = math.sqrt(sum(((b-a)/2)**2 for a,b in zip(low,high)))
         item = ET.SubElement(archetypes, "Item", {"type": "CBaseArchetypeDef"})
-        value(item,"lodDist",250); value(item,"flags",32); value(item,"specialAttribute",0)
+        # These are script-animated creatures, not static map props. Declare
+        # their clip dictionary, and bind the collision embedded in each YDR.
+        value(item,"lodDist",250); value(item,"flags",512); value(item,"specialAttribute",0)
         for tag, vector in [("bbMin",low),("bbMax",high),("bsCentre",centre)]:
             ET.SubElement(item,tag,{axis:format(v,".9g") for axis,v in zip("xyz",vector)})
         value(item,"bsRadius",radius); value(item,"hdTextureDist",10)
         ET.SubElement(item,"name").text=name
-        ET.SubElement(item,"textureDictionary")
+        ET.SubElement(item,"textureDictionary").text=name
         ET.SubElement(item,"clipDictionary").text=name+"_anims"
-        ET.SubElement(item,"drawableDictionary"); ET.SubElement(item,"physicsDictionary")
+        ET.SubElement(item,"drawableDictionary"); ET.SubElement(item,"physicsDictionary").text=name
         ET.SubElement(item,"assetType").text="ASSET_TYPE_DRAWABLE"
         ET.SubElement(item,"assetName").text=name
         ET.SubElement(item,"extensions")

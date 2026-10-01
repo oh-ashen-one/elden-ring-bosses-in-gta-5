@@ -16,7 +16,7 @@ Proposed first boss: Malenia, subject to owner preference and a successful model
 4. Implement boss decisions, attacks, health/stagger, ranged threat, death and reset in the GTA host. Tune separate weapon damage channels so helicopter explosives neither fail to register nor erase the encounter immediately.
 5. Build the ten-minute encounter: short briefing and ground fight, helicopter access and aerial phase, finish/reward, clean restart. Measure performance on the Studio and obtain owner gameplay feedback.
 
-The Mac route is Windows GTA V through CrossOver. Neither the required mod loader combination nor this boss integration is verified on this machine. universal-modder is a workflow reference; its published Minecraft/GTA bridge does not supply an Elden Ring boss implementation. We do not need to run both retail games simultaneously for a converted boss plus GTA-hosted behavior.
+The Mac route is Windows GTA V through CrossOver. The mod loader and script execution are verified on this machine. The first creature creation failed; the current repair candidate awaits owner retest. universal-modder is a workflow reference; its published Minecraft/GTA bridge does not supply an Elden Ring boss implementation. We do not need to run both retail games simultaneously for a converted boss plus GTA-hosted behavior.
 
 Publish original mod code, build/setup instructions and eligible tooling as open source. Players provide their own game content; this is not a standalone redistribution of GTA V or Elden Ring.
 
@@ -37,7 +37,7 @@ References: [Script Hook V](https://www.dev-c.com/gtav/scripthookv/), [universal
 
 Owner confirmed this split on 2026-10-01:
 
-- **This game-combines session:** the main GTA V × Elden Ring playable mod, Studio/CrossOver integration and verification, and the already scheduled post-download SD-card migration.
+- **This game-combines session:** the main GTA V × Elden Ring playable mod, Studio/CrossOver integration and verification, and source/asset integration; the owner cancelled SD-card migration.
 - **Midir dot:** the owner has selected **Dark Souls × Modern Warfare 2** as its separate showcase build. This supersedes the earlier suggestion to choose two combinations or start Elden Ring/MW2 Zombies.
 - **Additional sessions:** may inherit chat context, but use separate repositories for different host engines, or distinct worktrees and branches for reusable shared code. Never share a dirty working directory or a mutable game/mod profile.
 

@@ -1,40 +1,39 @@
 # Handoff
 
-Updated: 2026-10-01 (GTA V × Elden Ring priority and setup audit).
+Updated: 2026-10-01 (number keys and repair candidate after first owner spawn failure).
 
-## Current priority and setup audit
+## Current priority and verified state
 
-- Active goal: GTA V × Elden Ring, with a boss damaged by native GTA firearms, explosives, vehicle impacts and helicopter weapons. See docs/CROSSOVER-BACKLOG.md.
-- Windows Steam is installed and authenticated sufficiently to download games in the CrossOver Steam bottle. Rosetta is installed. Hari has confirmed GTA V Story Mode works and is currently playing the opening robbery/tutorial. Elden Ring gameplay and the crossover mod remain unverified.
-- Latest audit: GTA V Legacy has StateFlags 4 with all 129,049,797,551 bytes staged; MW2, Escape the Backrooms and Phasmophobia also report installed. Elden Ring and Dark Souls Remastered remain pending. Recheck live manifests and queue before use.
-- Storage: 512 GB writable exFAT SD card named memory, mounted at /Volumes/memory, UUID AB55E1EC-D2BD-38BD-961F-56347E0F5C9D; CrossOver maps it as D:. Initial inventory showed roughly 512 GB free. Reserved logical game files total roughly 274 GB; live totals may grow.
-- All six games and shared redistributables finished downloading. The owner then CANCELLED the SD-card migration because the sustained copy speed was too slow. Keep all games in the existing internal CrossOver Steam library. The task-owned rsync was stopped cleanly with SIGTERM (exit 20); no source files were removed and neither Steam library configuration was changed. Partial SD copies were removed and Windows Steam was reopened successfully (verified process). No storage migration is authorized now.
-- Owner cancelled the automatic follow-up on 2026-10-01; automation move-steam-games-after-downloads-finish was deleted successfully. He subsequently confirmed downloads finished and resumed work, then cancelled only the SD-card migration. Main GTA V × Elden Ring work remains authorized on internal storage. Do not recreate the reminder.
-- CrossOver, Steam and all game data stay INTERNAL per the latest owner instruction. Do not resume the SD-card move.
-- Product scope is real GTA V Story Mode with Elden Ring bosses in an open-ended Los Santos sandbox. One roughly ten-minute encounter is the first verification milestone, not a playtime limit or a replacement for the larger game. A local owner-preview profile with converted assets, mod loaders and gameplay source is prepared. See the current checkpoint below. Mod loading, visuals, damage channels and actual gameplay remain unverified.
-- Working branch: codex/elden-assets-and-combat, based on codex/gta-damage-probe; earlier branches remain preserved.
+- This thread owns GTA V × Elden Ring. Midir owns Dark Souls × MW2. Keep those lanes separate.
+- Repo: https://github.com/oh-ashen-one/modern-warfare-2-ai; branch `codex/elden-assets-and-combat`; draft PR #2 targets `codex/gta-damage-probe`. No merge permission.
+- Chat default cwd points at another lane (`/Users/midir/Documents/ChatGPT/combiing games`). ALWAYS pass this GTA checkout as the working directory.
+- All six games finished installing. Hari CANCELLED the slow SD-card migration; leave games internal. The task-owned partial copy was removed without removing source game files. Do not resume migration.
+- The `move-steam-games-after-downloads-finish` automation was deleted at Hari's request. Do not recreate it.
+- Hari owns gameplay, rendering and performance testing. He explicitly requested one GTA launch; the session launched Legacy through Windows Steam, then handed control back. No tutorial/input/playtest automation was performed. Do not launch again unless asked.
+- Hari now reports the tutorial completed. The previous window was saved at 800×600; he was given in-game window/resolution steps. Mac and Windows Steam both recognized DualSense; an empty GTA mapping was observed and Steam Input instructions supplied. Controller resolution is not independently confirmed.
+- Actual GTA build is 1.0.3889.0. Script Hook V initialized successfully, registered and executed `EldenLosSantos.asi`; ASI loader also loaded RageOpenV. The mod received two owner spawn commands but logged `create_object_failed` after its model and animation streaming gates. No visible creature or combat success is established.
 
-## Current GTA owner-preview checkpoint
+## Current installed candidate: number-keys-spawn-v2
 
-- Three authentic owned ER creatures are packaged locally: Malenia phase-one meshes, Red Wolf of Radagon, Giant Crab. Twelve source clips total, assigned provisional idle/movement/attack/death roles; visual/gameplay fidelity is NOT verified.
-- Source assets extracted without changing either game's archives. Private pipeline output remains under assets/private/eldenring; final conversion sources are gta/candidate2 and interchange/v6. All three have resolved base textures, skeletons and coarse whole-body collision boxes. Hair and layered materials are documented approximations; original ER AI/cloth/VFX are not ported.
-- Native GTA YDR/YCD resources round-trip through the local CodeWalker adapter. DLC package at assets/private/eldenring/dlc-build/v1/dlc.rpf is 27,295,744 bytes; archive structure and three archetypes verified. No render/gameplay/performance tests were run.
-- Original C++ EldenLosSantos.asi now implements three-choice spawning, up to three active creatures, real GTA health-loss/hit-flag intake with logged fallback damage, custom melee/ranged/chase/stagger/enrage logic, health bars, original animation playback, clear/reset, optional rifle/RPG and an armed Buzzard. Combat begins OFF. Controls F5–F10 are in gta/OWNER-TEST.md. Everything runtime-related remains owner-unverified.
-- Main ASI compiles as Windows x64. Portable combat/probe checks and APFS profile isolation/rollback/restore fixture checks passed. Tests did not touch live game data or the real registry.
-- Named PRIVATE preview bundle: /Users/midir/Applications/EldenLosSantosPreview (about 30 MB payload, including local retail-derived DLC and separately obtained runtime files). Never publish this folder.
-- The preview profile is now ACTIVE, without launching GTA. Steam's existing GTA folder is a symlink to /Users/midir/Library/Application Support/EldenLosSantos/Game. Exact original retail directory is preserved at /Users/midir/Library/Application Support/EldenLosSantos/Retail. APFS clonefile shared the original file blocks; no second 129 GB data copy or SD move occurred. Original GTA5.exe checksum and all six payload checksums verified.
-- Only GTA5.exe's Wine AppDefaults dinput8 override was set to native,builtin in the Steam bottle. Prior value was absent and is recorded for restore. Other games/bottles and their overrides were not changed. Existing saves were not modified; no story-save files were found at the checked standard paths to back up.
-- Profile state: ~/Library/Application Support/EldenLosSantos/profile-state.json. Restore via `python3 gta/tools/profile_manager.py restore` with GTA closed. This restores the original directory path and prior override; do not unlink paths manually.
-- ERGTA-Tools remains a separate accountless headless conversion bottle. All game launching/input/testing belongs to Hari. No reminder was recreated.
-- Source tools and versions are in gta/dependencies.json and gta/asset-tools. CodeWalker and runtime dependency binaries are private/local only; they are not redistributed or relicensed by the public project.
-- Chat default cwd is /Users/midir/Documents/ChatGPT/combiing games, another lane. ALWAYS set explicit cwd to this GTA checkout for work.
+- Original C++ plugin now uses **top-row 1 select / 2 spawn / 3 clear / 4 combat / 5 weapons / 6 Buzzard**. No Fn chord. It reserves corresponding GTA direct weapon-selection actions; the weapon wheel remains available. Numpad flight keys are not used by the mod.
+- Fixed missing archetype declarations: Has Anim flag 512, physics dictionary bound to embedded collision, and texture dictionary bound to embedded textures. Removed static-scenery flag 32. These omissions are verified; whether they fully explain GTA's failed creation is still an owner test.
+- Local non-door spawn call plus one bounded standard-object fallback on a zero handle. Fallback corrects GTA's model-radius Z offset. Invalid coordinates are rejected. Logs include exact model/hash, loaded state, type, spawn coordinates and both creation return values; no placeholder replacement is used.
+- Three authentic owned ER creatures: Malenia phase-one meshes, Red Wolf of Radagon and Giant Crab. Twelve clips have provisional idle/movement/attack/death roles. Skeletons, mesh resources and clips are unchanged by this repair.
+- Current private DLC: 27,295,744 bytes; SHA-256 `27d1ec032b91e2fb49b6df3f596d87e1efebd235f9da3cca53615a9d06a9e8a6`.
+- Current ASI SHA-256: `074d1bfa71fea1b3e82316de289a2008e3e33af7a691f3d0bce8fd5cb9dc54b6`.
+- Verified Windows x64 compile, two portable native scenario suites, all three native archetype bindings, archive structure and six unchanged YDR/YCD resources. These are source/format checks, not gameplay proof.
+- Installed with GTA and PlayGTAV both stopped. All six payload checksums match the active profile and private bundle. Original retail executable checksum unchanged. Prior ASI/DLC, manifest and profile state backed up privately under `~/Applications/EldenLosSantosPreview/Backups/2026-10-01-number-keys-v2/`.
+- **Remaining blocker: owner must relaunch Story Mode and press 2 once in a clear outdoor area.** If creation fails, inspect `EldenLosSantos.log` for the `loaded_number_keys_spawn_v2_owner_verification_pending` marker and the new detailed spawn events. Stop at the first failing step. Do not claim this repair spawned a creature until that happens.
 
-## Owner testing handoff (latest instruction)
+## Local profile and asset boundaries
 
-- Hari explicitly asked to handle game launching and playtesting himself to avoid spending agent credits on runtime testing. Do not launch or automate GTA/other game playtests unless he asks again. Focus this session on source, asset conversion and building reviewable artifacts, then give short owner test steps.
-- No GTA game was launched by this session. The latest attempted baseline launch stopped at read-only safety checks when the owner changed this workflow. Other sessions' Unreal processes were untouched.
-- Baseline owner check PASSED for launch: Hari reports GTA V Legacy Story Mode working and is playing the opening robbery/tutorial. A live GTA5.exe process was also observed. This is owner-reported baseline gameplay, not a mod test or performance measurement. Let him finish; do not close or restart GTA/Steam/Rockstar or change the running game files. Boss/probe behavior remains unverified.
-- At his request, quit our unused Modern Warfare 2 AI setup preview (verified exited), and dismissed the CrossOver manager window. Other sessions' Unreal/terminal work and GTA dependencies stay running.
+- Private bundle: `~/Applications/EldenLosSantosPreview/`; owner guide `START-HERE.md`; editable inputs `SourceAssets/`; latest private DLC build `SourceAssets/dlc-build/v2-bindings/`.
+- Steam's existing GTA path is a symlink to `~/Library/Application Support/EldenLosSantos/Game`. Exact original retail directory remains `~/Library/Application Support/EldenLosSantos/Retail`. APFS clonefile shares original blocks, not a second full-size copy.
+- Profile state: `~/Library/Application Support/EldenLosSantos/profile-state.json`. Only GTA5.exe's Wine `dinput8` override is `native,builtin`, with prior absence recorded. Account stores and saves were not changed.
+- Restore with GTA closed: `python3 ~/Applications/EldenLosSantosPreview/Tools/profile_manager.py restore`; use `activate` to reactivate. Do not unlink game/profile paths manually.
+- Owned-game data, converted assets, runtime files, saves and account stores must never be published. Public `gta/` contains original tools/code and source references.
+- ERGTA-Tools is a separate accountless conversion bottle. Data-only conversion is permitted; all rendered/gameplay validation belongs to Hari.
+- Custom GTA AI, coarse whole-body collision and approximate materials remain experimental. Original ER AI/cloth/VFX/audio are not ported. No verified boss encounter, damage balance or FPS claim.
 
 ## Source groundwork saved when the owner cancelled the follow-up
 
@@ -115,13 +114,13 @@ Updated: 2026-10-01 (GTA V × Elden Ring priority and setup audit).
 
 Read docs/BUILD-STATUS.md and docs/MAC-SETUP.md for exact limitations. Do not treat the scripted rule check as gameplay evidence.
 
-## Immediate owner handoff
+## Original preparation handoff (superseded by the current candidate above)
 
 - The preview is active. Next step is owner-only launch of GTA V Legacy through the existing CrossOver Steam path, finish the tutorial/free-roam save, and follow gta/OWNER-TEST.md.
 - All runtime and visual claims remain pending that owner test. If no header appears, inspect the loader chain. If models are unavailable, inspect the DLC mount and YTYP registration. If models appear but no damage/animations, use the local EldenLosSantos.log for focused fixes.
 - Do not run GTA, render previews or conduct agent playtests. No recurring continuation/reminder exists for this thread.
 
-## Final preparation verification
+## Original preparation verification (before the first owner spawn test)
 
 - Full dependency bootstrap succeeded. Its public runtime downloader was corrected to use the publishers' normal curl download route after urllib received HTTP 406; both downloaded archives matched their pinned SHA-256 values.
 - Complete build_owned_assets.py pipeline succeeded into a fresh asset output directory, without any game or render. Rebuilt DLC exactly matches the staged candidate SHA-256 48500df2c04e3e57103a086f4fd75dea54c238aaa743ec78beee80b9e0801018 (27,295,744 bytes).

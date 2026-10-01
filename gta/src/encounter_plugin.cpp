@@ -17,7 +17,8 @@ std::atomic<unsigned> commands{0};
 enum : unsigned { select_next=1, spawn=2, clear_all=4, toggle_combat=8, loadout=16, helicopter=32 };
 int selected = 0;
 bool fighting = false;
-char notice[192] = "F5 select | F6 spawn | F7 clear | F8 combat | F9 loadout | F10 helicopter";
+constexpr char controls[] = "1 select | 2 spawn | 3 clear | 4 combat | 5 loadout | 6 helicopter";
+char notice[192] = "Choose a creature with 1, then press 2 to spawn. Combat starts OFF.";
 
 struct Actor {
     int entity = 0;
@@ -62,7 +63,7 @@ void initialize_log() {
     if (!slash || slash-path>32700) return;
     std::wcscpy(slash+1,L"EldenLosSantos.log");
     log_file=_wfopen(path,L"a");
-    record("loaded_owner_gameplay_verification_pending");
+    record("loaded_number_keys_spawn_v2_owner_verification_pending");
 }
 void text(float x,float y,const char* line,float scale=0.32f) {
     hook.invoke(0x66E0276CC5F6B9DAULL,0);
@@ -106,7 +107,7 @@ void begin_spawn(bool vehicle,std::uint32_t now) {
         std::snprintf(notice,sizeof(notice),"Your helicopter already exists nearby."); return;
     }
     if (!vehicle && std::all_of(actors.begin(),actors.end(),[](const Actor& a){return a.entity!=0;})) {
-        std::snprintf(notice,sizeof(notice),"Three creatures are active. F7 clears them."); return;
+        std::snprintf(notice,sizeof(notice),"Three creatures are active. 3 clears them."); return;
     }
     const auto& spec=ergt::creatures[selected];
     const auto model_hash=hash(vehicle?"buzzard":spec.model);
@@ -115,6 +116,10 @@ void begin_spawn(bool vehicle,std::uint32_t now) {
         record("model_unavailable",0,static_cast<float>(selected)); return;
     }
     pending={true,vehicle,selected,model_hash,now};
+    if (log_file) {
+        std::fprintf(log_file,"event=spawn_requested model=%s hash=%08x preset=%d\n",vehicle?"buzzard":spec.model,model_hash,selected);
+        std::fflush(log_file);
+    }
     hook.invoke(0x963D27A58DF860ACULL,model_hash);
     if (!vehicle) hook.invoke(0xD3BD40951412FEF6ULL,spec.dictionary);
     std::snprintf(notice,sizeof(notice),"Loading %s...",vehicle?"helicopter":spec.label);
@@ -129,20 +134,43 @@ void finish_spawn(int player,std::uint32_t now) {
     if (!hook.invoke<int>(0x98A4EB5D89A0C952ULL,pending.hash)) return;
     if (!pending.vehicle && !hook.invoke<int>(0xD031A9162D01088CULL,spec.dictionary)) return;
     auto p=hook.invoke<ergt::NativeVector>(0x1899F328B0E12848ULL,player,pending.vehicle?12.0f:0.0f,18.0f,0.0f);
+    if (!finite({p.x,p.y,p.z})) {
+        record("invalid_spawn_position");
+        hook.invoke(0xE532F5D78798DAABULL,pending.hash); pending={};
+        std::snprintf(notice,sizeof(notice),"Invalid spawn position. Move outdoors and retry."); return;
+    }
     float ground=0;
-    if (!hook.invoke<int>(0xC906A7DAB05C8D2BULL,p.x,p.y,p.z+100.0f,&ground,false)) {
+    if (!hook.invoke<int>(0xC906A7DAB05C8D2BULL,p.x,p.y,p.z+100.0f,&ground,false) || !std::isfinite(ground)) {
         hook.invoke(0xE532F5D78798DAABULL,pending.hash); pending={};
         std::snprintf(notice,sizeof(notice),"No ground found. Move to a clear outdoor area."); return;
     }
     if (pending.vehicle) {
         owned_helicopter=hook.invoke<int>(0xAF35D0D2583051B0ULL,pending.hash,p.x,p.y,ground+1.0f,0.0f,false,true);
         if (exists(owned_helicopter)) hook.invoke(0xAD738C3085FE7E11ULL,owned_helicopter,true,true);
-        std::snprintf(notice,sizeof(notice),"Armed helicopter placed nearby.");
-        record("helicopter_created",owned_helicopter);
+        std::snprintf(notice,sizeof(notice),exists(owned_helicopter)?"Armed helicopter placed nearby.":"GTA could not create the helicopter. See the log.");
+        record(exists(owned_helicopter)?"helicopter_created":"helicopter_create_failed",owned_helicopter);
     } else {
         auto slot=std::find_if(actors.begin(),actors.end(),[](const Actor& a){return a.entity==0;});
         if (slot!=actors.end()) {
-            int entity=hook.invoke<int>(0x9A294B2138ABB884ULL,pending.hash,p.x,p.y,ground-spec.minimum_z+0.05f,false,true,true);
+            const float z=ground-spec.minimum_z+0.05f;
+            // These are local drawable objects, not networked door entities.
+            int entity=hook.invoke<int>(0x9A294B2138ABB884ULL,pending.hash,p.x,p.y,z,false,true,false);
+            record("create_object_no_offset_result",entity,static_cast<float>(pending.preset));
+            if (!entity) {
+                // One bounded attempt through the standard prop creation path.
+                // CREATE_OBJECT adds a radius offset, so reset the exact position.
+                entity=hook.invoke<int>(0x509D5878EB39E842ULL,pending.hash,p.x,p.y,z,false,true,false);
+                record("create_object_fallback_result",entity,static_cast<float>(pending.preset));
+                if (exists(entity)) hook.invoke(0x239A3351AC1DA385ULL,entity,p.x,p.y,z,true,true,false);
+            }
+            if (log_file) {
+                const int loaded=hook.invoke<int>(0x98A4EB5D89A0C952ULL,pending.hash);
+                const int ped=hook.invoke<int>(0x75816577FEA6DAD5ULL,pending.hash);
+                const int vehicle_model=hook.invoke<int>(0x19AAC8F07BFEC53EULL,pending.hash);
+                std::fprintf(log_file,"event=spawn_result model=%s hash=%08x entity=%d model_loaded=%d is_ped=%d is_vehicle=%d xyz=%.3f,%.3f,%.3f\n",
+                    spec.model,pending.hash,entity,loaded,ped,vehicle_model,p.x,p.y,z);
+                std::fflush(log_file);
+            }
             if (exists(entity)) {
                 slot->entity=entity; slot->spec=&spec; slot->combat.reset(&spec);
                 hook.invoke(0xAD738C3085FE7E11ULL,entity,true,true);
@@ -155,9 +183,9 @@ void finish_spawn(int player,std::uint32_t now) {
                 hook.invoke(0x6B76DC1F3AE6E6A3ULL,entity,10000);
                 slot->native_health=hook.invoke<int>(0xEEF059FAD016D209ULL,entity);
                 animate(*slot,spec.idle_clip,true);
-                std::snprintf(notice,sizeof(notice),"%s spawned. Combat %s (F8).",spec.label,fighting?"ON":"OFF");
+                std::snprintf(notice,sizeof(notice),"%s spawned. Combat %s (4).",spec.label,fighting?"ON":"OFF");
                 record("creature_created",entity,slot->native_health);
-            } else { std::snprintf(notice,sizeof(notice),"GTA could not create the creature."); record("create_object_failed"); }
+            } else { std::snprintf(notice,sizeof(notice),"Could not create %s. Details saved in EldenLosSantos.log.",spec.label); record("create_object_failed",entity,static_cast<float>(pending.preset)); }
         }
     }
     hook.invoke(0xE532F5D78798DAABULL,pending.hash); pending={};
@@ -217,7 +245,7 @@ void update_actor(Actor& actor,int player,int vehicle,std::uint32_t now,int dt) 
             animate(actor,actor.spec->death_clip,false);
             hook.invoke(0x428CA6DBD1094446ULL,actor.entity,true);
             hook.invoke(0x1A9205C1B9EE827FULL,actor.entity,false,false);
-            std::snprintf(notice,sizeof(notice),"%s defeated. F7 clears the arena.",actor.spec->label);
+            std::snprintf(notice,sizeof(notice),"%s defeated. 3 clears the arena.",actor.spec->label);
             record("defeated",actor.entity);
         }
         actor.previous_state=state;
@@ -252,14 +280,14 @@ void update_actor(Actor& actor,int player,int vehicle,std::uint32_t now,int dt) 
 }
 
 void keyboard(DWORD key,WORD,BYTE,BOOL,BOOL alt,BOOL repeated,BOOL up) {
-    if (alt || repeated || up) return;
+    if (alt || repeated || up || (GetAsyncKeyState(VK_CONTROL)&0x8000) || (GetAsyncKeyState(VK_SHIFT)&0x8000)) return;
     unsigned flag=0;
-    if (key==VK_F5) flag=select_next;
-    else if(key==VK_F6) flag=spawn;
-    else if(key==VK_F7) flag=clear_all;
-    else if(key==VK_F8) flag=toggle_combat;
-    else if(key==VK_F9) flag=loadout;
-    else if(key==VK_F10) flag=helicopter;
+    if (key=='1') flag=select_next;
+    else if(key=='2') flag=spawn;
+    else if(key=='3') flag=clear_all;
+    else if(key=='4') flag=toggle_combat;
+    else if(key=='5') flag=loadout;
+    else if(key=='6') flag=helicopter;
     commands.fetch_or(flag);
 }
 void run() {
@@ -274,6 +302,9 @@ void run() {
         }
         const int player=hook.invoke<int>(0xD80958FC74E988A6ULL);
         if (!exists(player)) { commands.store(0); hook.wait(0); continue; }
+        // Reserve top-row 1-6 for the mod without also selecting GTA weapons.
+        // The regular weapon wheel and controller bindings remain available.
+        for (const int control:{157,158,160,164,165,159}) hook.invoke(0xFE99B66D079CF6BCULL,0,control,true);
         const unsigned command=commands.exchange(0);
         if (command&select_next) selected=(selected+1)%static_cast<int>(ergt::creatures.size());
         if (command&clear_all) clear();
@@ -291,7 +322,7 @@ void run() {
         char title[160];
         std::snprintf(title,sizeof(title),"ELDEN LOS SANTOS | Selected: %s | Combat %s",ergt::creatures[selected].label,fighting?"ON":"OFF");
         text(0.02f,0.02f,title,0.4f); text(0.02f,0.057f,notice);
-        text(0.02f,0.085f,"F5 select | F6 spawn | F7 clear | F8 combat | F9 loadout | F10 helicopter",0.28f);
+        text(0.02f,0.085f,controls,0.28f);
         int row=0;
         for (const auto& actor:actors) if (actor.entity) {
             float y=0.78f+row*0.06f;

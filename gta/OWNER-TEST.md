@@ -1,33 +1,33 @@
 # Elden Los Santos — owner preview
 
-**Experimental build. The profile is installed, but mod loading, visuals and combat have not been tested in GTA.** Hari confirmed the unmodified game reaches Story Mode. This preparation did not launch a game, render a scene, control input, or measure FPS.
+**Experimental build: loader confirmed, creature spawning awaiting retest.** Hari finished the tutorial and reached the mod controls. The first creature spawn returned zero from GTA after model/animation streaming completed. The updated candidate fixes archetype animation/collision declarations, adds a bounded alternate spawn path and detailed diagnostics, and uses number keys. Creature visuals, combat and performance remain unverified.
 
 ## Start
 
 1. Launch **GTA V Legacy** from **Steam inside CrossOver**, as usual.
-2. Choose **Story Mode** and finish the opening tutorial until you can roam freely.
+2. Choose **Story Mode** and load your free-roam save. The owner has completed the tutorial.
 3. Look for **ELDEN LOS SANTOS** at the top left. Combat starts **OFF** so you can inspect the creatures first.
 
-On a Mac keyboard, hold **Fn** if the function keys activate macOS shortcuts.
+Use the **top-row number keys 1–6**. No Fn key is needed. These keys are reserved for the mod while playing; use GTA’s weapon wheel to change weapons. Numpad flight controls are left alone.
 
 | Key | Action |
 | --- | --- |
-| F5 | Select Malenia, Red Wolf of Radagon, or Giant Crab. |
-| F6 | Spawn the selected creature ahead of you. Maximum three at once. |
-| F7 | Remove this mod's creatures. Keeps your helicopter. |
-| F8 | Toggle creature attacks/pursuit. Starts OFF. |
-| F9 | Receive a carbine and RPG with ammunition. |
-| F10 | Place an armed Buzzard nearby. Enter/fly it normally. |
+| 1 | Select Malenia, Red Wolf of Radagon, or Giant Crab. |
+| 2 | Spawn the selected creature ahead of you. Maximum three at once. |
+| 3 | Remove this mod's creatures. Keeps your helicopter. |
+| 4 | Toggle creature attacks/pursuit. Starts OFF. |
+| 5 | Receive a carbine and RPG with ammunition. |
+| 6 | Place an armed Buzzard nearby. Enter/fly it normally. |
 
 Use a clear outdoor area for the first test. These are animated creature objects with custom GTA-side combat; they are not a port of the Elden Ring executable or its complete AI.
 
 ## Short first test
 
-1. Spawn one creature. Confirm the model and textures appear and animation plays.
+1. Press **2** once to spawn the selected creature. Confirm the model/textures appear and animation plays. If creation still fails, stop here; the new log records the exact model, loaded state, coordinates and both creation results.
 2. Shoot it while combat is OFF. Confirm the health bar drops.
 3. Toggle combat ON. Check pursuit, close attacks and the red warning sphere before a ranged blast.
 4. Use the RPG, a vehicle collision, then the helicopter weapons. Check each damage channel separately.
-5. Defeat the creature, clear it with F7, then spawn another one.
+5. Defeat the creature, clear it with 3, then spawn another one.
 
 A failure at an earlier step is useful feedback; you do not need to repeat the rest. If anything fails, send the visible error and `EldenLosSantos.log` from the active profile directory. No header usually means the ASI loader/plugin did not load; “Model unavailable” means the creature DLC was not registered.
 
@@ -52,7 +52,7 @@ The command restores the exact original directory to Steam's path and restores t
 
 ## Known limits
 
-- CrossOver + Script Hook V + RageOpenV + this DLC has not yet been exercised in a game session.
+- Script Hook V, the ASI loader and this script ran under CrossOver on GTA 1.0.3889.0. The old package reached model streaming but failed object creation. The corrected package has not yet passed an owner spawn test.
 - Malenia uses selected phase-one meshes. The AI is custom: chase, melee wind-up, stagger, increased aggression below half health and telegraphed ranged blasts.
 - Ranged effects and damage use GTA explosions; original Elden Ring VFX, spell systems, AI, sounds and cloth simulation are not ported.
 - Collision uses whole-body boxes. Direct line-of-sight movement is simple, with no pathfinding around buildings. Animation-role choices and strike timing need owner review.
