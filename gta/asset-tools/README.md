@@ -1,6 +1,6 @@
 # Elden Ring asset extraction (GPL-3.0-or-later)
 
-These standalone conversion tools are separate from the Apache-2.0 GTA gameplay plugin. The C/Python adapters link to or import GPL libraries and are distributed under GPL-3.0-or-later; see LICENSE. Exceptions: CodeWalkerBridge, build_dlc.py, normalize_dds.py and bootstrap_tools.py are original Apache-2.0 API/packaging adapters, as stated in their source headers and the root LICENSE. No proprietary assets, game libraries, archive keys, or converted models are distributed here.
+These standalone conversion tools are separate from the Apache-2.0 GTA gameplay plugin. The C/Python adapters link to or import GPL libraries and are distributed under GPL-3.0-or-later; see LICENSE. Exceptions: CodeWalkerBridge, build_dlc.py, normalize_dds.py, dlc_manifest.py and bootstrap_tools.py are original Apache-2.0 API/packaging adapters, as stated in their source headers and the root LICENSE. No proprietary assets, game libraries, archive keys, or converted models are distributed here.
 
 ## Verified on the Studio
 
@@ -60,3 +60,7 @@ The v2 native YDRs contained 11 invalid texture format enums (zero): Malenia 4/1
 `normalize_dds.py` now normalizes only the equivalent DDS header format in a separate packaging copy, preserving compressed pixels and mip bytes. It validates dimensions, single-image layout and mip payload length, and rejects unmapped formats. `CodeWalkerBridge` rejects unknown GTA texture formats, empty dimensions/mips and missing/truncated base texture data both before writing and after native round-trip. All 22 embedded textures in v3 pass. Five synthetic regressions plus rejection of the actual original Malenia input were checked; no game was launched for this repair.
 
 The captured crash is an access violation in Wine’s `RtlVirtualUnwind2` during the loading interval. That alone does not prove the first engine fault or establish that fixing textures resolves all creature compatibility issues. The malformed native texture enums are independently confirmed and corrected. Keep raw minidumps private.
+
+## Prop registration (v5)
+
+The owner-triggered v4 test proved that the full native spawn call creates/deletes the stock reference object (handle 2050), while Malenia still returned zero after model/animation streaming. This isolates the remaining failure to the custom asset path. The DLC request lacked `<contents>CONTENTS_PROPS</contents>`, present in the [prop-pack declaration reference](https://gist.github.com/Stuyk/44a717390854b2a0614c868efab200fa). v5 adds only this declaration to `content.xml`: plugin, nested native asset RPF, models, textures, skeletons and clips are unchanged. The native archive verifier also confirms all seven entries are resource entries with the correct Legacy versions (YDR 165, YCD 46, YTYP 2). The new manifest validator rejects the prior missing classification and files not enabled at startup. Gameplay retest determines whether this is sufficient.

@@ -1,6 +1,6 @@
 # Handoff
 
-Updated: 2026-10-01 (native API v4 repair after v3 creature-spawn failure).
+Updated: 2026-10-01 (v5 prop registration after successful stock-object diagnostic).
 
 ## Current priority and verified state
 
@@ -23,7 +23,16 @@ Updated: 2026-10-01 (native API v4 repair after v3 creature-spawn failure).
 - Eight source-only launch guard tests pass, including the previous 97% GPU case, low-util live renderer, unknown GPU, logged-out desktop, stuck exiting headless engine and emergency pause. A current read-only check refused launch until the owner reservation existed and other rendering stopped.
 - Lower-resolution v3 launch succeeded under that reservation at 14:53 America/New_York: GTA5.exe PID 50731, Script Hook initialization and DirectX initialization confirmed. A 20-second startup check sampled GPU values 0–31% (mostly 20–21%); desktop console remained midir. This is startup evidence, not sustained gameplay/FPS or creature verification. The exclusive slot remains held until the actual game process exits; the other coordinator owns its pause/auto-lift. Hari retains gameplay control.
 
-## Current installed candidate: native-contract-v4
+## Current installed candidate: prop-registration-v5
+
+- v4 owner test FAILED to create Malenia, but its stock-object A/B probe returned entity 2050 and deleted it immediately. This proves the native object factory works after the signature corrections and isolates custom asset setup. Owner confirmed the visible failure and then saved/closed GTA for replacement.
+- Found missing `<contents>CONTENTS_PROPS</contents>` on this project's DLC_ITYP_REQUEST, present in prop-pack declaration references. v5 adds only that field to content.xml. Nested ergt_assets.rpf is byte-identical, and the v4 ASI remains installed. This is a focused registration test, not another model/texture rewrite.
+- New manifest validation rejects the previous missing prop classification and any disabled file never enabled by GROUP_STARTUP. Archive verification confirms all seven native entries are resource entries, with YDR=165, YCD=46, YTYP=2. All six CTest suites pass.
+- v5 DLC SHA-256: `43ea11054ee6dfeb6cd63ce48087ab621c22e43ca478cc12ec87a3adbd1bd771`, 27,295,744 bytes. ASI remains `1057fbd214f863aa84751ed874e0295e0450f32ede34d153f0c065c29b6a5f4a`, so its runtime log marker remains `loaded_native_contract_v4_owner_verification_pending`.
+- Installed while game stopped; six payload hashes verified in package/profile, original retail bytes unchanged. Rollback at `~/Applications/EldenLosSantosPreview/Backups/2026-10-01-prop-registration-v5/`. Source build under `SourceAssets/dlc-build/v5-prop-registration/`.
+- Owner explicitly asked the Unreal coordinator to keep rendering paused across restarts. v5 relaunch requested through the exclusive guard at 1080p; prelaunch GPU 9%, no other renderer. Await one owner press of 2 outdoors with Malenia selected and combat off. Do not claim a creature spawned until the log and owner confirm it.
+
+## Previous native-contract-v4 checkpoint
 
 - Owner reported all creatures still failed in v3; guns/helicopter worked. Logs now prove all three custom models passed model and animation streaming gates, then returned zero from CREATE_OBJECT_NO_OFFSET. No new crash was reported for this bounded test. GTA subsequently exited; no game files were replaced while running.
 - Revisited user-supplied `rehan-remade/universal-modder` at commit 15d6f9d5fbd32de9b1884f29ddec3be9133bd912. Its working Minecraft/GTA example uses GTA Legacy 3889 + SHV 3889. Its native wrapper passes EIGHT arguments to CREATE_OBJECT_NO_OFFSET (last 0); our code passed seven. The same eight-argument signature is in alloc8or native DB revision 424fb51b089049a9fbcebcc641500b1d44d255b4.
@@ -39,7 +48,7 @@ Updated: 2026-10-01 (native API v4 repair after v3 creature-spawn failure).
 
 ## Local profile and asset boundaries
 
-- Private bundle: `~/Applications/EldenLosSantosPreview/`; owner guide `START-HERE.md`; editable inputs `SourceAssets/`; latest private DLC build `SourceAssets/dlc-build/v3-textures/`.
+- Private bundle: `~/Applications/EldenLosSantosPreview/`; owner guide `START-HERE.md`; editable inputs `SourceAssets/`; latest private DLC build `SourceAssets/dlc-build/v5-prop-registration/`.
 - Steam's existing GTA path is a symlink to `~/Library/Application Support/EldenLosSantos/Game`. Exact original retail directory remains `~/Library/Application Support/EldenLosSantos/Retail`. APFS clonefile shares original blocks, not a second full-size copy.
 - Profile state: `~/Library/Application Support/EldenLosSantos/profile-state.json`. Only GTA5.exe's Wine `dinput8` override is `native,builtin`, with prior absence recorded. Account stores and saves were not changed.
 - Restore with GTA closed: `python3 ~/Applications/EldenLosSantosPreview/Tools/profile_manager.py restore`; use `activate` to reactivate. Do not unlink game/profile paths manually.

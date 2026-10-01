@@ -13,6 +13,7 @@ import subprocess
 from pathlib import Path
 from xml.etree import ElementTree as ET
 from normalize_dds import normalize_dds
+from dlc_manifest import validate_registration
 
 CHARACTERS = [("c2120", "ergt_malenia"), ("c3181", "ergt_redwolf"), ("c2270", "ergt_crab")]
 
@@ -116,6 +117,10 @@ def main():
     for filename,kind in entries:
         item=ET.SubElement(files,"Item");ET.SubElement(item,"filename").text=filename;ET.SubElement(item,"fileType").text=kind
         value(item,"overlay",False);value(item,"disabled",True);value(item,"persistent",True)
+        if kind == "DLC_ITYP_REQUEST":
+            # Register script-spawnable object model information, not merely
+            # world/map archetypes. Asset streaming alone is not sufficient.
+            ET.SubElement(item,"contents").text="CONTENTS_PROPS"
     changes=ET.SubElement(content,"contentChangeSets");change=ET.SubElement(changes,"Item")
     ET.SubElement(change,"changeSetName").text="ergt_startup"
     ET.SubElement(change,"mapChangeSetData")
@@ -126,6 +131,7 @@ def main():
     value(change,"requiresLoadingScreen",False)
     ET.SubElement(content,"patchFiles")
     write_xml(content,stage/"content.xml")
+    validate_registration(stage/"setup2.xml", stage/"content.xml")
     invoke("pack",stage,output/"dlc.rpf")
     with (output/"dlc.rpf").open("rb") as stream: sha=hashlib.file_digest(stream,"sha256").hexdigest()
     (output/"package.json").write_text(json.dumps({"schema_version":1,"gta_runtime_verified":False,

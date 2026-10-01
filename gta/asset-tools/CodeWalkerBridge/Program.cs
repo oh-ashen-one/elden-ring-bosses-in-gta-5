@@ -70,6 +70,7 @@ try
         string oldDirectory = Directory.GetCurrentDirectory();
         byte[] archiveBytes;
         int count = 0;
+        int resourceCount = 0;
         try
         {
             Directory.SetCurrentDirectory(temporary);
@@ -92,12 +93,14 @@ try
             var check = new RpfFile(archive.FilePath, "package.rpf");
             check.ScanStructure(_ => { }, message => errors.Add(message));
             if (errors.Count != 0 || check.Root == null) throw new InvalidDataException(string.Join("; ", errors));
+            resourceCount = ValidateResourceEntries(check);
             archiveBytes = File.ReadAllBytes(archive.FilePath);
         }
         finally { Directory.SetCurrentDirectory(oldDirectory); Directory.Delete(temporary, true); }
         using (var output = new FileStream(destination, FileMode.CreateNew, FileAccess.Write)) output.Write(archiveBytes);
         Console.WriteLine(JsonSerializer.Serialize(new { archive_structure_verified = true, gta_runtime_verified = false,
-            files = count, bytes = archiveBytes.Length, sha256 = Convert.ToHexString(SHA256.HashData(archiveBytes)).ToLowerInvariant() }));
+            files = count, resource_entries_verified = resourceCount, bytes = archiveBytes.Length,
+            sha256 = Convert.ToHexString(SHA256.HashData(archiveBytes)).ToLowerInvariant() }));
         return 0;
     }
     var xml = new XmlDocument { XmlResolver = null };
@@ -187,4 +190,22 @@ static void ValidateTextures(YdrFile file)
             texture.Data?.FullData == null || texture.Data.FullData.Length < texture.Stride * texture.Height)
             throw new InvalidDataException("Empty/truncated texture: " + texture.Name);
     }
+}
+
+static int ValidateResourceEntries(RpfFile archive)
+{
+    int count = 0;
+    foreach (var entry in archive.AllEntries.OfType<RpfFileEntry>())
+    {
+        int expected = Path.GetExtension(entry.Name).ToLowerInvariant() switch
+        {
+            ".ydr" => 165, ".ycd" => 46, ".ytyp" => 2, _ => 0
+        };
+        if (expected == 0) continue;
+        if (entry is not RpfResourceFileEntry resource || resource.Version != expected)
+            throw new InvalidDataException("Wrong native resource entry type/version: " + entry.Name);
+        count++;
+    }
+    foreach (var child in archive.Children ?? []) count += ValidateResourceEntries(child);
+    return count;
 }

@@ -20,6 +20,7 @@ find_package(Python3 COMPONENTS Interpreter REQUIRED)
 add_test(NAME dds_texture_regressions COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/texture_test.py")
 add_test(NAME owner_launch_safety COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/launch_test.py")
 add_test(NAME native_call_contracts COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/native_contract_test.py")
+add_test(NAME dlc_prop_registration COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/dlc_manifest_test.py")
 
 if(WIN32)
   if(NOT MINGW)

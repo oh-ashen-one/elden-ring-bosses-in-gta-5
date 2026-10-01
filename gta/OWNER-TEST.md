@@ -1,6 +1,6 @@
 # Elden Los Santos — owner preview
 
-**Experimental v4: native-call repair installed.** The prior texture repair passed offline checks, but all three creatures still returned zero object handles. Rechecking the working Minecraft/GTA code exposed missing trailing native arguments, including the eighth object-spawn argument. These calls are corrected and checked against a pinned native database. Guns and the helicopter worked in the owner test; creature visuals, combat and performance remain unverified.
+**Experimental v5: prop-registration repair installed.** The v4 test successfully created/deleted a normal GTA object but still rejected Malenia. This package adds the missing `CONTENTS_PROPS` declaration to the creature DLC. The plugin and all seven native model/animation/archetype files are unchanged. The next owner test is still Malenia, once, with combat off. Creature visuals/combat remain unverified.
 
 ## Start
 
@@ -52,7 +52,7 @@ The command restores the exact original directory to Steam's path and restores t
 
 ## Known limits
 
-- Script Hook V, the ASI loader and this script ran under CrossOver on GTA 1.0.3889.0. The v2 package failed creature creation and later crashed after a crab request. The v3 texture repair still failed object creation. The v4 native-argument repair awaits owner retest.
+- Script Hook V, the ASI loader and this script ran under CrossOver on GTA 1.0.3889.0. The v2 package failed creature creation and later crashed after a crab request. The v3 texture repair still failed object creation. v4 proved stock-object creation works, while the custom model still failed. v5 adds prop registration; owner retest is pending.
 - Malenia uses selected phase-one meshes. The AI is custom: chase, melee wind-up, stagger, increased aggression below half health and telegraphed ranged blasts.
 - Ranged effects and damage use GTA explosions; original Elden Ring VFX, spell systems, AI, sounds and cloth simulation are not ported.
 - Collision uses whole-body boxes. Direct line-of-sight movement is simple, with no pathfinding around buildings. Animation-role choices and strike timing need owner review.

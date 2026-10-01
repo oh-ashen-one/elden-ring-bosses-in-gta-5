@@ -2,7 +2,7 @@
 
 Original GTA V Story Mode mod code and a local conversion pipeline for owned Elden Ring creatures. Current characters: **Malenia, Red Wolf of Radagon, Giant Crab**.
 
-**Status: guns/helicopter owner-confirmed; native-call repair awaiting creature retest.** v3 streamed all three models/animation dictionaries but GTA still returned zero object handles. Rechecking the owner-supplied universal-modder example for the same GTA 3889 build revealed an omitted eighth argument to `CREATE_OBJECT_NO_OFFSET`. A full audit found more missing trailing native arguments; v4 corrects them and adds regression checks against 72 pinned API signatures. Creature rendering/combat remain unverified. See the [owner guide](OWNER-TEST.md).
+**Status: v5 prop-registration repair awaiting owner retest.** v4's reference object spawned successfully, but Malenia still failed. The DLC lacked its `CONTENTS_PROPS` declaration; v5 adds that single manifest field while preserving the plugin and all native assets. Native call signatures and texture formats are now checked, but creature rendering/combat remain unverified. See the [owner guide](OWNER-TEST.md).
 
 ## What is implemented
 
