@@ -1,6 +1,6 @@
 # Source catalog
 
-Research snapshot: 2026-09-30. These are the GitHub projects discussed or inspected for this project. **No implementation code has been imported.** Root license metadata below is GitHub's report, not a complete review of nested components or game content.
+Research snapshot: 2026-09-30. These are the GitHub projects discussed or inspected for this project. The pinned mashup source is now imported under runtime/. See [UPSTREAM-IMPORT.md](UPSTREAM-IMPORT.md) for exact scope and changes. Root license metadata below is GitHub's report, not a complete review of nested components or game content.
 
 ## vladtrc/iw4L
 
@@ -20,7 +20,7 @@ Candidate implementation base: MW2 plus skating and a Minecraft world. Audit its
 - Observed branch: `main`
 - Observed revision: [`ab43b8a9e923`](https://github.com/chasmlol/2010-rust-rewrite-mashup/tree/ab43b8a9e923bdc4ad7effb874f6efec155577f1)
 - Root license reported by GitHub: Apache-2.0.
-- Relationship: primary technical reference / proposed foundation; code imported: **no**.
+- Relationship: primary technical reference / proposed foundation; code imported: **yes**, at runtime/.
 
 ## SK8-ENGINE/skate-3-rust-engine
 
@@ -103,6 +103,10 @@ Additional researched reference: Sonic Unleashed static recompilation and moddin
 - Relationship: additional research reference; code imported: **no**.
 
 ## Release and video references
+
+- [universal-modder](https://github.com/rehan-remade/universal-modder/tree/15d6f9d5fbd32de9b1884f29ddec3be9133bd912) — MIT workflow/tooling reference; no code imported.
+- [libsm64](https://github.com/libsm64/libsm64/tree/fd11813208272b4271d92bd92feb8f3fdbe61be5) — embeddable Mario reference; no code imported.
+- [Minecraft In Elden Ring Mod](https://www.youtube.com/watch?v=TmgAK5JjcDM) — additional visual reference; no captions or implementation source established.
 
 - [MW2 video: The Modern Warfare 2 Rust Rewrite is Here...](https://www.youtube.com/watch?v=9UbADrcEW5w) — format reference: introduce a working game, make an AI-assisted edit, test it, then attempt a larger crossover. Reviewed through its transcript.
 - [SkyCraft 0.1.0](https://github.com/chasmlol/SkyCraft/releases/tag/v0.1.0) — originally shared release.

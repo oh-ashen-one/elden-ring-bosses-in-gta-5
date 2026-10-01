@@ -1,0 +1,6 @@
+hexf-parse@0.2.1
+The published Cargo manifest declares CC0-1.0.
+No license file was present in the published crate or its matching repository root.
+Canonical CC0-1.0 terms are included from SPDX license-list-data.
+No package-specific copyright notice has been invented.
+Original source: https://github.com/lifthrasiir/hexf

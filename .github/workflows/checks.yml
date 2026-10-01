@@ -1,0 +1,19 @@
+name: Mission and Mac setup checks
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  rules-and-setup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Install the verified Rust version
+        run: rustup toolchain install 1.98.1 --profile minimal --component rustfmt --component clippy
+      - name: Check formatting
+        run: cargo +1.98.1 fmt --all --check
+      - name: Test mission and file validation
+        run: cargo +1.98.1 test --workspace --locked
+      - name: Lint original crates
+        run: cargo +1.98.1 clippy --workspace --all-targets --locked -- -D warnings

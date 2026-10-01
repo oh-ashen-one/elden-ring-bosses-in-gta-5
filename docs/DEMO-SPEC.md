@@ -6,7 +6,7 @@ Ship a public, reproducibly buildable open source prototype. Import only compone
 
 The requested outcome is a ten-minute playable version that demonstrates AI-assisted changes to nostalgic games. The following is the proposed first-release scope, pending baseline feasibility and platform selection.
 
-Current state: design only. No engine code has been imported or run.
+Current state: the imported engine compiles to an Apple Silicon executable; the native setup app and independent mission/block rules are verified. No retail game session or combined mission has been run.
 
 ## Signature loop
 
@@ -72,7 +72,7 @@ Project code being open source does not make the original game content redistrib
 
 ## Prerequisites checked
 
-The available development host was verified as an Apple M3 Ultra Mac Studio with 256 GB memory. Xcode and CMake are present. Rust and Cargo were absent from PATH and the usual local installation locations when checked.
+The available development host was verified as an Apple M3 Ultra Mac Studio with 256 GB memory. Xcode and CMake are present. Rust/Cargo 1.98.1 were installed for this task.
 
 The Steam library manifest and the standard Games folder checked on the Studio did not contain MW2, Skate 3 or Skyrim data. This is a bounded check, not a claim that no copy exists elsewhere.
 
@@ -82,4 +82,4 @@ Still needed from the owner:
 2. First playable target: the Mac Studio, or an available Windows testing machine.
 3. A compatible controller for skating review and a short owner playtest once the slice runs.
 
-The combined mashup's native macOS runtime has not been verified here. Base IW4L macOS support is useful evidence, but cannot establish support for the full fork. The platform choice is an input to the baseline gate.
+Mac is the selected first target. The full fork compiles for Apple Silicon, but its rendered game session still needs MW2 data and live verification.

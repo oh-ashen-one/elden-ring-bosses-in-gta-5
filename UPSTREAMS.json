@@ -1,7 +1,7 @@
 {
   "observed_date": "2026-09-30",
   "observation_scope": "GitHub default branches and root license metadata. This is a research snapshot, not a dependency lockfile or a complete license audit.",
-  "code_imported": false,
+  "code_imported": true,
   "repositories": [
     {
       "repository": "vladtrc/iw4L",
@@ -21,7 +21,8 @@
       "revision": "ab43b8a9e923bdc4ad7effb874f6efec155577f1",
       "root_license_reported_by_github": "Apache-2.0",
       "license_note": "Review actual license files, NOTICE and nested components before copying code.",
-      "imported": false
+      "imported": true,
+      "path": "runtime"
     },
     {
       "repository": "SK8-ENGINE/skate-3-rust-engine",
@@ -102,6 +103,30 @@
       "root_license_reported_by_github": "GPL-3.0",
       "license_note": "Review actual license files, NOTICE and nested components before copying code.",
       "imported": false
+    },
+    {
+      "repository": "rehan-remade/universal-modder",
+      "url": "https://github.com/rehan-remade/universal-modder",
+      "role": "related_reference",
+      "revision": "15d6f9d5fbd32de9b1884f29ddec3be9133bd912",
+      "root_license_reported_by_github": "MIT",
+      "license_note": "Review component terms before import. No source imported.",
+      "imported": false
+    },
+    {
+      "repository": "libsm64/libsm64",
+      "url": "https://github.com/libsm64/libsm64",
+      "role": "related_reference",
+      "revision": "fd11813208272b4271d92bd92feb8f3fdbe61be5",
+      "root_license_reported_by_github": "CC0-1.0",
+      "license_note": "Review component terms before import. No source imported.",
+      "imported": false
     }
-  ]
+  ],
+  "import": {
+    "repository": "chasmlol/2010-rust-rewrite-mashup",
+    "revision": "ab43b8a9e923bdc4ad7effb874f6efec155577f1",
+    "path": "runtime",
+    "provenance": "docs/UPSTREAM-IMPORT.md"
+  }
 }
