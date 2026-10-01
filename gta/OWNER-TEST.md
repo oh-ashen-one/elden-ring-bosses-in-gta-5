@@ -1,6 +1,6 @@
 # Elden Los Santos — owner preview
 
-**Experimental build: loader confirmed, creature spawning awaiting retest.** Hari finished the tutorial and reached the mod controls. The first creature spawn returned zero from GTA after model/animation streaming completed. The updated candidate fixes archetype animation/collision declarations, adds a bounded alternate spawn path and detailed diagnostics, and uses number keys. Creature visuals, combat and performance remain unverified.
+**Experimental build: guns and helicopter owner-confirmed; texture-format repair awaiting creature retest.** The previous build failed to create Malenia, then GTA crashed while the crab was loading. Offline inspection found 11 invalid embedded texture formats. The current v3 package corrects them, rejects invalid formats during conversion, and locks a failed creature against repeated spawn attempts for the rest of that session. Creature visuals, combat and performance remain unverified.
 
 ## Start
 
@@ -23,7 +23,7 @@ Use a clear outdoor area for the first test. These are animated creature objects
 
 ## Short first test
 
-1. Press **2** once to spawn the selected creature. Confirm the model/textures appear and animation plays. If creation still fails, stop here; the new log records the exact model, loaded state, coordinates and both creation results.
+1. Start with **Malenia** (the default selection), keep combat OFF and press **2 once** outdoors. If she fails to appear, stop here; don’t cycle through other creatures or repeatedly retry. The log now distinguishes model loading, animation loading and creation. A failed creature is locked for that session.
 2. Shoot it while combat is OFF. Confirm the health bar drops.
 3. Toggle combat ON. Check pursuit, close attacks and the red warning sphere before a ranged blast.
 4. Use the RPG, a vehicle collision, then the helicopter weapons. Check each damage channel separately.
@@ -52,7 +52,7 @@ The command restores the exact original directory to Steam's path and restores t
 
 ## Known limits
 
-- Script Hook V, the ASI loader and this script ran under CrossOver on GTA 1.0.3889.0. The old package reached model streaming but failed object creation. The corrected package has not yet passed an owner spawn test.
+- Script Hook V, the ASI loader and this script ran under CrossOver on GTA 1.0.3889.0. The v2 package failed creature creation and later crashed after a crab request. The v3 texture-format repair has not yet passed an owner spawn test.
 - Malenia uses selected phase-one meshes. The AI is custom: chase, melee wind-up, stagger, increased aggression below half health and telegraphed ranged blasts.
 - Ranged effects and damage use GTA explosions; original Elden Ring VFX, spell systems, AI, sounds and cloth simulation are not ported.
 - Collision uses whole-body boxes. Direct line-of-sight movement is simple, with no pathfinding around buildings. Animation-role choices and strike timing need owner review.

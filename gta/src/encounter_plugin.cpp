@@ -32,12 +32,14 @@ struct Actor {
     bool animation_failed = false;
 };
 std::array<Actor, 3> actors;
+std::array<bool, ergt::creatures.size()> failed_creatures{};
 struct Pending {
     bool active = false;
     bool vehicle = false;
     int preset = 0;
     std::uint32_t hash = 0;
     std::uint32_t started = 0;
+    bool model_ready = false;
 } pending;
 int owned_helicopter = 0;
 
@@ -63,7 +65,7 @@ void initialize_log() {
     if (!slash || slash-path>32700) return;
     std::wcscpy(slash+1,L"EldenLosSantos.log");
     log_file=_wfopen(path,L"a");
-    record("loaded_number_keys_spawn_v2_owner_verification_pending");
+    record("loaded_texture_format_v3_owner_verification_pending");
 }
 void text(float x,float y,const char* line,float scale=0.32f) {
     hook.invoke(0x66E0276CC5F6B9DAULL,0);
@@ -103,6 +105,10 @@ void clear() {
 }
 void begin_spawn(bool vehicle,std::uint32_t now) {
     if (pending.active) return;
+    if (!vehicle && failed_creatures[selected]) {
+        std::snprintf(notice,sizeof(notice),"This creature failed. Retry is locked for this session; its error is in the log.");
+        return;
+    }
     if (vehicle && exists(owned_helicopter)) {
         std::snprintf(notice,sizeof(notice),"Your helicopter already exists nearby."); return;
     }
@@ -120,18 +126,31 @@ void begin_spawn(bool vehicle,std::uint32_t now) {
         std::fprintf(log_file,"event=spawn_requested model=%s hash=%08x preset=%d\n",vehicle?"buzzard":spec.model,model_hash,selected);
         std::fflush(log_file);
     }
+    record("request_model_begin",0,static_cast<float>(selected));
     hook.invoke(0x963D27A58DF860ACULL,model_hash);
-    if (!vehicle) hook.invoke(0xD3BD40951412FEF6ULL,spec.dictionary);
+    record("request_model_returned");
+    // Stage animation loading after model streaming, to localize loading faults.
     std::snprintf(notice,sizeof(notice),"Loading %s...",vehicle?"helicopter":spec.label);
 }
 void finish_spawn(int player,std::uint32_t now) {
     if (!pending.active) return;
     const auto& spec=ergt::creatures[pending.preset];
     if (now-pending.started>12000) {
+        if (!pending.vehicle) failed_creatures[pending.preset]=true;
+        record(pending.model_ready?"animation_streaming_timeout":"model_streaming_timeout",0,static_cast<float>(pending.preset));
         hook.invoke(0xE532F5D78798DAABULL,pending.hash); pending={};
         std::snprintf(notice,sizeof(notice),"Asset streaming timed out. See EldenLosSantos.log."); record("streaming_timeout"); return;
     }
     if (!hook.invoke<int>(0x98A4EB5D89A0C952ULL,pending.hash)) return;
+    if (!pending.model_ready) {
+        pending.model_ready=true;
+        record("model_streaming_ready",0,static_cast<float>(pending.preset));
+        if (!pending.vehicle) {
+            record("request_animation_begin",0,static_cast<float>(pending.preset));
+            hook.invoke(0xD3BD40951412FEF6ULL,spec.dictionary);
+            record("request_animation_returned");
+        }
+    }
     if (!pending.vehicle && !hook.invoke<int>(0xD031A9162D01088CULL,spec.dictionary)) return;
     auto p=hook.invoke<ergt::NativeVector>(0x1899F328B0E12848ULL,player,pending.vehicle?12.0f:0.0f,18.0f,0.0f);
     if (!finite({p.x,p.y,p.z})) {
@@ -154,15 +173,9 @@ void finish_spawn(int player,std::uint32_t now) {
         if (slot!=actors.end()) {
             const float z=ground-spec.minimum_z+0.05f;
             // These are local drawable objects, not networked door entities.
+            record("create_object_begin",0,static_cast<float>(pending.preset));
             int entity=hook.invoke<int>(0x9A294B2138ABB884ULL,pending.hash,p.x,p.y,z,false,true,false);
             record("create_object_no_offset_result",entity,static_cast<float>(pending.preset));
-            if (!entity) {
-                // One bounded attempt through the standard prop creation path.
-                // CREATE_OBJECT adds a radius offset, so reset the exact position.
-                entity=hook.invoke<int>(0x509D5878EB39E842ULL,pending.hash,p.x,p.y,z,false,true,false);
-                record("create_object_fallback_result",entity,static_cast<float>(pending.preset));
-                if (exists(entity)) hook.invoke(0x239A3351AC1DA385ULL,entity,p.x,p.y,z,true,true,false);
-            }
             if (log_file) {
                 const int loaded=hook.invoke<int>(0x98A4EB5D89A0C952ULL,pending.hash);
                 const int ped=hook.invoke<int>(0x75816577FEA6DAD5ULL,pending.hash);
@@ -185,7 +198,11 @@ void finish_spawn(int player,std::uint32_t now) {
                 animate(*slot,spec.idle_clip,true);
                 std::snprintf(notice,sizeof(notice),"%s spawned. Combat %s (4).",spec.label,fighting?"ON":"OFF");
                 record("creature_created",entity,slot->native_health);
-            } else { std::snprintf(notice,sizeof(notice),"Could not create %s. Details saved in EldenLosSantos.log.",spec.label); record("create_object_failed",entity,static_cast<float>(pending.preset)); }
+            } else {
+                failed_creatures[pending.preset]=true;
+                std::snprintf(notice,sizeof(notice),"Could not create %s. Retry locked; details in EldenLosSantos.log.",spec.label);
+                record("create_object_failed",entity,static_cast<float>(pending.preset));
+            }
         }
     }
     hook.invoke(0xE532F5D78798DAABULL,pending.hash); pending={};

@@ -16,6 +16,8 @@ add_test(NAME probe_state_and_native_abi COMMAND probe_test)
 add_executable(combat_test tests/combat_test.cpp)
 target_include_directories(combat_test PRIVATE src)
 add_test(NAME combat_scenarios COMMAND combat_test)
+find_package(Python3 COMPONENTS Interpreter REQUIRED)
+add_test(NAME dds_texture_regressions COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/texture_test.py")
 
 if(WIN32)
   if(NOT MINGW)

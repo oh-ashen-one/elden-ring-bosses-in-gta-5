@@ -1,6 +1,6 @@
 # Handoff
 
-Updated: 2026-10-01 (number keys and repair candidate after first owner spawn failure).
+Updated: 2026-10-01 (texture-format v3 repair following owner-reported crash).
 
 ## Current priority and verified state
 
@@ -13,21 +13,23 @@ Updated: 2026-10-01 (number keys and repair candidate after first owner spawn fa
 - Hari now reports the tutorial completed. The previous window was saved at 800×600; he was given in-game window/resolution steps. Mac and Windows Steam both recognized DualSense; an empty GTA mapping was observed and Steam Input instructions supplied. Controller resolution is not independently confirmed.
 - Actual GTA build is 1.0.3889.0. Script Hook V initialized successfully, registered and executed `EldenLosSantos.asi`; ASI loader also loaded RageOpenV. The mod received two owner spawn commands but logged `create_object_failed` after its model and animation streaming gates. No visible creature or combat success is established.
 
-## Current installed candidate: number-keys-spawn-v2
+## Current installed candidate: texture-format-v3
 
-- Original C++ plugin now uses **top-row 1 select / 2 spawn / 3 clear / 4 combat / 5 weapons / 6 Buzzard**. No Fn chord. It reserves corresponding GTA direct weapon-selection actions; the weapon wheel remains available. Numpad flight keys are not used by the mod.
-- Fixed missing archetype declarations: Has Anim flag 512, physics dictionary bound to embedded collision, and texture dictionary bound to embedded textures. Removed static-scenery flag 32. These omissions are verified; whether they fully explain GTA's failed creation is still an owner test.
-- Local non-door spawn call plus one bounded standard-object fallback on a zero handle. Fallback corrects GTA's model-radius Z offset. Invalid coordinates are rejected. Logs include exact model/hash, loaded state, type, spawn coordinates and both creation return values; no placeholder replacement is used.
-- Three authentic owned ER creatures: Malenia phase-one meshes, Red Wolf of Radagon and Giant Crab. Twelve clips have provisional idle/movement/attack/death roles. Skeletons, mesh resources and clips are unchanged by this repair.
-- Current private DLC: 27,295,744 bytes; SHA-256 `27d1ec032b91e2fb49b6df3f596d87e1efebd235f9da3cca53615a9d06a9e8a6`.
-- Current ASI SHA-256: `074d1bfa71fea1b3e82316de289a2008e3e33af7a691f3d0bce8fd5cb9dc54b6`.
-- Verified Windows x64 compile, two portable native scenario suites, all three native archetype bindings, archive structure and six unchanged YDR/YCD resources. These are source/format checks, not gameplay proof.
-- Installed with GTA and PlayGTAV both stopped. All six payload checksums match the active profile and private bundle. Original retail executable checksum unchanged. Prior ASI/DLC, manifest and profile state backed up privately under `~/Applications/EldenLosSantosPreview/Backups/2026-10-01-number-keys-v2/`.
-- **Remaining blocker: owner must relaunch Story Mode and press 2 once in a clear outdoor area.** If creation fails, inspect `EldenLosSantos.log` for the `loaded_number_keys_spawn_v2_owner_verification_pending` marker and the new detailed spawn events. Stop at the first failing step. Do not claim this repair spawned a creature until that happens.
+- Owner reports number keys, guns and helicopter worked. v2 failed Malenia creation repeatedly (both native creation paths returned zero despite model_loaded=1, is_ped=0, is_vehicle=0). The next crab request was followed by a crash before any creation result logged.
+- Private minidump confirms 0xc0000005 null write in Wine ntdll `RtlVirtualUnwind2`; no game process remained. This does not prove the underlying engine fault. Raw dump/logs are preserved ONLY in `~/Applications/EldenLosSantosPreview/Diagnostics/2026-10-01-crash/`; never publish them.
+- Offline audit found a concrete defect in the installed v2 native resources: invalid TextureFormat zero in 4/10 Malenia textures, 4/6 Wolf textures and 3/6 Crab textures. CodeWalker's DXGI mapper lacks sRGB variants and silently returned zero. The previous validation checked skeletons/counts but missed texture formats.
+- The packager now normalizes supported sRGB DDS headers in a separate copied input directory, preserving all source pixel/mip bytes. Native conversion rejects unknown texture enums and empty/truncated texture data before save and after round-trip. Original game files and editable conversion sources stay untouched.
+- All 22 embedded textures in rebuilt v3 pass. Five synthetic texture regressions pass; the actual original malformed Malenia input now fails before writing a resource. Three CTest suites and Windows x64 compilation pass. This is a verified asset-format fix, not a verified successful creature spawn or crash resolution.
+- Plugin keeps top-row **1 select / 2 spawn / 3 clear / 4 combat / 5 weapons / 6 Buzzard**. No Fn chord; weapon wheel and numpad flight keys remain available. Failed/timeout creatures are locked for the session to prevent repeated requests. Removed the ineffective alternate native creation attempt. Model and animation requests are staged and individually logged.
+- v3 loading marker: `loaded_texture_format_v3_owner_verification_pending`.
+- Current private DLC: 27,295,744 bytes; SHA-256 `af119ef181a0f02ef7457a64a35f83c399c050992035b3258376ebb54d341765`.
+- Current ASI SHA-256: `e925ff16937bd381539b6748d377f49e533ec25f78e4b9ee1cf53e3146fba9f6`.
+- Installed only after GTA and PlayGTAV were confirmed stopped. Six payload checksums match the profile and private package; original retail executable unchanged. Previous candidate backed up under `~/Applications/EldenLosSantosPreview/Backups/2026-10-01-texture-format-v3/`.
+- **Next owner check: relaunch Story Mode, keep combat OFF, press 2 once with default Malenia selected outdoors. Stop at the first failure rather than trying the other creatures.** Read the staged loading events afterward. No agent game launch/relaunch or renderer test was performed for this repair; do not auto-relaunch after crashes.
 
 ## Local profile and asset boundaries
 
-- Private bundle: `~/Applications/EldenLosSantosPreview/`; owner guide `START-HERE.md`; editable inputs `SourceAssets/`; latest private DLC build `SourceAssets/dlc-build/v2-bindings/`.
+- Private bundle: `~/Applications/EldenLosSantosPreview/`; owner guide `START-HERE.md`; editable inputs `SourceAssets/`; latest private DLC build `SourceAssets/dlc-build/v3-textures/`.
 - Steam's existing GTA path is a symlink to `~/Library/Application Support/EldenLosSantos/Game`. Exact original retail directory remains `~/Library/Application Support/EldenLosSantos/Retail`. APFS clonefile shares original blocks, not a second full-size copy.
 - Profile state: `~/Library/Application Support/EldenLosSantos/profile-state.json`. Only GTA5.exe's Wine `dinput8` override is `native,builtin`, with prior absence recorded. Account stores and saves were not changed.
 - Restore with GTA closed: `python3 ~/Applications/EldenLosSantosPreview/Tools/profile_manager.py restore`; use `activate` to reactivate. Do not unlink game/profile paths manually.

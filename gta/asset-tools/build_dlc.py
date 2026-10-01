@@ -12,6 +12,7 @@ import shutil
 import subprocess
 from pathlib import Path
 from xml.etree import ElementTree as ET
+from normalize_dds import normalize_dds
 
 CHARACTERS = [("c2120", "ergt_malenia"), ("c3181", "ergt_redwolf"), ("c2270", "ergt_crab")]
 
@@ -51,8 +52,26 @@ def main():
         folder = args.converted / character
         receipt = json.loads((folder / f"{name}.conversion.json").read_text())
         if receipt["missing_base_materials"]: raise ValueError(f"{name}: unresolved base materials")
+        # Keep source files untouched. Normalize copied DDS headers before the
+        # native importer, which otherwise silently encodes sRGB formats as zero.
+        conversion = output / "conversion-input" / character
+        conversion.mkdir(parents=True)
+        drawable_xml = folder / f"{name}.ydr.xml"
+        shutil.copy2(drawable_xml, conversion / drawable_xml.name)
+        texture_folder = conversion / name; texture_folder.mkdir()
+        normalized_count = 0
+        for texture in ET.parse(drawable_xml).findall("ShaderGroup/TextureDictionary/Item"):
+            filename = texture.findtext("FileName")
+            if not filename or Path(filename).name != filename:
+                raise ValueError("Unsafe or missing embedded texture filename")
+            destination = texture_folder / filename
+            if destination.exists(): continue
+            data, changed = normalize_dds((folder / name / filename).read_bytes())
+            with destination.open("xb") as stream: stream.write(data)
+            normalized_count += int(changed)
         for extension, stem in [("ydr", name), ("ycd", name + "_anims")]:
-            invoke("convert", folder / f"{stem}.{extension}.xml", models / f"{stem}.{extension}")
+            source = conversion if extension == "ydr" else folder
+            invoke("convert", source / f"{stem}.{extension}.xml", models / f"{stem}.{extension}")
             (models / f"{stem}.{extension}.json").rename(output / f"{stem}.{extension}.verification.json")
         low, high = receipt["collision"]["min"], receipt["collision"]["max"]
         centre = [(a+b)/2 for a,b in zip(low,high)]
@@ -72,7 +91,7 @@ def main():
         ET.SubElement(item,"assetName").text=name
         ET.SubElement(item,"extensions")
         manifest_models.append({"source_character":character,"model":name,"clips":receipt["clips"],
-                                "collision":receipt["collision"],"gta_runtime_verified":False})
+                                "collision":receipt["collision"],"normalized_srgb_textures":normalized_count,"gta_runtime_verified":False})
     ET.SubElement(map_types,"name").text="ergt"
     ET.SubElement(map_types,"dependencies"); ET.SubElement(map_types,"compositeEntityTypes")
     ytyp_xml=output/"ergt.ytyp.xml"; write_xml(map_types,ytyp_xml)

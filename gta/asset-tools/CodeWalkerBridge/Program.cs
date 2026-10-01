@@ -9,7 +9,7 @@ using CodeWalker.GameFiles;
 
 CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
 CultureInfo.CurrentUICulture = CultureInfo.InvariantCulture;
-if (args.Length != 3 || (args[0] != "convert" && args[0] != "pack" && args[0] != "prepare-dlclist"))
+if (args.Length != 3 || (args[0] != "convert" && args[0] != "pack" && args[0] != "prepare-dlclist" && args[0] != "inspect-ydr"))
 {
     Console.Error.WriteLine("Usage: CodeWalkerBridge convert INPUT.ydr.xml|INPUT.ycd.xml|INPUT.ytyp.xml NEW_OUTPUT, or pack SOURCE_DIRECTORY NEW_RPF");
     return 2;
@@ -19,6 +19,19 @@ try
     string source = Path.GetFullPath(args[1]);
     string destination = Path.GetFullPath(args[2]);
     if (File.Exists(destination)) throw new IOException("Refusing to overwrite an existing asset");
+    if (args[0] == "inspect-ydr")
+    {
+        var drawable = new YdrFile();
+        drawable.Load(File.ReadAllBytes(source));
+        var textures = drawable.Drawable?.ShaderGroup?.TextureDictionary?.Textures?.data_items ?? [];
+        var report = new { textures = textures.Select(t => new { name = t.Name, format = (uint)t.Format,
+            known_format = Enum.IsDefined(typeof(TextureFormat), t.Format), width = t.Width, height = t.Height,
+            mips = t.Levels, data_bytes = t.Data?.FullData?.Length ?? 0 }).ToArray(), gta_runtime_verified = false };
+        File.WriteAllText(destination, JsonSerializer.Serialize(report, new JsonSerializerOptions { WriteIndented = true }) + "\n");
+        Console.WriteLine(JsonSerializer.Serialize(new { textures = textures.Length,
+            invalid_formats = textures.Count(t => !Enum.IsDefined(typeof(TextureFormat), t.Format)) }));
+        return 0;
+    }
     if (args[0] == "prepare-dlclist")
     {
         // Asset archive decoding only. Never run or patch the game executable,
@@ -96,13 +109,17 @@ try
     {
         string textures = source[..^".ydr.xml".Length];
         var original = XmlYdr.GetYdr(xml, textures);
+        ValidateTextures(original);
         data = original.Save();
         var loaded = new YdrFile();
         loaded.Load(data);
         if (loaded.Drawable?.Skeleton?.BonesCount != original.Drawable?.Skeleton?.BonesCount)
             throw new InvalidDataException("Skeleton count changed during binary round-trip");
+        ValidateTextures(loaded);
         details = new { bones = loaded.Drawable?.Skeleton?.BonesCount, drawable_present = loaded.Drawable != null,
-                        collision_present = loaded.Drawable?.Bound != null };
+                        collision_present = loaded.Drawable?.Bound != null,
+                        textures = loaded.Drawable?.ShaderGroup?.TextureDictionary?.Textures?.data_items?.Length ?? 0,
+                        texture_formats_verified = true };
     }
     else if (source.EndsWith(".ycd.xml", StringComparison.OrdinalIgnoreCase))
     {
@@ -154,4 +171,20 @@ catch (Exception error)
 {
     Console.Error.WriteLine(error.ToString());
     return 1;
+}
+
+static void ValidateTextures(YdrFile file)
+{
+    var textures = file.Drawable?.ShaderGroup?.TextureDictionary?.Textures?.data_items ?? [];
+    if (textures.Length == 0) throw new InvalidDataException("Creature drawable has no embedded textures");
+    foreach (var texture in textures)
+    {
+        // CodeWalker's DXGI mapper returns enum zero for sRGB DDS variants.
+        // A successful resource round-trip alone does not catch that invalid format.
+        if (!Enum.IsDefined(typeof(TextureFormat), texture.Format))
+            throw new InvalidDataException($"Unsupported GTA texture format {(uint)texture.Format}: {texture.Name}. Normalize the DDS before converting.");
+        if (texture.Width == 0 || texture.Height == 0 || texture.Levels == 0 || texture.Stride == 0 ||
+            texture.Data?.FullData == null || texture.Data.FullData.Length < texture.Stride * texture.Height)
+            throw new InvalidDataException("Empty/truncated texture: " + texture.Name);
+    }
 }

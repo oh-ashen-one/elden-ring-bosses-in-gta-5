@@ -1,6 +1,6 @@
 # Elden Ring asset extraction (GPL-3.0-or-later)
 
-These standalone conversion tools are separate from the Apache-2.0 GTA gameplay plugin. The C/Python adapters link to or import GPL libraries and are distributed under GPL-3.0-or-later; see LICENSE. Exceptions: CodeWalkerBridge, build_dlc.py and bootstrap_tools.py are original Apache-2.0 API/packaging adapters, as stated in their source headers and the root LICENSE. No proprietary assets, game libraries, archive keys, or converted models are distributed here.
+These standalone conversion tools are separate from the Apache-2.0 GTA gameplay plugin. The C/Python adapters link to or import GPL libraries and are distributed under GPL-3.0-or-later; see LICENSE. Exceptions: CodeWalkerBridge, build_dlc.py, normalize_dds.py and bootstrap_tools.py are original Apache-2.0 API/packaging adapters, as stated in their source headers and the root LICENSE. No proprietary assets, game libraries, archive keys, or converted models are distributed here.
 
 ## Verified on the Studio
 
@@ -10,7 +10,7 @@ These standalone conversion tools are separate from the Apache-2.0 GTA gameplay 
 - Native Mac Python can parse Malenia's FLVER and Havok skeleton. A compressed animation was decoded with its companion Havok compendium.
 - Exported all three characters to rigged glTF with four source clips each in the current candidate. Latest interchange files have zero errors/warnings in Khronos glTF Validator 2.0.0-dev.3.10. This verifies format structure, not visual fidelity or gameplay.
 - Data-only Blender 5.2/Sollumz conversion created local editable .blend files and GTA CodeWalker XML. Malenia converted to native YDR/YCD and loaded back through CodeWalker.Core: 96 bones and four clips preserved. Red Wolf and Crab native resources also round-trip, with 138 and 53 bones and four clips each. All three include whole-body collision boxes with an animal collision material.
-- None of this establishes in-game compatibility. No game, renderer or gameplay/performance test was launched. Materials are approximations, collision is coarse, animation roles need review, and DLC packaging/runtime integration remain in progress.
+- These offline conversions do not establish in-game compatibility. Owner testing confirmed the guns/helicopter, but creatures failed and a crab request preceded a crash. The current texture-format repair is awaiting owner retest; materials, collision, animation roles and combat remain unverified.
 
 ## Dependencies and provenance
 
@@ -52,3 +52,11 @@ All .blend, .glb, .dds, .ydr, .ycd and game-derived metadata stay under the igno
 ## Animated creature archetypes
 
 The DLC packager declares `Has Anim (YCD)` (512), links each clip dictionary and embedded texture dictionary, and sets `physicsDictionary` to the model name for embedded YDR collision. It does not mark moving creatures as static scenery. The native round-trip verifier checks these bindings, not just the archetype count. Sources: [Sollumz archetype flags](https://docs.sollumz.org/documentation/archetype-definition.ytyp/archetype-flags) and [CodeWalker embedded-bound binding](https://github.com/dexyfex/CodeWalker/blob/485d56bec00262ed7fa472261cce7bbc6202b96e/CodeWalker/Project/ProjectForm.cs#L3480). These format checks do not establish a successful GTA spawn.
+
+## Texture-format regression found during owner testing
+
+The v2 native YDRs contained 11 invalid texture format enums (zero): Malenia 4/10 textures, Wolf 4/6 and Crab 3/6. CodeWalker’s pinned `DDSIO.GetTextureFormat` maps UNORM DXGI formats, but its sRGB variants fall through to zero. The old skeleton/count round-trip check did not catch it. See [the importer mapping](https://github.com/dexyfex/CodeWalker/blob/485d56bec00262ed7fa472261cce7bbc6202b96e/CodeWalker.Core/GameFiles/Utils/DDSIO.cs#L479).
+
+`normalize_dds.py` now normalizes only the equivalent DDS header format in a separate packaging copy, preserving compressed pixels and mip bytes. It validates dimensions, single-image layout and mip payload length, and rejects unmapped formats. `CodeWalkerBridge` rejects unknown GTA texture formats, empty dimensions/mips and missing/truncated base texture data both before writing and after native round-trip. All 22 embedded textures in v3 pass. Five synthetic regressions plus rejection of the actual original Malenia input were checked; no game was launched for this repair.
+
+The captured crash is an access violation in Wine’s `RtlVirtualUnwind2` during the loading interval. That alone does not prove the first engine fault or establish that fixing textures resolves all creature compatibility issues. The malformed native texture enums are independently confirmed and corrected. Keep raw minidumps private.
