@@ -12,7 +12,17 @@ Updated: 2026-10-01 (GTA V × Elden Ring priority and setup audit).
 - Owner cancelled the automatic follow-up on 2026-10-01; automation move-steam-games-after-downloads-finish was deleted successfully. He subsequently confirmed downloads finished and resumed work, then cancelled only the SD-card migration. Main GTA V × Elden Ring work remains authorized on internal storage. Do not recreate the reminder.
 - CrossOver, Steam and all game data stay INTERNAL per the latest owner instruction. Do not resume the SD-card move.
 - Product scope is real GTA V Story Mode with Elden Ring bosses in an open-ended Los Santos sandbox. One roughly ten-minute encounter is the first verification milestone, not a playtime limit or a replacement for the larger game. No mod loader installed, no boss converted, no GTA gameplay verified. Current independent work can cover the encounter specification, original boss rules and tests, and investigation of the asset conversion route. GTA adapter and visible gameplay require the installed game.
-- Working branch: codex/gta-damage-probe, based on codex/gta-elden-ring-plan; earlier mac-prototype remains preserved.
+- Working branch: codex/elden-assets-and-combat, based on codex/gta-damage-probe; earlier branches remain preserved.
+
+## Current asset implementation checkpoint
+
+- Hari authorized all work possible without playing GTA or Elden Ring, targeting multiple Elden Ring bosses/monsters imported directly into GTA. No game launches or agent gameplay tests are needed/authorized for this lane.
+- Added GPL-3.0-or-later standalone tools under gta/asset-tools (separate from the Apache GTA plugin).
+- Pinned souls-formats-c compiled to Windows console binaries on Mac via MinGW. Created ERGTA-Tools CrossOver bottle solely for headless asset conversion; it has no Steam/account/game install.
+- Successfully extracted owned Malenia c2120, Red Wolf c3181 and Giant Crab c2270 model/animation/high-texture binders. Output: ignored assets/private/eldenring, with extraction-manifest.json and checksums. Game archives unmodified.
+- Native Python environment scratch/asset-venv contains pinned Soulstruct 2.6.0 / soulstruct-havok 1.5.0 and dependencies recorded in gta/asset-tools/requirements-mac.lock. Parsing Malenia's 899 FLVER bones/35 meshes and 337 Havok skeleton bones succeeded; a 136-frame/145-track compressed animation decoded with its compendium.
+- Next: texture/material unpacking and rig/animation export; then GTA-format conversion and runtime boss systems. No GTA-ready imported boss exists yet.
+- Read gta/asset-tools/README.md for tested workarounds (native BHD5 header decode and full 64-bit archive path hash), licenses and source pins. Latest Soulstruct Blender package is Windows-only via pyrelink; do not assume its release ZIP works on native Mac. Installed /Applications/Blender.app is 5.2.0, not the older 4.5 path from prior notes.
 
 ## Owner testing handoff (latest instruction)
 
