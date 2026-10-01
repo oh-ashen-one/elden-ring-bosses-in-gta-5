@@ -49,7 +49,7 @@ void text(float x, float y, const char* message) {
     hook.invoke(0x2513DFB0FB8400FEULL);
     hook.invoke(0x25FBB336DF1804CBULL, "STRING");
     hook.invoke(0x6C188BE134E074AAULL, message);
-    hook.invoke(0xCD015E5BB0D96A57ULL, x, y);
+    hook.invoke(0xCD015E5BB0D96A57ULL, x, y, 0);
 }
 
 void clear() {
@@ -92,7 +92,7 @@ void finish_spawn() {
     const int player = hook.invoke<int>(0xD80958FC74E988A6ULL);
     const auto p = hook.invoke<ergt::NativeVector>(0x1899F328B0E12848ULL, player, 0.0f, 12.0f, 0.0f);
     float ground = 0.0f;
-    if (!hook.invoke<int>(0xC906A7DAB05C8D2BULL, p.x, p.y, p.z + 100.0f, &ground, false)) {
+    if (!hook.invoke<int>(0xC906A7DAB05C8D2BULL, p.x, p.y, p.z + 100.0f, &ground, false, false)) {
         clear();
         status = "No ground found; stand outdoors and press F6";
         log_event("no_ground");
@@ -111,7 +111,7 @@ void finish_spawn() {
     hook.invoke(0xAD738C3085FE7E11ULL, actor, true, true);
     hook.invoke(0xF5F6378C4F3419D3ULL, actor, maximum_health);
     hook.invoke(0x166E7CF68597D8B5ULL, actor, maximum_health);
-    hook.invoke(0x6B76DC1F3AE6E6A3ULL, actor, maximum_health);
+    hook.invoke(0x6B76DC1F3AE6E6A3ULL, actor, maximum_health, 0, 0u);
     hook.invoke(0xEBD76F2359F190ACULL, actor, false);
     hook.invoke(0xB128377056A54E2AULL, actor, false);
     hook.invoke(0x9F8AA94D6D97DBF4ULL, actor, true);
@@ -148,7 +148,7 @@ void run() {
                 const int actor = probe.actor();
                 const bool exists = hook.invoke<int>(0x7239B21A38F536BAULL, actor) != 0;
                 const int health = exists ? hook.invoke<int>(0xEEF059FAD016D209ULL, actor) : 0;
-                const bool dead = exists && hook.invoke<int>(0x5F9532F3B5CC2551ULL, actor);
+                const bool dead = exists && hook.invoke<int>(0x5F9532F3B5CC2551ULL, actor, false);
                 const auto sample = probe.observe(exists, health, dead);
                 if (sample.lost_health) log_event("native_health_loss", sample.lost_health);
                 if (sample.died) { status = "Test actor defeated. F6: reset | F7: remove"; log_event("death"); }
@@ -160,9 +160,9 @@ void run() {
             std::snprintf(line, sizeof(line), "Raw GTA health: %d | observed loss: %llu",
                           probe.health(), static_cast<unsigned long long>(probe.total_loss()));
             text(0.025f, 0.09f, line);
-            hook.invoke(0x3A618A217E5154F0ULL, 0.175f, 0.135f, 0.30f, 0.012f, 30, 30, 30, 220);
+            hook.invoke(0x3A618A217E5154F0ULL, 0.175f, 0.135f, 0.30f, 0.012f, 30, 30, 30, 220, false);
             const float width = 0.30f * probe.ratio();
-            hook.invoke(0x3A618A217E5154F0ULL, 0.025f + width / 2.0f, 0.135f, width, 0.012f, 190, 35, 40, 240);
+            hook.invoke(0x3A618A217E5154F0ULL, 0.025f + width / 2.0f, 0.135f, width, 0.012f, 190, 35, 40, 240, false);
         } else {
             // A press while paused must not unexpectedly spawn on unpause.
             spawn_requested.store(false);

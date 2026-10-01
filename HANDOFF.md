@@ -1,6 +1,6 @@
 # Handoff
 
-Updated: 2026-10-01 (texture-format v3 repair following owner-reported crash).
+Updated: 2026-10-01 (native API v4 repair after v3 creature-spawn failure).
 
 ## Current priority and verified state
 
@@ -23,19 +23,19 @@ Updated: 2026-10-01 (texture-format v3 repair following owner-reported crash).
 - Eight source-only launch guard tests pass, including the previous 97% GPU case, low-util live renderer, unknown GPU, logged-out desktop, stuck exiting headless engine and emergency pause. A current read-only check refused launch until the owner reservation existed and other rendering stopped.
 - Lower-resolution v3 launch succeeded under that reservation at 14:53 America/New_York: GTA5.exe PID 50731, Script Hook initialization and DirectX initialization confirmed. A 20-second startup check sampled GPU values 0–31% (mostly 20–21%); desktop console remained midir. This is startup evidence, not sustained gameplay/FPS or creature verification. The exclusive slot remains held until the actual game process exits; the other coordinator owns its pause/auto-lift. Hari retains gameplay control.
 
-## Current installed candidate: texture-format-v3
+## Current installed candidate: native-contract-v4
 
-- Owner reports number keys, guns and helicopter worked. v2 failed Malenia creation repeatedly (both native creation paths returned zero despite model_loaded=1, is_ped=0, is_vehicle=0). The next crab request was followed by a crash before any creation result logged.
-- Private minidump confirms 0xc0000005 null write in Wine ntdll `RtlVirtualUnwind2`; no game process remained. This does not prove the underlying engine fault. Raw dump/logs are preserved ONLY in `~/Applications/EldenLosSantosPreview/Diagnostics/2026-10-01-crash/`; never publish them.
-- Offline audit found a concrete defect in the installed v2 native resources: invalid TextureFormat zero in 4/10 Malenia textures, 4/6 Wolf textures and 3/6 Crab textures. CodeWalker's DXGI mapper lacks sRGB variants and silently returned zero. The previous validation checked skeletons/counts but missed texture formats.
-- The packager now normalizes supported sRGB DDS headers in a separate copied input directory, preserving all source pixel/mip bytes. Native conversion rejects unknown texture enums and empty/truncated texture data before save and after round-trip. Original game files and editable conversion sources stay untouched.
-- All 22 embedded textures in rebuilt v3 pass. Five synthetic texture regressions pass; the actual original malformed Malenia input now fails before writing a resource. Three CTest suites and Windows x64 compilation pass. This is a verified asset-format fix, not a verified successful creature spawn or crash resolution.
-- Plugin keeps top-row **1 select / 2 spawn / 3 clear / 4 combat / 5 weapons / 6 Buzzard**. No Fn chord; weapon wheel and numpad flight keys remain available. Failed/timeout creatures are locked for the session to prevent repeated requests. Removed the ineffective alternate native creation attempt. Model and animation requests are staged and individually logged.
-- v3 loading marker: `loaded_texture_format_v3_owner_verification_pending`.
-- Current private DLC: 27,295,744 bytes; SHA-256 `af119ef181a0f02ef7457a64a35f83c399c050992035b3258376ebb54d341765`.
-- Current ASI SHA-256: `e925ff16937bd381539b6748d377f49e533ec25f78e4b9ee1cf53e3146fba9f6`.
-- Installed only after GTA and PlayGTAV were confirmed stopped. Six payload checksums match the profile and private package; original retail executable unchanged. Previous candidate backed up under `~/Applications/EldenLosSantosPreview/Backups/2026-10-01-texture-format-v3/`.
-- **Next owner check: relaunch Story Mode, keep combat OFF, press 2 once with default Malenia selected outdoors. Stop at the first failure rather than trying the other creatures.** Read the staged loading events afterward. No agent game launch/relaunch or renderer test was performed for this repair; do not auto-relaunch after crashes.
+- Owner reported all creatures still failed in v3; guns/helicopter worked. Logs now prove all three custom models passed model and animation streaming gates, then returned zero from CREATE_OBJECT_NO_OFFSET. No new crash was reported for this bounded test. GTA subsequently exited; no game files were replaced while running.
+- Revisited user-supplied `rehan-remade/universal-modder` at commit 15d6f9d5fbd32de9b1884f29ddec3be9133bd912. Its working Minecraft/GTA example uses GTA Legacy 3889 + SHV 3889. Its native wrapper passes EIGHT arguments to CREATE_OBJECT_NO_OFFSET (last 0); our code passed seven. The same eight-argument signature is in alloc8or native DB revision 424fb51b089049a9fbcebcc641500b1d44d255b4.
+- Corrected 12 incomplete call sites in the main plugin and 6 in the older probe: object/vehicle creation, ground queries, entity health/invincibility, ped damage, explosions, HUD text/rectangles and probe death query. No geometry/texture changes in this patch.
+- Added `gta/native-contracts.json` (72 API interface facts with pinned source links) and a parser-based regression suite checking every literal-hash native call in both plugins. The original seven-argument object call is explicitly rejected. All five CTest suites and both Windows x64 plugin builds pass. Arity is a verified bug; whether it completely fixes creature spawning is still an owner test.
+- If a creature still fails, one owner-triggered reference check creates/removes universal-modder's known stock prop `prop_box_wood01a` in the same tick below the player. See `reference_object_creation_result`: nonzero isolates custom assets, zero suggests a general object/native path issue. Never claim this diagnostic prop is a boss or a completed import.
+- v4 loading marker: `loaded_native_contract_v4_owner_verification_pending`.
+- Current ASI SHA-256: `1057fbd214f863aa84751ed874e0295e0450f32ede34d153f0c065c29b6a5f4a`.
+- DLC remains the v3 texture-corrected package, SHA-256 `af119ef181a0f02ef7457a64a35f83c399c050992035b3258376ebb54d341765` (27,295,744 bytes). Prior v2 had 11 invalid texture enums; v3 corrected them and all 22 textures pass offline format checks, but that did not by itself fix spawning.
+- v4 installed with GTA stopped; six payload hashes match active profile and private bundle; original retail checksum unchanged. Backup: `~/Applications/EldenLosSantosPreview/Backups/2026-10-01-native-contract-v4/`.
+- Hari relayed another request to the external Unreal session to keep rendering paused ACROSS GTA restarts until this test finishes. Observed coordinator marker: `owner reopening GTA 15:02 - renders paused by game_watch.sh (pre-emptive)`. Launcher now recognizes this exact reservation shape as well as the earlier opening-GTA-V marker; emergency pause remains blocked. No other session processes or pause files were changed.
+- v4 relaunch requested under the exclusive owner reservation at 1080p. Read local launch status for actual outcome. Owner should press **2 once** outdoors, default Malenia, combat OFF. Read log rather than repeating identical failed attempts. No creature success is claimed yet.
 
 ## Local profile and asset boundaries
 

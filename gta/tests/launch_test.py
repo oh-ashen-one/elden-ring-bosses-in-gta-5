@@ -40,6 +40,8 @@ class LaunchPreflight(unittest.TestCase):
             p.write_text('desktop session cannot render');self.assertFalse(module.owner_reservation(root))
             p.write_text('owner opening GTA V 14:48 - renders paused; auto-lift after GTA5.exe exits')
             self.assertTrue(module.owner_reservation(root))
+            p.write_text('owner reopening GTA 15:02 - renders paused by game_watch.sh (pre-emptive)')
+            self.assertTrue(module.owner_reservation(root))
 
 
 if __name__ == '__main__': unittest.main()

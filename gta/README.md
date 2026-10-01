@@ -2,7 +2,7 @@
 
 Original GTA V Story Mode mod code and a local conversion pipeline for owned Elden Ring creatures. Current characters: **Malenia, Red Wolf of Radagon, Giant Crab**.
 
-**Status: guns/helicopter confirmed by the owner; creature loading repair awaiting retest.** The previous package failed Malenia creation and a subsequent crab request preceded a GTA crash. We found and repaired 11 embedded textures encoded with invalid format zero, and added regression validation and a failed-spawn lockout. Number keys 1–6 remain the controls. Creature rendering, combat and performance are still unverified. See the [owner guide](OWNER-TEST.md).
+**Status: guns/helicopter owner-confirmed; native-call repair awaiting creature retest.** v3 streamed all three models/animation dictionaries but GTA still returned zero object handles. Rechecking the owner-supplied universal-modder example for the same GTA 3889 build revealed an omitted eighth argument to `CREATE_OBJECT_NO_OFFSET`. A full audit found more missing trailing native arguments; v4 corrects them and adds regression checks against 72 pinned API signatures. Creature rendering/combat remain unverified. See the [owner guide](OWNER-TEST.md).
 
 ## What is implemented
 
@@ -60,3 +60,11 @@ The local private DLC, game archives, DDS/GLB/Blend/native assets, runtime binar
 ## Studio launch coordination
 
 After the owner-reported desktop crash, agent launches use `tools/launch_owner.py` with the actual current shared GPU protocol directory. It keeps exclusive GPU ownership until GTA exits, refuses other renderers/unknown GPU readings, and never relaunches a crashed game. `--check` is read-only. Coordinate with the other session first; `--owner-reservation` is only for its explicit PAUSED marker reserving the machine for Hari’s GTA test. It leaves that marker and other sessions’ jobs untouched. This path requests 1920×1080 windowed; it does not establish measured FPS or crash-free operation.
+
+## Native API contract references
+
+`native-contracts.json` records interface names and argument counts from [alloc8or’s native database at the audited revision](https://github.com/alloc8or/gta5-nativedb-data/blob/424fb51b089049a9fbcebcc641500b1d44d255b4/natives.json). `tests/native_contract_test.py` checks every constant-hash call in both plugins, and rejects the original seven-argument object-spawn call. The same-build cross-check is [universal-modder’s working GTA 3889 native wrapper](https://github.com/rehan-remade/universal-modder/blob/15d6f9d5fbd32de9b1884f29ddec3be9133bd912/examples/minecraft-gta5-passthrough/gta/src/natives.h).
+
+That Minecraft demo runs Minecraft beside GTA and composites its frames, with native GTA collision proxies; it does not convert Minecraft mobs into native GTA models. Its native object-spawn signature and reference prop are useful interoperability evidence for our single-game asset import. We did not copy its two-game renderer or claim it verifies our Elden Ring import.
+
+After an owner-triggered creature failure, v4 requests its known-working `prop_box_wood01a` once, creates it below the player and deletes it in the same tick. Only its result is logged; it is never kept or presented as a boss. This separates a general native object-creation failure from rejection of our custom assets without another diagnostic installation.

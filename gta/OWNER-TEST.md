@@ -1,6 +1,6 @@
 # Elden Los Santos — owner preview
 
-**Experimental build: guns and helicopter owner-confirmed; texture-format repair awaiting creature retest.** The previous build failed to create Malenia, then GTA crashed while the crab was loading. Offline inspection found 11 invalid embedded texture formats. The current v3 package corrects them, rejects invalid formats during conversion, and locks a failed creature against repeated spawn attempts for the rest of that session. Creature visuals, combat and performance remain unverified.
+**Experimental v4: native-call repair installed.** The prior texture repair passed offline checks, but all three creatures still returned zero object handles. Rechecking the working Minecraft/GTA code exposed missing trailing native arguments, including the eighth object-spawn argument. These calls are corrected and checked against a pinned native database. Guns and the helicopter worked in the owner test; creature visuals, combat and performance remain unverified.
 
 ## Start
 
@@ -52,7 +52,7 @@ The command restores the exact original directory to Steam's path and restores t
 
 ## Known limits
 
-- Script Hook V, the ASI loader and this script ran under CrossOver on GTA 1.0.3889.0. The v2 package failed creature creation and later crashed after a crab request. The v3 texture-format repair has not yet passed an owner spawn test.
+- Script Hook V, the ASI loader and this script ran under CrossOver on GTA 1.0.3889.0. The v2 package failed creature creation and later crashed after a crab request. The v3 texture repair still failed object creation. The v4 native-argument repair awaits owner retest.
 - Malenia uses selected phase-one meshes. The AI is custom: chase, melee wind-up, stagger, increased aggression below half health and telegraphed ranged blasts.
 - Ranged effects and damage use GTA explosions; original Elden Ring VFX, spell systems, AI, sounds and cloth simulation are not ported.
 - Collision uses whole-body boxes. Direct line-of-sight movement is simple, with no pathfinding around buildings. Animation-role choices and strike timing need owner review.

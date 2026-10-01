@@ -47,7 +47,8 @@ def blockers(table, gpu, console, owner, limit=15):
 
 def owner_reservation(gpu_root):
     pause = gpu_root / 'PAUSED'
-    return pause.exists() and pause.read_text().startswith('owner opening GTA V ')
+    return pause.exists() and bool(re.match(
+        r'^owner (?:opening|reopening) GTA(?: V)? \d{1,2}:\d{2} - renders paused\b', pause.read_text()))
 
 
 def preflight(gpu_root, reserved=False):

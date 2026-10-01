@@ -1,0 +1,298 @@
+{
+  "schema_version": 1,
+  "target": "GTA V Legacy 1.0.3889.0",
+  "sources": {
+    "native_database": "https://github.com/alloc8or/gta5-nativedb-data/blob/424fb51b089049a9fbcebcc641500b1d44d255b4/natives.json",
+    "same_build_worked_example": "https://github.com/rehan-remade/universal-modder/blob/15d6f9d5fbd32de9b1884f29ddec3be9133bd912/examples/minecraft-gta5-passthrough/gta/src/natives.h"
+  },
+  "natives": {
+    "0x07C837F9A01C34C9": {
+      "name": "SET_TEXT_SCALE",
+      "arguments": 2
+    },
+    "0x0A6DB4965674D243": {
+      "name": "GET_SELECTED_PED_WEAPON",
+      "arguments": 1
+    },
+    "0x1017582BCD3832DC": {
+      "name": "GET_CURRENT_PED_VEHICLE_WEAPON",
+      "arguments": 2
+    },
+    "0x131D401334815E94": {
+      "name": "HAS_ENTITY_BEEN_DAMAGED_BY_WEAPON",
+      "arguments": 3
+    },
+    "0x166E7CF68597D8B5": {
+      "name": "SET_ENTITY_MAX_HEALTH",
+      "arguments": 2
+    },
+    "0x1718DE8E3F2823CA": {
+      "name": "SET_ENTITY_DYNAMIC",
+      "arguments": 2
+    },
+    "0x1760FFA8AB074D66": {
+      "name": "SET_ENTITY_CAN_BE_DAMAGED",
+      "arguments": 2
+    },
+    "0x1899F328B0E12848": {
+      "name": "GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS",
+      "arguments": 4
+    },
+    "0x19AAC8F07BFEC53E": {
+      "name": "IS_MODEL_A_VEHICLE",
+      "arguments": 1
+    },
+    "0x1A9205C1B9EE827F": {
+      "name": "SET_ENTITY_COLLISION",
+      "arguments": 3
+    },
+    "0x239A3351AC1DA385": {
+      "name": "SET_ENTITY_COORDS_NO_OFFSET",
+      "arguments": 7
+    },
+    "0x2513DFB0FB8400FE": {
+      "name": "SET_TEXT_OUTLINE",
+      "arguments": 0
+    },
+    "0x25FBB336DF1804CB": {
+      "name": "BEGIN_TEXT_COMMAND_DISPLAY_TEXT",
+      "arguments": 1
+    },
+    "0x28477EC23D892089": {
+      "name": "DRAW_MARKER",
+      "arguments": 24
+    },
+    "0x298B91AE825E5705": {
+      "name": "IS_PED_IN_ANY_HELI",
+      "arguments": 1
+    },
+    "0x3133B907D8B32053": {
+      "name": "GET_WEAPON_DAMAGE",
+      "arguments": 2
+    },
+    "0x3317DEDB88C95038": {
+      "name": "IS_PED_DEAD_OR_DYING",
+      "arguments": 2
+    },
+    "0x35B9E0803292B641": {
+      "name": "IS_MODEL_IN_CDIMAGE",
+      "arguments": 1
+    },
+    "0x3882114BDE571AD4": {
+      "name": "SET_ENTITY_INVINCIBLE",
+      "arguments": 3
+    },
+    "0x3A618A217E5154F0": {
+      "name": "DRAW_RECT",
+      "arguments": 9
+    },
+    "0x3FEF770D40960D5A": {
+      "name": "GET_ENTITY_COORDS",
+      "arguments": 2
+    },
+    "0x428CA6DBD1094446": {
+      "name": "FREEZE_ENTITY_POSITION",
+      "arguments": 2
+    },
+    "0x45F6D8EEF34ABEF1": {
+      "name": "SET_VEHICLE_ENGINE_HEALTH",
+      "arguments": 2
+    },
+    "0x4A4722448F18EEF5": {
+      "name": "SET_ENTITY_HAS_GRAVITY",
+      "arguments": 2
+    },
+    "0x539E0AE3E6634B9F": {
+      "name": "DELETE_OBJECT",
+      "arguments": 1
+    },
+    "0x5F9532F3B5CC2551": {
+      "name": "IS_ENTITY_DEAD",
+      "arguments": 2
+    },
+    "0x66E0276CC5F6B9DA": {
+      "name": "SET_TEXT_FONT",
+      "arguments": 1
+    },
+    "0x697157CED63F18D4": {
+      "name": "APPLY_DAMAGE_TO_PED",
+      "arguments": 5
+    },
+    "0x6B76DC1F3AE6E6A3": {
+      "name": "SET_ENTITY_HEALTH",
+      "arguments": 4
+    },
+    "0x6C188BE134E074AA": {
+      "name": "ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME",
+      "arguments": 1
+    },
+    "0x7239B21A38F536BA": {
+      "name": "DOES_ENTITY_EXIST",
+      "arguments": 1
+    },
+    "0x75816577FEA6DAD5": {
+      "name": "IS_MODEL_A_PED",
+      "arguments": 1
+    },
+    "0x7FB218262B810701": {
+      "name": "PLAY_ENTITY_ANIM",
+      "arguments": 9
+    },
+    "0x8E2530AA8ADA980E": {
+      "name": "SET_ENTITY_HEADING",
+      "arguments": 2
+    },
+    "0x919BE13EED931959": {
+      "name": "TASK_STAND_STILL",
+      "arguments": 2
+    },
+    "0x9614299DCB53E54B": {
+      "name": "DELETE_PED",
+      "arguments": 1
+    },
+    "0x963D27A58DF860AC": {
+      "name": "REQUEST_MODEL",
+      "arguments": 1
+    },
+    "0x98A4EB5D89A0C952": {
+      "name": "HAS_MODEL_LOADED",
+      "arguments": 1
+    },
+    "0x991251AFC3981F84": {
+      "name": "IS_CUTSCENE_ACTIVE",
+      "arguments": 0
+    },
+    "0x9A294B2138ABB884": {
+      "name": "CREATE_OBJECT_NO_OFFSET",
+      "arguments": 8
+    },
+    "0x9A9112A0FE9A4713": {
+      "name": "GET_VEHICLE_PED_IS_IN",
+      "arguments": 2
+    },
+    "0x9CD27B0045628463": {
+      "name": "GET_GAME_TIMER",
+      "arguments": 0
+    },
+    "0x9DE624D2FC4B603F": {
+      "name": "NETWORK_IS_SESSION_STARTED",
+      "arguments": 0
+    },
+    "0x9F47B058362C84B5": {
+      "name": "GET_ENTITY_MODEL",
+      "arguments": 1
+    },
+    "0x9F8AA94D6D97DBF4": {
+      "name": "SET_BLOCKING_OF_NON_TEMPORARY_EVENTS",
+      "arguments": 2
+    },
+    "0xA72CD9CA74A5ECBA": {
+      "name": "CLEAR_ENTITY_LAST_DAMAGE_ENTITY",
+      "arguments": 1
+    },
+    "0xAC678E40BE7C74D2": {
+      "name": "CLEAR_ENTITY_LAST_WEAPON_DAMAGE",
+      "arguments": 1
+    },
+    "0xAD738C3085FE7E11": {
+      "name": "SET_ENTITY_AS_MISSION_ENTITY",
+      "arguments": 3
+    },
+    "0xAF35D0D2583051B0": {
+      "name": "CREATE_VEHICLE",
+      "arguments": 8
+    },
+    "0xB0034A223497FFCB": {
+      "name": "IS_PAUSE_MENU_ACTIVE",
+      "arguments": 0
+    },
+    "0xB128377056A54E2A": {
+      "name": "SET_PED_CAN_RAGDOLL",
+      "arguments": 2
+    },
+    "0xBE6B23FFA53FB442": {
+      "name": "SET_TEXT_COLOUR",
+      "arguments": 4
+    },
+    "0xBF0FD6E56C964FCB": {
+      "name": "GIVE_WEAPON_TO_PED",
+      "arguments": 5
+    },
+    "0xC0296A2EDF545E92": {
+      "name": "IS_MODEL_VALID",
+      "arguments": 1
+    },
+    "0xC02F4DBFB51D988B": {
+      "name": "SET_TEXT_CENTRE",
+      "arguments": 1
+    },
+    "0xC45D23BAF168AAB8": {
+      "name": "GET_VEHICLE_ENGINE_HEALTH",
+      "arguments": 1
+    },
+    "0xC906A7DAB05C8D2B": {
+      "name": "GET_GROUND_Z_FOR_3D_COORD",
+      "arguments": 6
+    },
+    "0xCD015E5BB0D96A57": {
+      "name": "END_TEXT_COMMAND_DISPLAY_TEXT",
+      "arguments": 3
+    },
+    "0xD031A9162D01088C": {
+      "name": "HAS_ANIM_DICT_LOADED",
+      "arguments": 1
+    },
+    "0xD24D37CC275948CC": {
+      "name": "GET_HASH_KEY",
+      "arguments": 1
+    },
+    "0xD3BD40951412FEF6": {
+      "name": "REQUEST_ANIM_DICT",
+      "arguments": 1
+    },
+    "0xD49F9B0955C367DE": {
+      "name": "CREATE_PED",
+      "arguments": 8
+    },
+    "0xD80958FC74E988A6": {
+      "name": "PLAYER_PED_ID",
+      "arguments": 0
+    },
+    "0xDFD5033FDBA0A9C8": {
+      "name": "HAS_ENTITY_BEEN_DAMAGED_BY_ANY_VEHICLE",
+      "arguments": 1
+    },
+    "0xE3AD2BDBAEE269AC": {
+      "name": "ADD_EXPLOSION",
+      "arguments": 9
+    },
+    "0xE532F5D78798DAAB": {
+      "name": "SET_MODEL_AS_NO_LONGER_NEEDED",
+      "arguments": 1
+    },
+    "0xE83D4F9BA2A38914": {
+      "name": "GET_ENTITY_HEADING",
+      "arguments": 1
+    },
+    "0xEBD76F2359F190AC": {
+      "name": "SET_PED_SUFFERS_CRITICAL_HITS",
+      "arguments": 2
+    },
+    "0xEEF059FAD016D209": {
+      "name": "GET_ENTITY_HEALTH",
+      "arguments": 1
+    },
+    "0xF5F6378C4F3419D3": {
+      "name": "SET_PED_MAX_HEALTH",
+      "arguments": 2
+    },
+    "0xFCDFF7B72D23A1AC": {
+      "name": "HAS_ENTITY_CLEAR_LOS_TO_ENTITY",
+      "arguments": 3
+    },
+    "0xFE99B66D079CF6BC": {
+      "name": "DISABLE_CONTROL_ACTION",
+      "arguments": 3
+    }
+  }
+}

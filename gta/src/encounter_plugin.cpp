@@ -42,6 +42,10 @@ struct Pending {
     bool model_ready = false;
 } pending;
 int owned_helicopter = 0;
+bool reference_probe_used = false;
+bool reference_probe_active = false;
+std::uint32_t reference_probe_hash = 0;
+std::uint32_t reference_probe_started = 0;
 
 bool exists(int entity) { return entity && hook.invoke<int>(0x7239B21A38F536BAULL, entity); }
 ergt::Vec3 coords(int entity) {
@@ -65,7 +69,7 @@ void initialize_log() {
     if (!slash || slash-path>32700) return;
     std::wcscpy(slash+1,L"EldenLosSantos.log");
     log_file=_wfopen(path,L"a");
-    record("loaded_texture_format_v3_owner_verification_pending");
+    record("loaded_native_contract_v4_owner_verification_pending");
 }
 void text(float x,float y,const char* line,float scale=0.32f) {
     hook.invoke(0x66E0276CC5F6B9DAULL,0);
@@ -75,7 +79,7 @@ void text(float x,float y,const char* line,float scale=0.32f) {
     hook.invoke(0x2513DFB0FB8400FEULL);
     hook.invoke(0x25FBB336DF1804CBULL,"STRING");
     hook.invoke(0x6C188BE134E074AAULL,line);
-    hook.invoke(0xCD015E5BB0D96A57ULL,x,y);
+    hook.invoke(0xCD015E5BB0D96A57ULL,x,y,0);
 }
 void marker(ergt::Vec3 p) {
     hook.invoke(0x28477EC23D892089ULL,28,p.x,p.y,p.z,
@@ -99,6 +103,9 @@ void remove_actor(Actor& actor) {
 }
 void clear() {
     if (pending.active) { hook.invoke(0xE532F5D78798DAABULL,pending.hash); pending={}; }
+    if (reference_probe_active) {
+        hook.invoke(0xE532F5D78798DAABULL,reference_probe_hash); reference_probe_active=false;
+    }
     for (auto& actor:actors) remove_actor(actor);
     std::snprintf(notice,sizeof(notice),"Creatures cleared. Your helicopter is kept.");
     record("clear_creatures");
@@ -159,12 +166,12 @@ void finish_spawn(int player,std::uint32_t now) {
         std::snprintf(notice,sizeof(notice),"Invalid spawn position. Move outdoors and retry."); return;
     }
     float ground=0;
-    if (!hook.invoke<int>(0xC906A7DAB05C8D2BULL,p.x,p.y,p.z+100.0f,&ground,false) || !std::isfinite(ground)) {
+    if (!hook.invoke<int>(0xC906A7DAB05C8D2BULL,p.x,p.y,p.z+100.0f,&ground,false,false) || !std::isfinite(ground)) {
         hook.invoke(0xE532F5D78798DAABULL,pending.hash); pending={};
         std::snprintf(notice,sizeof(notice),"No ground found. Move to a clear outdoor area."); return;
     }
     if (pending.vehicle) {
-        owned_helicopter=hook.invoke<int>(0xAF35D0D2583051B0ULL,pending.hash,p.x,p.y,ground+1.0f,0.0f,false,true);
+        owned_helicopter=hook.invoke<int>(0xAF35D0D2583051B0ULL,pending.hash,p.x,p.y,ground+1.0f,0.0f,false,true,false);
         if (exists(owned_helicopter)) hook.invoke(0xAD738C3085FE7E11ULL,owned_helicopter,true,true);
         std::snprintf(notice,sizeof(notice),exists(owned_helicopter)?"Armed helicopter placed nearby.":"GTA could not create the helicopter. See the log.");
         record(exists(owned_helicopter)?"helicopter_created":"helicopter_create_failed",owned_helicopter);
@@ -174,7 +181,7 @@ void finish_spawn(int player,std::uint32_t now) {
             const float z=ground-spec.minimum_z+0.05f;
             // These are local drawable objects, not networked door entities.
             record("create_object_begin",0,static_cast<float>(pending.preset));
-            int entity=hook.invoke<int>(0x9A294B2138ABB884ULL,pending.hash,p.x,p.y,z,false,true,false);
+            int entity=hook.invoke<int>(0x9A294B2138ABB884ULL,pending.hash,p.x,p.y,z,false,true,false,0);
             record("create_object_no_offset_result",entity,static_cast<float>(pending.preset));
             if (log_file) {
                 const int loaded=hook.invoke<int>(0x98A4EB5D89A0C952ULL,pending.hash);
@@ -190,10 +197,10 @@ void finish_spawn(int player,std::uint32_t now) {
                 hook.invoke(0x1A9205C1B9EE827FULL,entity,true,true);
                 hook.invoke(0x1718DE8E3F2823CAULL,entity,true);
                 hook.invoke(0x4A4722448F18EEF5ULL,entity,true);
-                hook.invoke(0x3882114BDE571AD4ULL,entity,false);
+                hook.invoke(0x3882114BDE571AD4ULL,entity,false,false);
                 hook.invoke(0x1760FFA8AB074D66ULL,entity,true);
                 hook.invoke(0x166E7CF68597D8B5ULL,entity,10000);
-                hook.invoke(0x6B76DC1F3AE6E6A3ULL,entity,10000);
+                hook.invoke(0x6B76DC1F3AE6E6A3ULL,entity,10000,0,0u);
                 slot->native_health=hook.invoke<int>(0xEEF059FAD016D209ULL,entity);
                 animate(*slot,spec.idle_clip,true);
                 std::snprintf(notice,sizeof(notice),"%s spawned. Combat %s (4).",spec.label,fighting?"ON":"OFF");
@@ -202,10 +209,35 @@ void finish_spawn(int player,std::uint32_t now) {
                 failed_creatures[pending.preset]=true;
                 std::snprintf(notice,sizeof(notice),"Could not create %s. Retry locked; details in EldenLosSantos.log.",spec.label);
                 record("create_object_failed",entity,static_cast<float>(pending.preset));
+                // A one-time A/B diagnostic after an OWNER-triggered failure.
+                // Use the same stock prop as universal-modder's working bridge;
+                // remove it immediately, and never present it as a creature.
+                if (!reference_probe_used) {
+                    reference_probe_used=true; reference_probe_active=true; reference_probe_started=now;
+                    reference_probe_hash=hash("prop_box_wood01a");
+                    hook.invoke(0x963D27A58DF860ACULL,reference_probe_hash);
+                    record("reference_object_probe_requested");
+                }
             }
         }
     }
     hook.invoke(0xE532F5D78798DAABULL,pending.hash); pending={};
+}
+
+void tick_reference_probe(int player,std::uint32_t now) {
+    if (!reference_probe_active) return;
+    if (hook.invoke<int>(0x98A4EB5D89A0C952ULL,reference_probe_hash)) {
+        const auto p=coords(player);
+        if (finite(p)) {
+            // Below the player, deleted in the same script tick before physics.
+            int entity=hook.invoke<int>(0x9A294B2138ABB884ULL,reference_probe_hash,p.x,p.y,p.z-5.0f,false,true,false,0);
+            record("reference_object_creation_result",entity);
+            if (exists(entity)) hook.invoke(0x539E0AE3E6634B9FULL,&entity);
+        }
+    } else if (now-reference_probe_started<=3000) return;
+    else record("reference_object_streaming_timeout");
+    hook.invoke(0xE532F5D78798DAABULL,reference_probe_hash);
+    reference_probe_active=false;
 }
 
 void observe_damage(Actor& actor,int player,std::uint32_t now) {
@@ -237,7 +269,7 @@ void observe_damage(Actor& actor,int player,std::uint32_t now) {
     hook.invoke(0xAC678E40BE7C74D2ULL,actor.entity);
     hook.invoke(0xA72CD9CA74A5ECBAULL,actor.entity);
     if (actor.native_health>0 && actor.combat.state()!=ergt::CombatState::defeated)
-        hook.invoke(0x6B76DC1F3AE6E6A3ULL,actor.entity,actor.native_health);
+        hook.invoke(0x6B76DC1F3AE6E6A3ULL,actor.entity,actor.native_health,0,0u);
 }
 void update_actor(Actor& actor,int player,int vehicle,std::uint32_t now,int dt) {
     if (!actor.entity) return;
@@ -274,7 +306,7 @@ void update_actor(Actor& actor,int player,int vehicle,std::uint32_t now,int dt) 
     if (decision.movement.x!=0 || decision.movement.y!=0) {
         const float x=position.x+decision.movement.x,y=position.y+decision.movement.y;
         float ground=0;
-        if (hook.invoke<int>(0xC906A7DAB05C8D2BULL,x,y,position.z+4.0f,&ground,false)) {
+        if (hook.invoke<int>(0xC906A7DAB05C8D2BULL,x,y,position.z+4.0f,&ground,false,false)) {
             const float z=ground-actor.spec->minimum_z+0.05f;
             if (std::abs(z-position.z)<1.5f)
                 hook.invoke(0x239A3351AC1DA385ULL,actor.entity,x,y,z,true,true,false);
@@ -285,13 +317,13 @@ void update_actor(Actor& actor,int player,int vehicle,std::uint32_t now,int dt) 
         if (vehicle) {
             const float engine=hook.invoke<float>(0xC45D23BAF168AAB8ULL,vehicle);
             hook.invoke(0x45F6D8EEF34ABEF1ULL,vehicle,engine-actor.spec->melee_damage*5.0f);
-        } else hook.invoke(0x697157CED63F18D4ULL,player,actor.spec->melee_damage,true);
+        } else hook.invoke(0x697157CED63F18D4ULL,player,actor.spec->melee_damage,true,0,0u);
         record("melee_strike",actor.entity);
     }
     if (decision.ranged_strike) {
         // GTA effect/area damage; original ER projectile/VFX behavior is not ported.
         const auto p=decision.aim;
-        hook.invoke(0xE3AD2BDBAEE269ACULL,p.x,p.y,p.z,0,0.35f,true,false,0.15f);
+        hook.invoke(0xE3AD2BDBAEE269ACULL,p.x,p.y,p.z,0,0.35f,true,false,0.15f,false);
         record("ranged_strike",actor.entity);
     }
 }
@@ -334,6 +366,7 @@ void run() {
             std::snprintf(notice,sizeof(notice),"Carbine and RPG supplied.");
         }
         finish_spawn(player,now);
+        tick_reference_probe(player,now);
         const int vehicle=hook.invoke<int>(0x9A9112A0FE9A4713ULL,player,false);
         for (auto& actor:actors) update_actor(actor,player,vehicle,now,dt);
         char title[160];
@@ -346,9 +379,9 @@ void run() {
             const char* phase=actor.combat.state()==ergt::CombatState::defeated?"  DEFEATED":actor.combat.enraged()?"  ENRAGED":"";
             char label[128];std::snprintf(label,sizeof(label),"%s  %.0f / %.0f%s",actor.spec->label,actor.combat.health(),actor.spec->maximum_health,phase);
             text(0.25f,y,label);
-            hook.invoke(0x3A618A217E5154F0ULL,0.5f,y+0.038f,0.5f,0.009f,30,25,25,225);
+            hook.invoke(0x3A618A217E5154F0ULL,0.5f,y+0.038f,0.5f,0.009f,30,25,25,225,false);
             float width=0.5f*actor.combat.ratio();
-            hook.invoke(0x3A618A217E5154F0ULL,0.25f+width/2,y+0.038f,width,0.009f,180,30,35,245);row++;
+            hook.invoke(0x3A618A217E5154F0ULL,0.25f+width/2,y+0.038f,width,0.009f,180,30,35,245,false);row++;
         }
         hook.wait(0);
     }
