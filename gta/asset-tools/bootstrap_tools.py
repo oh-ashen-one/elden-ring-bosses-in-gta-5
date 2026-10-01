@@ -24,7 +24,7 @@ def main():
     root=Path(__file__).resolve().parents[2]; cache=root/".cache/gta-tools";cache.mkdir(parents=True,exist_ok=True)
     pins=json.loads((root/"gta/dependencies.json").read_text())
     if sys.version_info<(3,13):raise RuntimeError("Python 3.13 or newer is required")
-    for tool in ("git","cmake","x86_64-w64-mingw32-gcc","x86_64-w64-mingw32-g++"):
+    for tool in ("git","curl","cmake","x86_64-w64-mingw32-gcc","x86_64-w64-mingw32-g++"):
         if not shutil.which(tool):raise RuntimeError(f"Missing prerequisite: {tool}")
     if not args.blender.is_file() or not args.blender_python.is_file():raise RuntimeError("Set the Blender and bundled Python paths")
     def run(*cmd,**kwargs):subprocess.run(list(map(str,cmd)),cwd=root,check=True,**kwargs)
@@ -62,8 +62,13 @@ def main():
     for name,item in pins["runtime_downloads"].items():
         path=cache/(name+".zip")
         if not path.exists():
-            request=urllib.request.Request(item["url"],headers={"Referer":item["reference"]})
-            with urllib.request.urlopen(request,timeout=60) as response:path.write_bytes(response.read())
+            # The publisher rejects urllib's default request with HTTP 406;
+            # use its normal public download route and verify the pinned hash.
+            temporary=path.with_suffix(".download")
+            run("curl","-fL","--max-time","60","-e",item["reference"],"-o",temporary,item["url"])
+            if hashlib.sha256(temporary.read_bytes()).hexdigest()!=item["sha256"]:
+                raise RuntimeError(f"Download checksum mismatch: {name}")
+            temporary.replace(path)
         if hashlib.sha256(path.read_bytes()).hexdigest()!=item["sha256"]:raise RuntimeError(f"Download checksum mismatch: {name}")
     print("Pinned source/conversion dependencies prepared. Games were not launched.")
 

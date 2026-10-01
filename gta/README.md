@@ -47,7 +47,7 @@ Create a separate accountless **ERGTA-Tools** Windows 10 64-bit CrossOver bottle
   --out '/path/to/private/ergt-assets'
 ```
 
-This reconstructs local artifacts and does not launch either game. The individual conversion stages were exercised on the Studio; the complete convenience orchestration is source-prepared and still needs a fresh-environment rebuild check. Dependency revisions and downloaded runtime hashes are recorded in [dependencies.json](dependencies.json).
+This reconstructs local artifacts and does not launch either game. The dependency bootstrap and complete conversion orchestration were exercised on the Studio with a fresh asset output directory. The rebuilt DLC matched the installed candidate byte-for-byte. A separate-machine rebuild and actual GTA playtest remain unverified. Dependency revisions and downloaded runtime hashes are recorded in [dependencies.json](dependencies.json).
 
 ## Scope and publication
 

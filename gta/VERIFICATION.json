@@ -1,0 +1,29 @@
+{
+  "checked_at": "2026-10-01T11:07:26.967026-04:00",
+  "gameplay_verified": false,
+  "rendering_verified": false,
+  "performance_verified": false,
+  "owner_vanilla_story_mode_confirmed": true,
+  "characters": [
+    "Malenia",
+    "Red Wolf of Radagon",
+    "Giant Crab"
+  ],
+  "source_clips": 12,
+  "native_bone_counts": [
+    96,
+    138,
+    53
+  ],
+  "native_resource_roundtrips": "passed",
+  "archetype_count": 3,
+  "dlc_structure_check": "passed",
+  "fresh_output_rebuild": "passed",
+  "dlc_sha256": "48500df2c04e3e57103a086f4fd75dea54c238aaa743ec78beee80b9e0801018",
+  "dlc_bytes": 27295744,
+  "original_code_checks": "passed",
+  "windows_x64_build": "passed",
+  "apfs_profile_fixture_checks": "passed",
+  "games_launched_by_agent": 0,
+  "renders_run_by_agent": 0
+}

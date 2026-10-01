@@ -120,3 +120,12 @@ Read docs/BUILD-STATUS.md and docs/MAC-SETUP.md for exact limitations. Do not tr
 - The preview is active. Next step is owner-only launch of GTA V Legacy through the existing CrossOver Steam path, finish the tutorial/free-roam save, and follow gta/OWNER-TEST.md.
 - All runtime and visual claims remain pending that owner test. If no header appears, inspect the loader chain. If models are unavailable, inspect the DLC mount and YTYP registration. If models appear but no damage/animations, use the local EldenLosSantos.log for focused fixes.
 - Do not run GTA, render previews or conduct agent playtests. No recurring continuation/reminder exists for this thread.
+
+## Final preparation verification
+
+- Full dependency bootstrap succeeded. Its public runtime downloader was corrected to use the publishers' normal curl download route after urllib received HTTP 406; both downloaded archives matched their pinned SHA-256 values.
+- Complete build_owned_assets.py pipeline succeeded into a fresh asset output directory, without any game or render. Rebuilt DLC exactly matches the staged candidate SHA-256 48500df2c04e3e57103a086f4fd75dea54c238aaa743ec78beee80b9e0801018 (27,295,744 bytes).
+- Final rigged interchange files (four clips each) also pass the Khronos glTF validator with zero errors and zero warnings. Native resources preserve 96/138/53 bones, four clips each, and collision. See gta/VERIFICATION.json.
+- Source review: draft PR https://github.com/oh-ashen-one/modern-warfare-2-ai/pull/2, based on codex/gta-damage-probe. No merge performed. GitHub source checks passed for the preceding source checkpoint; final docs/download fix triggers the same checks.
+- Private named deliverables are under ~/Applications/EldenLosSantosPreview. SourceAssets contains the retained editable assets; the old ignored assets/private/eldenring path is maintained as a local symlink so saved Blender texture references remain valid. Older intermediate exports and duplicate verification outputs are disposable and being cleaned up, along with task-owned build/tool caches. Recreate tools with bootstrap_tools.py when development resumes.
+- Preview profile ACTIVE; original retail bytes and all six installed payload hashes verified. No game was launched. The remaining gate is Hari's own loading/visual/gameplay/performance check, starting with gta/OWNER-TEST.md.
