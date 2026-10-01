@@ -8,11 +8,17 @@ Updated: 2026-10-01 (GTA V × Elden Ring priority and setup audit).
 - Windows Steam is installed and authenticated sufficiently to download games in the CrossOver Steam bottle. Rosetta is installed. No GTA or Elden Ring gameplay has been verified.
 - Latest audit: GTA V Legacy has StateFlags 4 with all 129,049,797,551 bytes staged; MW2, Escape the Backrooms and Phasmophobia also report installed. Elden Ring and Dark Souls Remastered remain pending. Recheck live manifests and queue before use.
 - Storage: 512 GB writable exFAT SD card named memory, mounted at /Volumes/memory, UUID AB55E1EC-D2BD-38BD-961F-56347E0F5C9D; CrossOver maps it as D:. Initial inventory showed roughly 512 GB free. Reserved logical game files total roughly 274 GB; live totals may grow.
-- All six games and shared redistributables finished downloading. The owner then CANCELLED the SD-card migration because the sustained copy speed was too slow. Keep all games in the existing internal CrossOver Steam library. The task-owned rsync was stopped cleanly with SIGTERM (exit 20); no source files were removed and neither Steam library configuration was changed. Partial SD copies are being removed and Windows Steam is being reopened. No storage migration is authorized now.
+- All six games and shared redistributables finished downloading. The owner then CANCELLED the SD-card migration because the sustained copy speed was too slow. Keep all games in the existing internal CrossOver Steam library. The task-owned rsync was stopped cleanly with SIGTERM (exit 20); no source files were removed and neither Steam library configuration was changed. Partial SD copies were removed and Windows Steam was reopened successfully (verified process). No storage migration is authorized now.
 - Owner cancelled the automatic follow-up on 2026-10-01; automation move-steam-games-after-downloads-finish was deleted successfully. He subsequently confirmed downloads finished and resumed work, then cancelled only the SD-card migration. Main GTA V × Elden Ring work remains authorized on internal storage. Do not recreate the reminder.
 - CrossOver, Steam and all game data stay INTERNAL per the latest owner instruction. Do not resume the SD-card move.
 - Product scope is real GTA V Story Mode with Elden Ring bosses in an open-ended Los Santos sandbox. One roughly ten-minute encounter is the first verification milestone, not a playtime limit or a replacement for the larger game. No mod loader installed, no boss converted, no GTA gameplay verified. Current independent work can cover the encounter specification, original boss rules and tests, and investigation of the asset conversion route. GTA adapter and visible gameplay require the installed game.
 - Working branch: codex/gta-damage-probe, based on codex/gta-elden-ring-plan; earlier mac-prototype remains preserved.
+
+## Owner testing handoff (latest instruction)
+
+- Hari explicitly asked to handle game launching and playtesting himself to avoid spending agent credits on runtime testing. Do not launch or automate GTA/other game playtests unless he asks again. Focus this session on source, asset conversion and building reviewable artifacts, then give short owner test steps.
+- No GTA game was launched by this session. The latest attempted baseline launch stopped at read-only safety checks when the owner changed this workflow. Other sessions' Unreal processes were untouched.
+- Immediate owner check: launch GTA V Legacy through Windows Steam/CrossOver and reach Story Mode; provide whether it works or the exact visible error. Boss/probe runtime behavior remains unverified until evidence is supplied.
 
 ## Source groundwork saved when the owner cancelled the follow-up
 
