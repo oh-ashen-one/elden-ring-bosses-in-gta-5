@@ -4,7 +4,7 @@ Owner decision: 2026-10-01. GTA V × Elden Ring is the active first demo. Earlie
 
 ## 1. GTA V × Elden Ring — active
 
-Target: a roughly ten-minute repeatable GTA V Story Mode encounter with an Elden Ring boss in Los Santos. Native GTA firearms, vehicle impacts and helicopter weapons must damage the boss. Give the boss attacks that can threaten the player on foot and in the helicopter, a visible health bar, defeat state, and restart/cleanup.
+Target: an open-ended GTA V Story Mode crossover sandbox with Elden Ring bosses in Los Santos. The first verification milestone is a roughly ten-minute repeatable boss encounter, not a timer limiting the game. Native GTA firearms, vehicle impacts and helicopter weapons must damage the boss. Give the boss attacks that can threaten the player on foot and in the helicopter, a visible health bar, defeat state, and restart/cleanup.
 
 Proposed first boss: Malenia, subject to owner preference and a successful model/rig conversion test. A humanoid first boss reduces initial skeleton complexity; her complete Elden Ring behavior does not transfer automatically. Flight must remain an actual combat phase, with telegraphed ranged attacks and balanced damage.
 
@@ -38,9 +38,9 @@ References: [Script Hook V](https://www.dev-c.com/gtav/scripthookv/), [universal
 Owner confirmed this split on 2026-10-01:
 
 - **This game-combines session:** the main GTA V × Elden Ring playable mod, Studio/CrossOver integration and verification, and the already scheduled post-download SD-card migration.
-- **Midir dot:** separate crossover showcase builds; propose two feasible combinations, build one bounded playable demo first, keep the second queued. A Zombies-style Elden Ring enemies/MW2 guns demo is a candidate, not a confirmed implementation choice.
+- **Midir dot:** the owner has selected **Dark Souls × Modern Warfare 2** as its separate showcase build. This supersedes the earlier suggestion to choose two combinations or start Elden Ring/MW2 Zombies.
 - **Additional sessions:** may inherit chat context, but use separate repositories for different host engines, or distinct worktrees and branches for reusable shared code. Never share a dirty working directory or a mutable game/mod profile.
 
-A coordination brief was successfully sent through the supported task API to the dot conversation connected to its earlier Review game combines project task. Delivery is verified; acceptance, a new side-build task and implementation progress are not yet verified. No extra session was created from this thread.
+A coordination brief was successfully sent through the supported task API to the dot conversation connected to its earlier Review game combines project task. Delivery of the original brief and the corrected Dark Souls/MW2 scope is verified. Hari reports Midir is handling the side build; its implementation progress has not been independently checked here. No extra session was created from this thread.
 
 Each showcase needs actual player input, one clear crossover interaction, a short objective and restart. Do not describe an unverified combination as never done before. Keep proprietary assets local, preserve upstream attribution, and verify performance/gameplay separately from successful compilation.
