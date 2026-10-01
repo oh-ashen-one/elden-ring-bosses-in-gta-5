@@ -80,7 +80,9 @@ def main():
         item = ET.SubElement(archetypes, "Item", {"type": "CBaseArchetypeDef"})
         # These are script-animated creatures, not static map props. Declare
         # their clip dictionary, and bind the collision embedded in each YDR.
-        value(item,"lodDist",250); value(item,"flags",512); value(item,"specialAttribute",0)
+        # The in-game isolation check accepted 131072|512 (Dynamic + Has Anim)
+        # with the full original rig/collision; 512 and 32|512 returned zero.
+        value(item,"lodDist",250); value(item,"flags",131072 | 512); value(item,"specialAttribute",0)
         for tag, vector in [("bbMin",low),("bbMax",high),("bsCentre",centre)]:
             ET.SubElement(item,tag,{axis:format(v,".9g") for axis,v in zip("xyz",vector)})
         value(item,"bsRadius",radius); value(item,"hdTextureDist",10)

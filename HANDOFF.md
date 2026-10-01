@@ -1,6 +1,6 @@
 # Handoff
 
-Updated: 2026-10-01 (v6 import-isolation diagnostics; native creatures still unresolved).
+Updated: 2026-10-01 (Dynamic archetype setting proven in runtime; v7 applied to originals).
 
 ## Current priority and verified state
 
@@ -23,7 +23,18 @@ Updated: 2026-10-01 (v6 import-isolation diagnostics; native creatures still unr
 - Eight source-only launch guard tests pass, including the previous 97% GPU case, low-util live renderer, unknown GPU, logged-out desktop, stuck exiting headless engine and emergency pause. A current read-only check refused launch until the owner reservation existed and other rendering stopped.
 - Lower-resolution v3 launch succeeded under that reservation at 14:53 America/New_York: GTA5.exe PID 50731, Script Hook initialization and DirectX initialization confirmed. A 20-second startup check sampled GPU values 0–31% (mostly 20–21%); desktop console remained midir. This is startup evidence, not sustained gameplay/FPS or creature verification. The exclusive slot remains held until the actual game process exits; the other coordinator owns its pause/auto-lift. Hari retains gameplay control.
 
-## Current installed candidate: import-diagnostics-v6
+## Current installed candidate: dynamic-creatures-v7
+
+- **Runtime isolation found the decisive setting:** the full Malenia asset with Dynamic+HasAnim flags (`131584`) created valid objects in every v6 run, with both native dynamic arguments. Examples: handles 2306/2562, 3586/3842, 9218/9474. The baseline (flags 512), static+animation/default-clip variant (544), collisionless variant and unskinned/static variant returned zero. This is native creation proof for the real rigged/collidable Malenia asset, not visual/gameplay acceptance.
+- v7 applies `Dynamic (131072) | HasAnim (512)` to ALL THREE original archetypes. Original YDR/YCD mesh, rig, texture, collision and animation resources are byte-identical to the texture-corrected v3 originals. No placeholder/proxy/ped replacement is used. Experimental aliases and the default-clip alias were removed from the production DLC.
+- Normal controls are restored to **1–6**. Temporary key 7 removed; file-only, fixed-command technical verification remains. A one-shot check of stock object + original Malenia/Wolf/Crab is queued as part of the owner-approved import verification, to confirm the repair on their real model names. It deletes the technical samples immediately. Press 2 afterward for a persistent normal creature with combat OFF.
+- ASI SHA-256: `6971f83a331654d8b79aaabe9c2bb240f3ce0917b038a8dbcdf53706a6bb62df`.
+- DLC SHA-256: `ccad3b6a638074c46edcdf478ba96458b6612f2c89086f301c3ee6e6f321c28b`, 27,295,744 bytes; build `SourceAssets/dlc-build/v7-dynamic-creatures/`.
+- v7 script marker: `loaded_dynamic_creatures_v7_owner_verification_pending`; technical sweep completion has `value=0` if the production native call succeeded for every model. Normal persistent spawns log `creature_created` and native HP; animation failures are separate events.
+- Owner saved/closed GTA for this patch. It was installed with no GTA/PlayGTAV process present; six payload hashes verified and original retail executable unchanged. Rollback: `~/Applications/EldenLosSantosPreview/Backups/2026-10-01-dynamic-creatures-v7/`.
+- v7 guarded launch requested under the explicit OWNER PAUSE reservation, 1080p/windowed; check actual launch/runtime logs. Await current model checks plus owner visual/combat review before upgrading completion claims. All six source test suites and Windows x64 compilation pass.
+
+## Previous import-diagnostics-v6 checkpoint
 
 - v5 also FAILED for all three custom creatures; stock reference object still succeeded (2306). Do not repeat claims that arity/texture/CONTENTS_PROPS corrections completed spawning. Root custom-asset failure remains unresolved.
 - Hari explicitly approved the model-only technical import check: briefly create/remove six model variants and log acceptance. This authorizes the fixed file command for this diagnostic, not tutorial/combat/controller automation. One request is queued at `Game/EldenLosSantos.import-check.request` containing `CHECK_IMPORTS_ONCE` plus newline. It waits for Story Mode (scripts skip pause/cutscenes/network), then is consumed once. Key **7** triggers the same check; **3** cancels it. No listener/server.

@@ -2,7 +2,7 @@
 
 Original GTA V Story Mode mod code and a local conversion pipeline for owned Elden Ring creatures. Current characters: **Malenia, Red Wolf of Radagon, Giant Crab**.
 
-**Status: imported-creature spawning remains unresolved; v6 contains isolation diagnostics.** Stock GTA object creation works, but v5's custom creatures still returned zero handles. The owner approved a bounded model-only check comparing flags, collision, skinning and default-clip setup. Compilation and native resource checks pass; no imported boss has spawned successfully yet. See [owner guide](OWNER-TEST.md).
+**Status: the full Malenia asset created successfully in runtime isolation; the Dynamic archetype repair is installed for all three original creatures.** v6 proved that flags `131072 | 512` are accepted while the other tested setups returned zero. v7 applies that setting without replacing the real meshes, rigs or collisions. Creation checks for the original names and owner visual/combat review remain the next gate. See [owner guide](OWNER-TEST.md).
 
 ## What is implemented
 

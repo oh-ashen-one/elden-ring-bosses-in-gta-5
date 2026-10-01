@@ -14,10 +14,10 @@ HMODULE module_handle = nullptr;
 FILE* log_file = nullptr;
 bool registered = false;
 std::atomic<unsigned> commands{0};
-enum : unsigned { select_next=1, spawn=2, clear_all=4, toggle_combat=8, loadout=16, helicopter=32, import_diagnostics=64 };
+enum : unsigned { select_next=1, spawn=2, clear_all=4, toggle_combat=8, loadout=16, helicopter=32 };
 int selected = 0;
 bool fighting = false;
-constexpr char controls[] = "1 select | 2 spawn | 3 clear | 4 combat | 5 loadout | 6 helicopter | 7 import check";
+constexpr char controls[] = "1 select | 2 spawn | 3 clear | 4 combat | 5 loadout | 6 helicopter";
 char notice[192] = "Choose a creature with 1, then press 2 to spawn. Combat starts OFF.";
 
 struct Actor {
@@ -46,8 +46,9 @@ bool reference_probe_used = false;
 bool reference_probe_active = false;
 std::uint32_t reference_probe_hash = 0;
 std::uint32_t reference_probe_started = 0;
-constexpr std::array<const char*,6> diagnostic_models={"prop_box_wood01a","ergt_malenia","ergt_test_sta","ergt_test_dyn","ergt_test_nocol","ergt_test_rigid"};
+constexpr std::array<const char*,4> diagnostic_models={"prop_box_wood01a","ergt_malenia","ergt_redwolf","ergt_crab"};
 int diagnostic_index=-1;
+int diagnostic_failures=0;
 std::uint32_t diagnostic_hash=0,diagnostic_started=0;
 wchar_t diagnostic_request_path[32768]{};
 std::uint32_t last_request_check=0;
@@ -76,7 +77,7 @@ void initialize_log() {
     log_file=_wfopen(path,L"a");
     std::wcscpy(slash+1,L"EldenLosSantos.import-check.request");
     std::wcscpy(diagnostic_request_path,path);
-    record("loaded_import_diagnostics_v6_owner_verification_pending");
+    record("loaded_dynamic_creatures_v7_owner_verification_pending");
 }
 void text(float x,float y,const char* line,float scale=0.32f) {
     hook.invoke(0x66E0276CC5F6B9DAULL,0);
@@ -255,8 +256,8 @@ void diagnostic_next(std::uint32_t now) {
     if (diagnostic_hash) hook.invoke(0xE532F5D78798DAABULL,diagnostic_hash);
     diagnostic_hash=0;
     if (++diagnostic_index>=static_cast<int>(diagnostic_models.size())) {
-        diagnostic_index=-1;record("import_diagnostics_complete");
-        std::snprintf(notice,sizeof(notice),"Import checks complete. Results saved in EldenLosSantos.log.");return;
+        diagnostic_index=-1;record("import_diagnostics_complete",0,static_cast<float>(diagnostic_failures));
+        std::snprintf(notice,sizeof(notice),diagnostic_failures?"Import check failed. Results saved in EldenLosSantos.log.":"Object creation checks passed. Press 2 to spawn a creature.");return;
     }
     diagnostic_hash=hash(diagnostic_models[diagnostic_index]);diagnostic_started=now;
     hook.invoke(0x963D27A58DF860ACULL,diagnostic_hash);
@@ -265,7 +266,7 @@ void diagnostic_next(std::uint32_t now) {
 void begin_diagnostics(std::uint32_t now) {
     if (diagnostic_index>=0 || pending.active || reference_probe_active || fighting) return;
     if (std::any_of(actors.begin(),actors.end(),[](const Actor& a){return a.entity!=0;})) return;
-    diagnostic_index=-1;diagnostic_hash=0;record("import_diagnostics_begin");diagnostic_next(now);
+    diagnostic_index=-1;diagnostic_hash=0;diagnostic_failures=0;record("import_diagnostics_begin");diagnostic_next(now);
 }
 void tick_diagnostics(int player,std::uint32_t now) {
     if (diagnostic_index<0) return;
@@ -273,12 +274,14 @@ void tick_diagnostics(int player,std::uint32_t now) {
     if (!hook.invoke<int>(0x98A4EB5D89A0C952ULL,diagnostic_hash)) {
         if (now-diagnostic_started<5000) return;
         if (log_file) {std::fprintf(log_file,"event=import_check model=%s result=stream_timeout\n",name);std::fflush(log_file);}
+        diagnostic_failures++;
         diagnostic_next(now);return;
     }
     const auto p=coords(player);
     if (finite(p)) for (const bool dynamic:{false,true}) {
         int entity=hook.invoke<int>(0x9A294B2138ABB884ULL,diagnostic_hash,p.x,p.y,p.z-5.0f,false,true,dynamic,0);
         const bool valid=exists(entity);
+        if (!dynamic && !valid) diagnostic_failures++;
         if (log_file) {
             std::fprintf(log_file,"event=import_check model=%s dynamic=%d entity=%d exists=%d\n",name,dynamic,entity,valid);
             std::fflush(log_file);
@@ -396,7 +399,6 @@ void keyboard(DWORD key,WORD,BYTE,BOOL,BOOL alt,BOOL repeated,BOOL up) {
     else if(key=='4') flag=toggle_combat;
     else if(key=='5') flag=loadout;
     else if(key=='6') flag=helicopter;
-    else if(key=='7') flag=import_diagnostics;
     commands.fetch_or(flag);
 }
 void run() {
@@ -413,10 +415,9 @@ void run() {
         if (!exists(player)) { commands.store(0); hook.wait(0); continue; }
         // Reserve top-row 1-6 for the mod without also selecting GTA weapons.
         // The regular weapon wheel and controller bindings remain available.
-        for (const int control:{157,158,160,164,165,159,161}) hook.invoke(0xFE99B66D079CF6BCULL,0,control,true);
+        for (const int control:{157,158,160,164,165,159}) hook.invoke(0xFE99B66D079CF6BCULL,0,control,true);
         const unsigned command=commands.exchange(0);
         if (command&select_next) selected=(selected+1)%static_cast<int>(ergt::creatures.size());
-        if (command&import_diagnostics) begin_diagnostics(now);
         read_diagnostic_request(now);
         if (command&clear_all) clear();
         else if (command&spawn) begin_spawn(false,now);

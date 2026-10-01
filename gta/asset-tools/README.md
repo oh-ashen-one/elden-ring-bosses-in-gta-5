@@ -51,7 +51,7 @@ All .blend, .glb, .dds, .ydr, .ycd and game-derived metadata stay under the igno
 
 ## Animated creature archetypes
 
-The DLC packager declares `Has Anim (YCD)` (512), links each clip dictionary and embedded texture dictionary, and sets `physicsDictionary` to the model name for embedded YDR collision. It does not mark moving creatures as static scenery. The native round-trip verifier checks these bindings, not just the archetype count. Sources: [Sollumz archetype flags](https://docs.sollumz.org/documentation/archetype-definition.ytyp/archetype-flags) and [CodeWalker embedded-bound binding](https://github.com/dexyfex/CodeWalker/blob/485d56bec00262ed7fa472261cce7bbc6202b96e/CodeWalker/Project/ProjectForm.cs#L3480). These format checks do not establish a successful GTA spawn.
+The DLC packager declares `Dynamic | Has Anim (YCD)` (131584), links each clip dictionary and embedded texture dictionary, and sets `physicsDictionary` to the model name for embedded YDR collision. It does not mark moving creatures as static scenery. The native round-trip verifier checks these bindings, not just the archetype count. Sources: [Sollumz archetype flags](https://docs.sollumz.org/documentation/archetype-definition.ytyp/archetype-flags) and [CodeWalker embedded-bound binding](https://github.com/dexyfex/CodeWalker/blob/485d56bec00262ed7fa472261cce7bbc6202b96e/CodeWalker/Project/ProjectForm.cs#L3480). These format checks do not establish a successful GTA spawn.
 
 ## Texture-format regression found during owner testing
 
@@ -68,3 +68,7 @@ The owner-triggered v4 test proved that the full native spawn call creates/delet
 ## Import isolation tools
 
 `build_import_diagnostics.py` (original Apache-2.0 adapter) produces private variants of the same owned Malenia source: static/dynamic archetype flags, collisionless, and unskinned/default shader. It preserves original inputs. The static animated variant includes a default clip alias matching its model hash, following [CodeWalker's default-clip lookup](https://github.com/dexyfex/CodeWalker/blob/485d56bec00262ed7fa472261cce7bbc6202b96e/CodeWalker/Rendering/Renderer.cs#L3688). This is a diagnostic tool, not a verified game conversion. Its outputs must stay private.
+
+## Runtime result: Dynamic archetypes
+
+On 2026-10-01 the bounded owner-approved import test created the complete Malenia variant with flags 131584 repeatedly; the original flags 512 and static/animated variants returned zero. Stock GTA objects also succeeded, isolating the issue from the native invocation layer. The production packager now includes Dynamic (131072) alongside Has Anim (512). Setting entity dynamics after a failed creation cannot repair the archetype used by that creation. v7 preserves the six original native mesh/animation files byte-for-byte and changes the three archetype flags. This native creation evidence does not itself prove visual fidelity or combat.

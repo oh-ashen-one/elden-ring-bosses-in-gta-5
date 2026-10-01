@@ -1,6 +1,6 @@
 # Elden Los Santos — owner preview
 
-**Diagnostic build v6.** Creature spawning is still unresolved. Hari approved one automatic, model-only import check once Story Mode is loaded. It creates and immediately removes test objects and writes results; these are not playable bosses. Key **7** starts the same check manually; **3** cancels it. No controller, tutorial or combat automation is performed.
+**v7: Dynamic archetype repair installed.** The import-isolation check successfully created the full rigged Malenia model with its original collision and textures when the Dynamic flag was enabled. That setting now applies to Malenia, Red Wolf and Giant Crab. One approved technical creation check runs after Story Mode loads and removes its samples; then press **2** to create a persistent creature. Visuals, animation, combat and performance still need your review.
 
 ## Start
 
@@ -52,7 +52,7 @@ The command restores the exact original directory to Steam's path and restores t
 
 ## Known limits
 
-- Script Hook V, the ASI loader and this script ran under CrossOver on GTA 1.0.3889.0. The v2 package failed creature creation and later crashed after a crab request. The v3 texture repair still failed object creation. v4 proved stock-object creation works, while the custom model still failed. v5 adds prop registration; owner retest is pending.
+- Script Hook V, the ASI loader and this script ran under CrossOver on GTA 1.0.3889.0. The v2 package failed creature creation and later crashed after a crab request. The v3 texture repair still failed object creation. v4 proved stock-object creation works, while the custom model still failed. v5 registration alone still failed. Runtime isolation then identified the Dynamic archetype flag; v7 applies it to the originals.
 - Malenia uses selected phase-one meshes. The AI is custom: chase, melee wind-up, stagger, increased aggression below half health and telegraphed ranged blasts.
 - Ranged effects and damage use GTA explosions; original Elden Ring VFX, spell systems, AI, sounds and cloth simulation are not ported.
 - Collision uses whole-body boxes. Direct line-of-sight movement is simple, with no pathfinding around buildings. Animation-role choices and strike timing need owner review.
