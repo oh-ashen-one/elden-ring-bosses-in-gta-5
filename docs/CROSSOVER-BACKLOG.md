@@ -44,4 +44,3 @@ Owner confirmed this split on 2026-10-01:
 A coordination brief was successfully sent through the supported task API to the dot conversation connected to its earlier Review game combines project task. Delivery is verified; acceptance, a new side-build task and implementation progress are not yet verified. No extra session was created from this thread.
 
 Each showcase needs actual player input, one clear crossover interaction, a short objective and restart. Do not describe an unverified combination as never done before. Keep proprietary assets local, preserve upstream attribution, and verify performance/gameplay separately from successful compilation.
-
