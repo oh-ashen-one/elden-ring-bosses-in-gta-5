@@ -4,12 +4,15 @@ Updated: 2026-10-01 (GTA V × Elden Ring priority and setup audit).
 
 ## Current priority and setup audit
 
-- Owner now prioritizes GTA V × Elden Ring: a boss encounter with native GTA guns and helicopter weapons. See docs/CROSSOVER-BACKLOG.md for the sequence and additional ten-minute demo ideas.
-- Owner clarified that GTA V and Elden Ring are purchased but NOT downloaded; native macOS Steam blocked the Windows-only downloads. On this Studio, the registered native Steam library currently lists only MW2 single-player and multiplayer manifests (both StateFlags 4), sharing the MW2 directory. This does not prove gameplay or complete Windows asset compatibility.
-- GTA V and Elden Ring require downloading through Windows Steam in CrossOver. Their absence in the registered native library is now explained.
-- Owner approved Rosetta installation. Before the pending click could execute, the UI had already advanced; pkgutil subsequently verified the Rosetta installation receipt. CrossOver completed Windows Steam installation in its new Steam bottle and reports Ready. Steam was launched and its bootstrap log confirms its initial client update and verification completed. The latest login log reports WaitingForNetwork after a login attempt; successful account authentication and a usable library are not yet verified. The computer-use app inventory did not expose a controllable Windows Steam login window. Steam/Steam Guard and later Rockstar authentication may require owner interaction. No game has launched.
-- No game launched, no mod loader installed, no boss converted, and no GTA gameplay verified.
-- Documentation branch: codex/gta-elden-ring-plan, based on the preserved codex/mac-prototype branch.
+- Active goal: GTA V × Elden Ring, with a boss damaged by native GTA firearms, explosives, vehicle impacts and helicopter weapons. See docs/CROSSOVER-BACKLOG.md.
+- Windows Steam is installed and authenticated sufficiently to download games in the CrossOver Steam bottle. Rosetta is installed. No GTA or Elden Ring gameplay has been verified.
+- Current queue includes GTA V Legacy, Elden Ring, Dark Souls Remastered and Escape the Backrooms. Windows MW2 and Phasmophobia manifests now report installed. Recheck live manifests before use.
+- Storage: 512 GB writable exFAT SD card named memory, mounted at /Volumes/memory, UUID AB55E1EC-D2BD-38BD-961F-56347E0F5C9D; CrossOver maps it as D:. Initial inventory showed roughly 512 GB free. Reserved logical game files total roughly 274 GB; live totals may grow.
+- Owner explicitly chose to let downloads finish BEFORE moving games to the SD card. Do not interrupt, pause, stop or relocate active downloads. An earlier shutdown request did not stop the client; no files have been moved or deleted.
+- Active thread heartbeat move-steam-games-after-downloads-finish checks every 15 minutes. It must verify the whole queue is complete before a safe migration, verify destination contents before source removal, and disable itself after success. It does not launch games.
+- CrossOver and Steam client/account data stay internal. Only game data moves; no reformat is authorized or needed.
+- No mod loader installed, no boss converted, no GTA gameplay verified. Current independent work can cover the encounter specification, original boss rules and tests, and investigation of the asset conversion route. GTA adapter and visible gameplay require the installed game.
+- Working branch: codex/gta-elden-ring-plan, based on the preserved codex/mac-prototype branch.
 
 ## Previous Terminal goal and owner decisions
 
@@ -23,7 +26,7 @@ Updated: 2026-10-01 (GTA V × Elden Ring priority and setup audit).
 ## Repository and ownership
 
 - Public remote: https://github.com/oh-ashen-one/modern-warfare-2-ai
-- Working branch: codex/mac-prototype, based on codex/terminal-foundation.
+- Earlier implementation branch: codex/mac-prototype, based on codex/terminal-foundation. Current branch is listed above.
 - The original foundation branch remains the default; no main/default-branch merge is authorized or performed.
 - No other session's game process, bottle or checkout was changed.
 
@@ -51,7 +54,7 @@ Updated: 2026-10-01 (GTA V × Elden Ring priority and setup audit).
 ## CrossOver and more-game research
 
 - CrossOver 26.2 is installed on the Studio.
-- Steam shortcuts exist, but their named bottle was not found in the default bottle locations by the read-only CLI check. No bottle was created, modified or started.
+- The earlier missing-bottle finding is superseded: the Steam bottle now exists and Windows Steam is downloading games.
 - universal-modder's published worked bridge is Minecraft/GTA V on Windows. The linked Elden Ring clip is by a different creator; captions were unavailable, and only four frames were sampled.
 - Neither universal-modder nor libsm64 has been imported or installed. They are references in docs/MORE-GAMES.md.
 
