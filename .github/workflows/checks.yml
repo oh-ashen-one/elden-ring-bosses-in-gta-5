@@ -17,3 +17,12 @@ jobs:
         run: cargo +1.98.1 test --workspace --locked
       - name: Lint original crates
         run: cargo +1.98.1 clippy --workspace --all-targets --locked -- -D warnings
+
+  gta-source-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Configure original GTA logic
+        run: cmake -S gta -B build/gta-native -DCMAKE_BUILD_TYPE=Release
+      - name: Build and check source scenarios
+        run: cmake --build build/gta-native && ctest --test-dir build/gta-native --output-on-failure

@@ -1,0 +1,20 @@
+{
+  "repositories": {
+    "souls-formats-c": {"url": "https://github.com/soarqin/souls-formats-c.git", "revision": "a01057b3bf7554bfdaaf69376b2e605e93aa9d39", "license": "GPL-3.0-or-later"},
+    "BinderKeys": {"url": "https://github.com/JKAnderson/BinderKeys.git", "revision": "b95a32c509e35e5b18306c1d37a7778ea4034f38", "license": "Apache-2.0"},
+    "Sollumz": {"url": "https://github.com/Sollumz/Sollumz.git", "revision": "82817d1211e7769bf3b9eb45866b6f8b802864fe", "license": "GPL-3.0-or-later"},
+    "CodeWalker": {"url": "https://github.com/dexyfex/CodeWalker.git", "revision": "485d56bec00262ed7fa472261cce7bbc6202b96e", "license": "Not specified in inspected root; external local tool only, not redistributed"},
+    "klib": {"url": "https://github.com/attractivechaos/klib.git", "revision": "97a0fcb790b43b9e5da8994f4671021fec036f19", "license": "MIT"},
+    "zlib-ng": {"url": "https://github.com/zlib-ng/zlib-ng.git", "revision": "12731092979c6d07f42da27da673a9f6c7b13586", "license": "Zlib"},
+    "zstd": {"url": "https://github.com/facebook/zstd.git", "revision": "f8745da6ff1ad1e7bab384bd1f9d742439278e99", "license": "BSD-3-Clause OR GPL-2.0"},
+    "mxml": {"url": "https://github.com/michaelrsweet/mxml.git", "revision": "0d5afc4278d7a336d554602b951c2979c3f8f296", "license": "Apache-2.0 WITH LLVM-exception"}
+  },
+  "runtime_downloads": {
+    "scripthook": {"url": "https://www.dev-c.com/files/ScriptHookV_3889.0_1158.13.zip", "sha256": "b64c97c3353906f14621e7e9511e4aec2a7d436ecc21ed124d3816585e2e6188", "reference": "https://www.dev-c.com/gtav/scripthookv/", "redistribute": false},
+    "rageopenv": {"url": "https://github.com/Chiheb-Bacha/RageOpenV/releases/download/v1.0/RageOpenV.zip", "sha256": "c39d574caa9db4462b20110e87a8229e48deeb2819883800c8e54f1c6c80548c", "reference": "https://github.com/Chiheb-Bacha/RageOpenV", "redistribute": false}
+  },
+  "dotnet_sdk": "10.0.401",
+  "szio": "1.4.0.dev1",
+  "gltf_validator": "2.0.0-dev.3.10",
+  "supported_gta_file_version": "1.0.3889.0"
+}

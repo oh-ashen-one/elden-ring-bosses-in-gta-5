@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <CodeWalkerCore Condition="'$(CodeWalkerCore)' == ''">$(MSBuildThisFileDirectory)../../../build/codewalker-core</CodeWalkerCore>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="CodeWalker.Core"><HintPath>$(CodeWalkerCore)/CodeWalker.Core.dll</HintPath></Reference>
+    <PackageReference Include="SharpDX" Version="4.2.0" />
+    <PackageReference Include="SharpDX.Mathematics" Version="4.2.0" />
+  </ItemGroup>
+</Project>
