@@ -3,8 +3,11 @@ Copyright 2026 Modern Warfare 2 AI contributors
 
 Original contributions in this repository are licensed under Apache License 2.0.
 
-The initial publication contains original planning and reference documents only.
-No upstream engine or game implementation code has been imported.
+This repository includes a source snapshot of 2010 Rust Rewrite Mashup
+(ab43b8a9e923bdc4ad7effb874f6efec155577f1) under runtime/.
+That project derives from IW4L and includes its author's skating and
+MinecraftOSS components as described in runtime/NOTICE. Original upstream
+LICENSE and NOTICE files are preserved. See docs/UPSTREAM-IMPORT.md.
 
 Primary technical references:
 - IW4L, by vladtrc and contributors:
@@ -18,7 +21,7 @@ Primary technical references:
 
 Further references and source revisions are recorded in docs/SOURCES.md and
 UPSTREAMS.json. Upstream authors retain their copyrights. Listing a project
-as a reference neither incorporates its code nor grants additional rights.
+as a reference does not by itself incorporate its code or grant additional rights.
 
 When importing implementation code, retain its applicable license and NOTICE
 files and document the exact source revision and local modifications.
