@@ -2,7 +2,7 @@
 
 An open source experiment in combining **MW2, Minecraft, Skate 3 and Skyrim** through AI-assisted development.
 
-Our first proposed playground is **Terminal**, the airport map from Modern Warfare 2.
+**Current priority: Elden Ring bosses in GTA V**, fought with GTA guns and helicopter weapons. See the [active plan and crossover backlog](docs/CROSSOVER-BACKLOG.md). The earlier Terminal airport prototype is preserved for a later demo.
 
 > **Status: Mac setup preview.** The imported engine builds as a native Apple Silicon executable. A setup app and tested mission/block rule modules are available. The four-game Terminal mission is not playable yet; real game data and runtime integration/testing are still required.
 

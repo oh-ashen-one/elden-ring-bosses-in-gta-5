@@ -3,7 +3,7 @@
 Read README.md, docs/TERMINAL-PLAN.md, docs/SOURCES.md and HANDOFF.md before continuing.
 
 - The vendored runtime builds on Apple Silicon; a setup app and tested rule modules exist. Retail gameplay and the combined mission are not verified. Read HANDOFF.md before claiming more.
-- The owner selected MW2's Terminal airport map as the first shared playground.
+- On 2026-10-01 the owner prioritized GTA V × Elden Ring: bosses damaged by GTA firearms and helicopter weapons. Read docs/CROSSOVER-BACKLOG.md. Earlier Terminal work is preserved in the backlog.
 - Work on a task branch. Push it in the same session. Merging or pushing main needs explicit owner authorization.
 - Inspect concurrent changes and process ownership before editing or launching anything.
 - Review component licenses and preserve upstream provenance before importing code. UPSTREAMS.json records observations, not blanket reuse permission.

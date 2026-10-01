@@ -1,12 +1,21 @@
 # Handoff
 
-Updated: 2026-10-01 02:59 UTC.
+Updated: 2026-10-01 (GTA V × Elden Ring priority and setup audit).
 
-## Goal and owner decisions
+## Current priority and setup audit
+
+- Owner now prioritizes GTA V × Elden Ring: a boss encounter with native GTA guns and helicopter weapons. See docs/CROSSOVER-BACKLOG.md for the sequence and additional ten-minute demo ideas.
+- Owner clarified that GTA V and Elden Ring are purchased but NOT downloaded; native macOS Steam blocked the Windows-only downloads. On this Studio, the registered native Steam library currently lists only MW2 single-player and multiplayer manifests (both StateFlags 4), sharing the MW2 directory. This does not prove gameplay or complete Windows asset compatibility.
+- GTA V and Elden Ring require downloading through Windows Steam in CrossOver. Their absence in the registered native library is now explained.
+- Owner approved Rosetta installation. Before the pending click could execute, the UI had already advanced; pkgutil subsequently verified the Rosetta installation receipt. CrossOver is installing Windows Steam in its new Steam bottle (last observed installing dependencies). Steam/Steam Guard and later Rockstar authentication may require owner interaction. No game has launched.
+- No game launched, no mod loader installed, no boss converted, and no GTA gameplay verified.
+- Documentation branch: codex/gta-elden-ring-plan, based on the preserved codex/mac-prototype branch.
+
+## Previous Terminal goal and owner decisions
 
 - Public open source project with a ten-minute Terminal crossover demo for a video.
 - Mac is the first build target. The owner authorized autonomous implementation and will provide game data later.
-- MW2 and Minecraft are not yet owned/supplied. Skate 3 and Skyrim data have not been supplied here.
+- Earlier implementation lacked retail data. The new owner report and current audit above supersede that setup status.
 - Terminal means the MW2 airport map.
 - Signature proposal: builder gun, skating, confirmed-trick charge, dragon killstreak, objective/extraction/restart loop.
 - Additional research: universal-modder, the Minecraft/Elden Ring clip, libsm64 and CrossOver. Preserve the Terminal objective while expanding through reusable adapters.
@@ -46,7 +55,7 @@ Updated: 2026-10-01 02:59 UTC.
 - universal-modder's published worked bridge is Minecraft/GTA V on Windows. The linked Elden Ring clip is by a different creator; captions were unavailable, and only four frames were sampled.
 - Neither universal-modder nor libsm64 has been imported or installed. They are references in docs/MORE-GAMES.md.
 
-## Next steps
+## Previous Terminal next steps (backlog)
 
 1. Provide owned MW2 (2009 PC) multiplayer data to the native setup app; verify the unchanged Terminal baseline first.
 2. Supply/convert Skate 3 data and verify real controls, animation, collision, death and restart.
