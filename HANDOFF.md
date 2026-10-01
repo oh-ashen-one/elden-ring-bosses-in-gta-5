@@ -19,7 +19,7 @@ Updated: 2026-10-01 (GTA V × Elden Ring priority and setup audit).
 - Three authentic owned ER creatures are packaged locally: Malenia phase-one meshes, Red Wolf of Radagon, Giant Crab. Twelve source clips total, assigned provisional idle/movement/attack/death roles; visual/gameplay fidelity is NOT verified.
 - Source assets extracted without changing either game's archives. Private pipeline output remains under assets/private/eldenring; final conversion sources are gta/candidate2 and interchange/v6. All three have resolved base textures, skeletons and coarse whole-body collision boxes. Hair and layered materials are documented approximations; original ER AI/cloth/VFX are not ported.
 - Native GTA YDR/YCD resources round-trip through the local CodeWalker adapter. DLC package at assets/private/eldenring/dlc-build/v1/dlc.rpf is 27,295,744 bytes; archive structure and three archetypes verified. No render/gameplay/performance tests were run.
-- Original C++ EldenLosSantos.asi now implements three-choice spawning, up to three active creatures, real GTA health-loss/hit-flag intake with logged fallback damage, custom melee/ranged/chase/stagger/enrage logic, health bars, original animation playback, clear/reset, optional rifle/RPG and an armed Buzzard. Combat begins OFF. Controls F5–F10 are in gta/OWNER-TEST.md (being finalized). Everything runtime-related remains owner-unverified.
+- Original C++ EldenLosSantos.asi now implements three-choice spawning, up to three active creatures, real GTA health-loss/hit-flag intake with logged fallback damage, custom melee/ranged/chase/stagger/enrage logic, health bars, original animation playback, clear/reset, optional rifle/RPG and an armed Buzzard. Combat begins OFF. Controls F5–F10 are in gta/OWNER-TEST.md. Everything runtime-related remains owner-unverified.
 - Main ASI compiles as Windows x64. Portable combat/probe checks and APFS profile isolation/rollback/restore fixture checks passed. Tests did not touch live game data or the real registry.
 - Named PRIVATE preview bundle: /Users/midir/Applications/EldenLosSantosPreview (about 30 MB payload, including local retail-derived DLC and separately obtained runtime files). Never publish this folder.
 - The preview profile is now ACTIVE, without launching GTA. Steam's existing GTA folder is a symlink to /Users/midir/Library/Application Support/EldenLosSantos/Game. Exact original retail directory is preserved at /Users/midir/Library/Application Support/EldenLosSantos/Retail. APFS clonefile shared the original file blocks; no second 129 GB data copy or SD move occurred. Original GTA5.exe checksum and all six payload checksums verified.
@@ -114,3 +114,9 @@ Updated: 2026-10-01 (GTA V × Elden Ring priority and setup audit).
 - cargo run -p mw2ai-launcher -- demo-check
 
 Read docs/BUILD-STATUS.md and docs/MAC-SETUP.md for exact limitations. Do not treat the scripted rule check as gameplay evidence.
+
+## Immediate owner handoff
+
+- The preview is active. Next step is owner-only launch of GTA V Legacy through the existing CrossOver Steam path, finish the tutorial/free-roam save, and follow gta/OWNER-TEST.md.
+- All runtime and visual claims remain pending that owner test. If no header appears, inspect the loader chain. If models are unavailable, inspect the DLC mount and YTYP registration. If models appear but no damage/animations, use the local EldenLosSantos.log for focused fixes.
+- Do not run GTA, render previews or conduct agent playtests. No recurring continuation/reminder exists for this thread.

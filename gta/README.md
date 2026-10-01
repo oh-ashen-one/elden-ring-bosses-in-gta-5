@@ -1,49 +1,58 @@
-# Elden Ring × GTA V: damage probe groundwork
+# Elden Los Santos
 
-Status: original source groundwork only. No game launch or in-game verification has occurred. This is not an Elden Ring boss implementation or a playable crossover release.
+Original GTA V Story Mode mod code and a local conversion pipeline for owned Elden Ring creatures. Current characters: **Malenia, Red Wolf of Radagon, Giant Crab**.
 
-This diagnostic ASI plugin requests one GTA-owned test actor using F6, shows its raw native health, logs observed health loss and death, and removes the owned actor using F7. It does not install itself, modify retail files, spawn a helicopter, or claim that any damage channel has passed an in-game check. The intended next test covers firearms, explosions, vehicle impacts and helicopter weapons separately. Damage classification and balancing are not implemented.
+**Status: experimental owner-preview profile prepared; gameplay unverified.** The vanilla GTA baseline was confirmed by the owner. No agent game launch, render, input automation or performance test was performed for this build. See [owner launch/test guide](OWNER-TEST.md).
 
-## Build
+## What is implemented
 
-Portable state/ABI checks on macOS or Linux:
+- Original Windows x64 ASI: creature selection/spawning, up to three active creatures, health bars, native health-loss/hit-flag damage intake, custom melee/ranged/chase/stagger/enrage behavior, source-animation playback, reset, optional weapons and an armed helicopter.
+- Offline asset extraction from owned Elden Ring archives, rigged interchange exports, textures/material adaptation, background data-only Blender/Sollumz conversion, native GTA resource conversion and DLC packaging.
+- Twelve original animation clips, coarse collision, and a three-archetype local DLC. Assets, textures and game-derived metadata are private, not Git contents.
+- A reversible APFS profile manager that keeps original retail bytes intact and scopes the Wine DLL override to GTA5.exe.
+- Independent rule/ABI tests plus fixture tests for clone isolation and profile restoration. These checks do not prove game behavior.
+
+## Build original code
+
+Requires CMake and C++17. For the Windows target on Mac, install MinGW-w64 from Homebrew.
 
 ```sh
 cmake -S gta -B build/gta-native -DCMAKE_BUILD_TYPE=Release
 cmake --build build/gta-native
 ctest --test-dir build/gta-native --output-on-failure
-```
 
-Cross-compile the Windows x64 ASI on the Mac with CMake and Homebrew mingw-w64:
-
-```sh
 cmake -S gta -B build/gta-win64 -DCMAKE_TOOLCHAIN_FILE=tools/mingw.cmake -DCMAKE_BUILD_TYPE=Release
 cmake --build build/gta-win64
+
+# macOS/APFS synthetic fixture checks; does not touch real games or registry
+python3 gta/tests/profile_test.py
 ```
 
-The output is `build/gta-win64/EldenLosSantosProbe.asi`. No vendor SDK or runtime is required to compile the original dynamic ABI wrapper. A separately obtained compatible Script Hook V runtime and ASI loader are required to use it in a dedicated GTA Story Mode mod profile. Runtime compatibility through CrossOver has not been tested. Do not modify the original installation to test this draft.
+Main output: `build/gta-win64/EldenLosSantos.asi`. The separate `EldenLosSantosProbe.asi` is a diagnostic using a GTA test actor; do not install both together because their hotkeys overlap.
 
-## Loader dependency
+## Rebuild owned assets
 
-The build generates a small import library from the original `tools/runtime.def`. Its C alias resolves to Script Hook V's game-version export, ensuring the Windows loader loads the runtime before our DllMain binds the other APIs. The resulting PE import table and all eight dynamic export names were checked against the official runtime. No vendor library is copied into the repository. The verified Windows build uses MinGW-w64; MSVC support is not implemented.
+Read [asset-tool licenses, dependencies and limitations](asset-tools/README.md) first. On a Mac with CrossOver, Blender 5.2, Python 3.13+, Git, CMake and MinGW-w64:
 
-## Runtime contract and remaining checks
+```sh
+python3 gta/asset-tools/bootstrap_tools.py
+```
 
-- No actor appears until F6; F7 removes the task-owned actor. Press F7 before a Script Hook development reload, because detach callbacks cannot safely call game natives.
-- Streaming has a ten-second timeout and requires a ground query to succeed.
-- It uses GTA's actual health; it does not simulate damage or periodically heal the test actor. Critical hits and ragdoll are disabled for this diagnostic target.
-- A native-dead actor is recorded as dead even when the engine reports nonzero raw health. Lost actors are recorded separately from kills.
-- The UI identifies the subject as a **GTA test actor**. No Elden Ring model, animation, attack or AI has been imported.
-- The plugin writes `EldenLosSantosProbe.log` next to itself. Keep runtime logs and assets local.
-- Verify keyboard focus, spawn placement, target deletion, save/load behavior, model streaming failure and every damage source in an actual game session before using this foundation further.
+Create a separate accountless **ERGTA-Tools** Windows 10 64-bit CrossOver bottle for the console converters. The current Studio already has it. Then choose a **new output directory** and run:
 
-## Provenance
+```sh
+.cache/gta-tools/asset-python/bin/python gta/asset-tools/build_owned_assets.py \
+  --elden-game '/path/to/ELDEN RING/Game' \
+  --gta-game '/path/to/Grand Theft Auto V' \
+  --out '/path/to/private/ergt-assets'
+```
 
-Original code is covered by the repository's Apache-2.0 license. Script Hook V is Alexander Blade's separately distributed runtime: https://www.dev-c.com/gtav/scripthookv/ . Its SDK and runtime archives prohibit archive redistribution and are not included here. The wrapper uses API signatures/native identifiers from the official SDK and runtime export table for interoperability; it does not copy the SDK implementation or sample code.
+This reconstructs local artifacts and does not launch either game. The individual conversion stages were exercised on the Studio; the complete convenience orchestration is source-prepared and still needs a fresh-environment rebuild check. Dependency revisions and downloaded runtime hashes are recorded in [dependencies.json](dependencies.json).
 
-Inspected official archives (local research only):
+## Scope and publication
 
-- ScriptHookV_SDK_1.0.617.1a.zip — SHA-256 `56b6ad265b2b93aa4e73f79f97949d72f3683a35576b977e63dde91c6485fe22`
-- ScriptHookV_3889.0_1158.13.zip — SHA-256 `b64c97c3353906f14621e7e9511e4aec2a7d436ecc21ed124d3816585e2e6188`
+This adds selected authentic creatures and custom combat to GTA. It does not include Elden Ring's complete world, quests or original AI. The first encounter is a milestone toward an open-ended sandbox, not a ten-minute timer.
 
-On 2026-10-01 the locally installed GTA5.exe reports file version 1.0.3889.0, matching the runtime's advertised Legacy build. This is a version match, not proof that the runtime works on CrossOver.
+Original gameplay/profile code is Apache-2.0. The GPL conversion adapters and their dependencies keep their applicable licenses. Script Hook V, RageOpenV and CodeWalker are separately obtained tools; this repository does not redistribute their binaries. Refer to the upstream notices before redistributing anything built with them.
+
+The local private DLC, game archives, DDS/GLB/Blend/native assets, runtime binaries, saves and account stores must not be committed or uploaded. Users need their own game installations. This unofficial fan project is not affiliated with Rockstar, Take-Two, FromSoftware or Bandai Namco.

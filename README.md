@@ -6,6 +6,10 @@ An open source experiment in combining **MW2, Minecraft, Skate 3 and Skyrim** th
 
 > **Status: Mac setup preview.** The imported engine builds as a native Apple Silicon executable. A setup app and tested mission/block rule modules are available. The four-game Terminal mission is not playable yet; real game data and runtime integration/testing are still required.
 
+## GTA V × Elden Ring owner preview
+
+Original source and setup tools are now under [gta/](gta/README.md). A private local preview contains converted Malenia, Red Wolf and Giant Crab assets, custom GTA-side combat, and a reversible profile. **Mod gameplay is not verified yet; the owner handles game launches and playtesting.** Read the [owner guide](gta/OWNER-TEST.md) for controls and known limits. Retail-derived assets and third-party runtime files are not distributed in this repository.
+
 ## Mac setup preview
 
 - Build the native app with `bash scripts/build-mac.sh`.

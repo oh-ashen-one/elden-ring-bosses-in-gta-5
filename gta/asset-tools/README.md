@@ -1,6 +1,6 @@
 # Elden Ring asset extraction (GPL-3.0-or-later)
 
-These standalone conversion tools are separate from the Apache-2.0 GTA gameplay plugin. The C/Python adapters link to or import GPL libraries and are distributed under GPL-3.0-or-later; see LICENSE. Exception: the original CodeWalkerBridge C# API adapter is Apache-2.0 as stated in its source header and the root LICENSE. No proprietary assets, game libraries, archive keys, or converted models are distributed here.
+These standalone conversion tools are separate from the Apache-2.0 GTA gameplay plugin. The C/Python adapters link to or import GPL libraries and are distributed under GPL-3.0-or-later; see LICENSE. Exceptions: CodeWalkerBridge, build_dlc.py and bootstrap_tools.py are original Apache-2.0 API/packaging adapters, as stated in their source headers and the root LICENSE. No proprietary assets, game libraries, archive keys, or converted models are distributed here.
 
 ## Verified on the Studio
 
@@ -8,8 +8,8 @@ These standalone conversion tools are separate from the Apache-2.0 GTA gameplay 
 - Selective Data3 extraction succeeded for Malenia (c2120), Red Wolf of Radagon (c3181), and Giant Crab (c2270): models, animation binders including Malenia's split binders, and high-resolution texture binders.
 - Source headers and each output are recorded with SHA-256 hashes in a LOCAL extraction manifest.
 - Native Mac Python can parse Malenia's FLVER and Havok skeleton. A compressed animation was decoded with its companion Havok compendium.
-- Exported all three characters to rigged glTF with three source clips each. Latest interchange files have zero errors/warnings in Khronos glTF Validator 2.0.0-dev.3.10. This verifies format structure, not visual fidelity or gameplay.
-- Data-only Blender 5.2/Sollumz conversion created local editable .blend files and GTA CodeWalker XML. Malenia converted to native YDR/YCD and loaded back through CodeWalker.Core: 96 bones and three clips preserved. Red Wolf/Crab XML includes initial whole-body box collision, with a missing collision-material warning still to resolve.
+- Exported all three characters to rigged glTF with four source clips each in the current candidate. Latest interchange files have zero errors/warnings in Khronos glTF Validator 2.0.0-dev.3.10. This verifies format structure, not visual fidelity or gameplay.
+- Data-only Blender 5.2/Sollumz conversion created local editable .blend files and GTA CodeWalker XML. Malenia converted to native YDR/YCD and loaded back through CodeWalker.Core: 96 bones and four clips preserved. Red Wolf and Crab native resources also round-trip, with 138 and 53 bones and four clips each. All three include whole-body collision boxes with an animal collision material.
 - None of this establishes in-game compatibility. No game, renderer or gameplay/performance test was launched. Materials are approximations, collision is coarse, animation roles need review, and DLC packaging/runtime integration remain in progress.
 
 ## Dependencies and provenance
