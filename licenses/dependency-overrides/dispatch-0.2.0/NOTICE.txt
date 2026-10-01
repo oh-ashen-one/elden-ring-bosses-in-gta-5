@@ -1,0 +1,6 @@
+dispatch@0.2.0
+The published Cargo manifest declares MIT.
+No license file was present in the published crate or its matching repository root.
+Canonical MIT terms are included from SPDX license-list-data.
+No package-specific copyright notice has been invented.
+Original source: http://github.com/SSheldon/rust-dispatch

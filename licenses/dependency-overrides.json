@@ -1,0 +1,413 @@
+{
+  "accesskit@0.24.1": {
+    "repository": "https://github.com/AccessKit/accesskit",
+    "revision": "a55d3e1a18bb9ef0e4bccc9083fb13c3e0ad8969",
+    "files": [
+      "licenses/dependency-overrides/70ccb689bfed/LICENSE-APACHE",
+      "licenses/dependency-overrides/70ccb689bfed/LICENSE-MIT",
+      "licenses/dependency-overrides/70ccb689bfed/LICENSE.chromium"
+    ]
+  },
+  "accesskit_consumer@0.38.0": {
+    "repository": "https://github.com/AccessKit/accesskit",
+    "revision": "c88605b96d04431f9c3c792464a0f2f253480e94",
+    "files": [
+      "licenses/dependency-overrides/b0fe545e2b55/LICENSE-APACHE",
+      "licenses/dependency-overrides/b0fe545e2b55/LICENSE-MIT",
+      "licenses/dependency-overrides/b0fe545e2b55/LICENSE.chromium"
+    ]
+  },
+  "accesskit_macos@0.26.3": {
+    "repository": "https://github.com/AccessKit/accesskit",
+    "revision": "c88605b96d04431f9c3c792464a0f2f253480e94",
+    "files": [
+      "licenses/dependency-overrides/b0fe545e2b55/LICENSE-APACHE",
+      "licenses/dependency-overrides/b0fe545e2b55/LICENSE-MIT",
+      "licenses/dependency-overrides/b0fe545e2b55/LICENSE.chromium"
+    ]
+  },
+  "accesskit_winit@0.32.2": {
+    "repository": "https://github.com/AccessKit/accesskit",
+    "revision": "1bbcf100942bac96c2c3a4a91cb67b0b20201a24",
+    "files": [
+      "licenses/dependency-overrides/1f9c11ec690d/LICENSE-APACHE",
+      "licenses/dependency-overrides/1f9c11ec690d/LICENSE-MIT",
+      "licenses/dependency-overrides/1f9c11ec690d/LICENSE.chromium"
+    ]
+  },
+  "bcdec_rs@0.2.0": {
+    "repository": "https://github.com/ScanMountGoat/image_dds",
+    "revision": "be82800d4cdf20375cd1f3dedb662d42e62242a3",
+    "files": [
+      "licenses/dependency-overrides/89b764d73bf1/LICENSE"
+    ]
+  },
+  "block2@0.5.1": {
+    "repository": "https://github.com/madsmtm/objc2",
+    "revision": "4fc083f1c6d6784577e38b0ee8dbd344481e2fd2",
+    "files": [
+      "licenses/dependency-overrides/92697e11a4c1/LICENSE.txt"
+    ]
+  },
+  "objc-sys@0.3.5": {
+    "repository": "https://github.com/madsmtm/objc2",
+    "revision": "4fc083f1c6d6784577e38b0ee8dbd344481e2fd2",
+    "files": [
+      "licenses/dependency-overrides/92697e11a4c1/LICENSE.txt"
+    ]
+  },
+  "objc2@0.5.2": {
+    "repository": "https://github.com/madsmtm/objc2",
+    "revision": "4fc083f1c6d6784577e38b0ee8dbd344481e2fd2",
+    "files": [
+      "licenses/dependency-overrides/92697e11a4c1/LICENSE.txt"
+    ]
+  },
+  "block2@0.6.2": {
+    "repository": "https://github.com/madsmtm/objc2",
+    "revision": "b4167b582b2f75f9a1be75495c41b765344fd03c",
+    "files": [
+      "licenses/dependency-overrides/db9c6e0755e4/LICENSE.md"
+    ]
+  },
+  "dasp_sample@0.11.0": {
+    "repository": "https://github.com/rustaudio/sample",
+    "revision": "97c3bb9b2363c0b46ac1633858bf1054fd02a980",
+    "files": [
+      "licenses/dependency-overrides/e9dcfa4bf066/LICENSE-APACHE",
+      "licenses/dependency-overrides/e9dcfa4bf066/LICENSE-MIT"
+    ]
+  },
+  "dispatch2@0.3.1": {
+    "repository": "https://github.com/madsmtm/objc2",
+    "revision": "8852b424193ca41602281b3d7540d7c8ed51e49a",
+    "files": [
+      "licenses/dependency-overrides/d96e4b86d0b9/LICENSE.md"
+    ]
+  },
+  "objc2@0.6.4": {
+    "repository": "https://github.com/madsmtm/objc2",
+    "revision": "8852b424193ca41602281b3d7540d7c8ed51e49a",
+    "files": [
+      "licenses/dependency-overrides/d96e4b86d0b9/LICENSE.md"
+    ]
+  },
+  "encase_derive@0.12.0": {
+    "repository": "https://github.com/teoxoy/encase",
+    "revision": "ffba833409487e8958f327215e2c0a09f0c470df",
+    "files": [
+      "licenses/dependency-overrides/d741291480ec/LICENSE"
+    ]
+  },
+  "encase_derive_impl@0.12.0": {
+    "repository": "https://github.com/teoxoy/encase",
+    "revision": "ffba833409487e8958f327215e2c0a09f0c470df",
+    "files": [
+      "licenses/dependency-overrides/d741291480ec/LICENSE"
+    ]
+  },
+  "gpu-descriptor@0.3.2": {
+    "repository": "https://github.com/zakarumych/gpu-descriptor",
+    "revision": "bb28b4e55b742e0ea3e7a0968e7ee6287ba0e06a",
+    "files": [
+      "licenses/dependency-overrides/e2f20513c14f/COPYING"
+    ]
+  },
+  "gpu-descriptor-types@0.2.0": {
+    "repository": "https://github.com/zakarumych/gpu-descriptor",
+    "revision": "9f2fb9546591322e7b77ee1e79385e01effd85e4",
+    "files": [
+      "licenses/dependency-overrides/a1041cf482db/COPYING"
+    ]
+  },
+  "objc2-app-kit@0.2.2": {
+    "repository": "https://github.com/madsmtm/objc2",
+    "revision": "e282618be4c3a3b9542957e0c8540e9588472ce8",
+    "files": [
+      "licenses/dependency-overrides/4b658f52b708/LICENSE.txt"
+    ]
+  },
+  "objc2-core-data@0.2.2": {
+    "repository": "https://github.com/madsmtm/objc2",
+    "revision": "e282618be4c3a3b9542957e0c8540e9588472ce8",
+    "files": [
+      "licenses/dependency-overrides/4b658f52b708/LICENSE.txt"
+    ]
+  },
+  "objc2-core-image@0.2.2": {
+    "repository": "https://github.com/madsmtm/objc2",
+    "revision": "e282618be4c3a3b9542957e0c8540e9588472ce8",
+    "files": [
+      "licenses/dependency-overrides/4b658f52b708/LICENSE.txt"
+    ]
+  },
+  "objc2-foundation@0.2.2": {
+    "repository": "https://github.com/madsmtm/objc2",
+    "revision": "e282618be4c3a3b9542957e0c8540e9588472ce8",
+    "files": [
+      "licenses/dependency-overrides/4b658f52b708/LICENSE.txt"
+    ]
+  },
+  "objc2-metal@0.2.2": {
+    "repository": "https://github.com/madsmtm/objc2",
+    "revision": "e282618be4c3a3b9542957e0c8540e9588472ce8",
+    "files": [
+      "licenses/dependency-overrides/4b658f52b708/LICENSE.txt"
+    ]
+  },
+  "objc2-quartz-core@0.2.2": {
+    "repository": "https://github.com/madsmtm/objc2",
+    "revision": "e282618be4c3a3b9542957e0c8540e9588472ce8",
+    "files": [
+      "licenses/dependency-overrides/4b658f52b708/LICENSE.txt"
+    ]
+  },
+  "objc2-app-kit@0.3.2": {
+    "repository": "https://github.com/madsmtm/objc2",
+    "revision": "7b1abfd750a2cacaea71d6a56ecfb83cb7de560b",
+    "files": [
+      "licenses/dependency-overrides/c7d8d0229000/LICENSE.md"
+    ]
+  },
+  "objc2-audio-toolbox@0.3.2": {
+    "repository": "https://github.com/madsmtm/objc2",
+    "revision": "7b1abfd750a2cacaea71d6a56ecfb83cb7de560b",
+    "files": [
+      "licenses/dependency-overrides/c7d8d0229000/LICENSE.md"
+    ]
+  },
+  "objc2-core-audio@0.3.2": {
+    "repository": "https://github.com/madsmtm/objc2",
+    "revision": "7b1abfd750a2cacaea71d6a56ecfb83cb7de560b",
+    "files": [
+      "licenses/dependency-overrides/c7d8d0229000/LICENSE.md"
+    ]
+  },
+  "objc2-core-audio-types@0.3.2": {
+    "repository": "https://github.com/madsmtm/objc2",
+    "revision": "7b1abfd750a2cacaea71d6a56ecfb83cb7de560b",
+    "files": [
+      "licenses/dependency-overrides/c7d8d0229000/LICENSE.md"
+    ]
+  },
+  "objc2-core-foundation@0.3.2": {
+    "repository": "https://github.com/madsmtm/objc2",
+    "revision": "7b1abfd750a2cacaea71d6a56ecfb83cb7de560b",
+    "files": [
+      "licenses/dependency-overrides/c7d8d0229000/LICENSE.md"
+    ]
+  },
+  "objc2-core-graphics@0.3.2": {
+    "repository": "https://github.com/madsmtm/objc2",
+    "revision": "7b1abfd750a2cacaea71d6a56ecfb83cb7de560b",
+    "files": [
+      "licenses/dependency-overrides/c7d8d0229000/LICENSE.md"
+    ]
+  },
+  "objc2-foundation@0.3.2": {
+    "repository": "https://github.com/madsmtm/objc2",
+    "revision": "7b1abfd750a2cacaea71d6a56ecfb83cb7de560b",
+    "files": [
+      "licenses/dependency-overrides/c7d8d0229000/LICENSE.md"
+    ]
+  },
+  "objc2-io-kit@0.3.2": {
+    "repository": "https://github.com/madsmtm/objc2",
+    "revision": "7b1abfd750a2cacaea71d6a56ecfb83cb7de560b",
+    "files": [
+      "licenses/dependency-overrides/c7d8d0229000/LICENSE.md"
+    ]
+  },
+  "objc2-io-surface@0.3.2": {
+    "repository": "https://github.com/madsmtm/objc2",
+    "revision": "7b1abfd750a2cacaea71d6a56ecfb83cb7de560b",
+    "files": [
+      "licenses/dependency-overrides/c7d8d0229000/LICENSE.md"
+    ]
+  },
+  "objc2-metal@0.3.2": {
+    "repository": "https://github.com/madsmtm/objc2",
+    "revision": "7b1abfd750a2cacaea71d6a56ecfb83cb7de560b",
+    "files": [
+      "licenses/dependency-overrides/c7d8d0229000/LICENSE.md"
+    ]
+  },
+  "objc2-quartz-core@0.3.2": {
+    "repository": "https://github.com/madsmtm/objc2",
+    "revision": "7b1abfd750a2cacaea71d6a56ecfb83cb7de560b",
+    "files": [
+      "licenses/dependency-overrides/c7d8d0229000/LICENSE.md"
+    ]
+  },
+  "objc2-encode@4.1.0": {
+    "repository": "https://github.com/madsmtm/objc2",
+    "revision": "8d214f5477365ffcbcbb7de058c86ed9a518efb7",
+    "files": [
+      "licenses/dependency-overrides/967e5a21f31c/LICENSE.md"
+    ]
+  },
+  "perfetto-sdk@1.1.1": {
+    "repository": "https://github.com/google/perfetto",
+    "revision": "4b69bf97ccd38b0fb161ccd94c6389887bdf7a04",
+    "files": [
+      "licenses/dependency-overrides/b154039e0e88/LICENSE"
+    ]
+  },
+  "perfetto-sdk-sys@1.3.0": {
+    "repository": "https://github.com/google/perfetto",
+    "revision": "4b69bf97ccd38b0fb161ccd94c6389887bdf7a04",
+    "files": [
+      "licenses/dependency-overrides/b154039e0e88/LICENSE"
+    ]
+  },
+  "profiling@1.0.18": {
+    "repository": "https://github.com/aclysma/profiling",
+    "revision": "8271551172eb6fa4cba47369aedd93790c623df9",
+    "files": [
+      "licenses/dependency-overrides/950aa350ce1c/LICENSE-APACHE",
+      "licenses/dependency-overrides/950aa350ce1c/LICENSE-MIT"
+    ]
+  },
+  "spirv@0.4.0+sdk-1.4.341.0": {
+    "repository": "https://github.com/gfx-rs/rspirv",
+    "revision": "8afc3d0ac8e158128cd1410bb2e4b4c26ab11bb4",
+    "files": [
+      "licenses/dependency-overrides/1ea9cb709920/LICENSE"
+    ]
+  },
+  "svg_fmt@0.4.5": {
+    "repository": "https://github.com/nical/rust_debug",
+    "revision": "93f414cd572b5c2781df93dbdc068ed13443d05a",
+    "files": [
+      "licenses/dependency-overrides/4ccd15e27da6/LICENSE"
+    ]
+  },
+  "symphonia@0.5.5": {
+    "repository": "https://github.com/pdeljanov/Symphonia",
+    "revision": "6d533f26150953a882a6a111ebd13f0abf7129d5",
+    "files": [
+      "licenses/dependency-overrides/7e6186665bb8/LICENSE"
+    ]
+  },
+  "symphonia-bundle-mp3@0.5.5": {
+    "repository": "https://github.com/pdeljanov/Symphonia",
+    "revision": "6d533f26150953a882a6a111ebd13f0abf7129d5",
+    "files": [
+      "licenses/dependency-overrides/7e6186665bb8/LICENSE"
+    ]
+  },
+  "symphonia-codec-adpcm@0.5.5": {
+    "repository": "https://github.com/pdeljanov/Symphonia",
+    "revision": "6d533f26150953a882a6a111ebd13f0abf7129d5",
+    "files": [
+      "licenses/dependency-overrides/7e6186665bb8/LICENSE"
+    ]
+  },
+  "symphonia-codec-pcm@0.5.5": {
+    "repository": "https://github.com/pdeljanov/Symphonia",
+    "revision": "6d533f26150953a882a6a111ebd13f0abf7129d5",
+    "files": [
+      "licenses/dependency-overrides/7e6186665bb8/LICENSE"
+    ]
+  },
+  "symphonia-codec-vorbis@0.5.5": {
+    "repository": "https://github.com/pdeljanov/Symphonia",
+    "revision": "6d533f26150953a882a6a111ebd13f0abf7129d5",
+    "files": [
+      "licenses/dependency-overrides/7e6186665bb8/LICENSE"
+    ]
+  },
+  "symphonia-core@0.5.5": {
+    "repository": "https://github.com/pdeljanov/Symphonia",
+    "revision": "6d533f26150953a882a6a111ebd13f0abf7129d5",
+    "files": [
+      "licenses/dependency-overrides/7e6186665bb8/LICENSE"
+    ]
+  },
+  "symphonia-format-ogg@0.5.5": {
+    "repository": "https://github.com/pdeljanov/Symphonia",
+    "revision": "6d533f26150953a882a6a111ebd13f0abf7129d5",
+    "files": [
+      "licenses/dependency-overrides/7e6186665bb8/LICENSE"
+    ]
+  },
+  "symphonia-format-riff@0.5.5": {
+    "repository": "https://github.com/pdeljanov/Symphonia",
+    "revision": "6d533f26150953a882a6a111ebd13f0abf7129d5",
+    "files": [
+      "licenses/dependency-overrides/7e6186665bb8/LICENSE"
+    ]
+  },
+  "symphonia-metadata@0.5.5": {
+    "repository": "https://github.com/pdeljanov/Symphonia",
+    "revision": "6d533f26150953a882a6a111ebd13f0abf7129d5",
+    "files": [
+      "licenses/dependency-overrides/7e6186665bb8/LICENSE"
+    ]
+  },
+  "symphonia-utils-xiph@0.5.5": {
+    "repository": "https://github.com/pdeljanov/Symphonia",
+    "revision": "6d533f26150953a882a6a111ebd13f0abf7129d5",
+    "files": [
+      "licenses/dependency-overrides/7e6186665bb8/LICENSE"
+    ]
+  },
+  "taffy@0.10.1": {
+    "repository": "https://github.com/DioxusLabs/taffy",
+    "revision": "639f0acdd20f914f847abffbeaa903d66cae4882",
+    "files": [
+      "licenses/dependency-overrides/47a18ca93186/LICENSE.md"
+    ]
+  },
+  "crc-catalog@2.5.0": {
+    "repository": "https://github.com/akhilles/crc-catalog.git",
+    "revision": "ed4ad631f22b05055c21a3a4127eb7cf6d75bb62",
+    "files": [
+      "licenses/dependency-overrides/crc-catalog/Apache-2.0.txt",
+      "licenses/dependency-overrides/crc-catalog/MIT.txt"
+    ]
+  },
+  "gilrs@0.11.2": {
+    "repository": "https://gitlab.com/gilrs-project/gilrs",
+    "revision": "07e286e24b046cf39e5c367daa2770b805a64692",
+    "files": [
+      "licenses/dependency-overrides/gilrs-07e286e24b04/LICENSE-APACHE",
+      "licenses/dependency-overrides/gilrs-07e286e24b04/LICENSE-MIT"
+    ]
+  },
+  "gilrs-core@0.6.8": {
+    "repository": "https://gitlab.com/gilrs-project/gilrs",
+    "revision": "07e286e24b046cf39e5c367daa2770b805a64692",
+    "files": [
+      "licenses/dependency-overrides/gilrs-07e286e24b04/LICENSE-APACHE",
+      "licenses/dependency-overrides/gilrs-07e286e24b04/LICENSE-MIT"
+    ]
+  },
+  "constgebra@0.1.4": {
+    "repository": "https://github.com/knickish/constgebra",
+    "basis": "published Cargo license declaration and canonical SPDX terms",
+    "files": [
+      "licenses/dependency-overrides/constgebra-0.1.4/LICENSE-TERMS.txt",
+      "licenses/dependency-overrides/constgebra-0.1.4/PACKAGE-MANIFEST.toml",
+      "licenses/dependency-overrides/constgebra-0.1.4/NOTICE.txt"
+    ]
+  },
+  "dispatch@0.2.0": {
+    "repository": "http://github.com/SSheldon/rust-dispatch",
+    "basis": "published Cargo license declaration and canonical SPDX terms",
+    "files": [
+      "licenses/dependency-overrides/dispatch-0.2.0/LICENSE-TERMS.txt",
+      "licenses/dependency-overrides/dispatch-0.2.0/PACKAGE-MANIFEST.toml",
+      "licenses/dependency-overrides/dispatch-0.2.0/NOTICE.txt"
+    ]
+  },
+  "hexf-parse@0.2.1": {
+    "repository": "https://github.com/lifthrasiir/hexf",
+    "basis": "published Cargo license declaration and canonical SPDX terms",
+    "files": [
+      "licenses/dependency-overrides/hexf-parse-0.2.1/LICENSE-TERMS.txt",
+      "licenses/dependency-overrides/hexf-parse-0.2.1/PACKAGE-MANIFEST.toml",
+      "licenses/dependency-overrides/hexf-parse-0.2.1/NOTICE.txt"
+    ]
+  }
+}

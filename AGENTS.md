@@ -2,7 +2,7 @@
 
 Read README.md, docs/TERMINAL-PLAN.md, docs/SOURCES.md and HANDOFF.md before continuing.
 
-- This repository currently contains planning and provenance only. Do not claim there is a playable game or an imported engine.
+- The vendored runtime builds on Apple Silicon; a setup app and tested rule modules exist. Retail gameplay and the combined mission are not verified. Read HANDOFF.md before claiming more.
 - The owner selected MW2's Terminal airport map as the first shared playground.
 - Work on a task branch. Push it in the same session. Merging or pushing main needs explicit owner authorization.
 - Inspect concurrent changes and process ownership before editing or launching anything.

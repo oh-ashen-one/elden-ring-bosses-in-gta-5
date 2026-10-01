@@ -74,7 +74,7 @@ Every hostile creature and spell must use the same targeting/damage conventions 
 | 3 | One Skyrim encounter and one ability | Model/animation inspection, hit detection, attack/cooldown behavior, recovery and cleanup. |
 | 4 | Combined playable slice | Repeat the complete loop, review frame times at declared settings, then obtain owner gameplay feedback. |
 
-Current status: every stage is pending.
+Current status: Stage 0 has an Apple Silicon executable and native setup app. Its rendered game check, and stages 1–4, still require the real game data. Independent mission/block rules are implemented but not connected to gameplay.
 
 ## Platform decision
 

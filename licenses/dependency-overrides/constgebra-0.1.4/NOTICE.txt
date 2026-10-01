@@ -1,0 +1,6 @@
+constgebra@0.1.4
+The published Cargo manifest declares MIT OR Apache-2.0.
+No license file was present in the published crate or its matching repository root.
+Canonical Apache-2.0 terms are included from SPDX license-list-data.
+No package-specific copyright notice has been invented.
+Original source: https://github.com/knickish/constgebra

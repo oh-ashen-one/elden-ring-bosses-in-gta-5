@@ -4,7 +4,16 @@ An open source experiment in combining **MW2, Minecraft, Skate 3 and Skyrim** th
 
 Our first proposed playground is **Terminal**, the airport map from Modern Warfare 2.
 
-> **Status: repository foundation and design only.** No upstream game implementation has been imported, no game has been built, and there is no playable release from this repository yet.
+> **Status: Mac setup preview.** The imported engine builds as a native Apple Silicon executable. A setup app and tested mission/block rule modules are available. The four-game Terminal mission is not playable yet; real game data and runtime integration/testing are still required.
+
+## Mac setup preview
+
+- Build the native app with `bash scripts/build-mac.sh`.
+- Run original-code tests with `cargo test --workspace --locked`.
+- The app checks your locally supplied game data and keeps Terminal launch disabled until the required MW2 zone headers are present.
+- No game data is bundled or automatically downloaded. The builder/dragon/mission modules are not yet wired into a retail game session.
+
+See [Mac setup](docs/MAC-SETUP.md), [verified build status](docs/BUILD-STATUS.md) and [upstream import provenance](docs/UPSTREAM-IMPORT.md).
 
 ## The idea: Terminal Playground
 
@@ -23,7 +32,7 @@ The proposed first release is a **ten-minute solo Terminal run**: build a ramp, 
 
 ## Projects our work builds on
 
-We credit the research, tools and implementations that make this direction possible. The projects below are our intended foundations and technical references. This initial repository contains our own planning documents; it does not yet contain their implementation code.
+We credit the research, tools and implementations that make this direction possible. The pinned 2010 Rust Rewrite Mashup is imported under `runtime/`, retaining its source credits, licenses and notices. Other projects remain references unless the import record says otherwise.
 
 | Project | Authors / maintainers | Intended role |
 | --- | --- | --- |
@@ -32,7 +41,7 @@ We credit the research, tools and implementations that make this direction possi
 | [Skate 3 Rust Engine](https://github.com/SK8-ENGINE/skate-3-rust-engine) | SK8-ENGINE and contributors | Skating, animation, collision and modding references. |
 | [SkyCraft](https://github.com/chasmlol/SkyCraft) | chasmlol and contributors | Reference for interactions between Minecraft and Skyrim; its SKSE/Fabric bridge is not a drop-in IW4L module. |
 
-We will preserve upstream authorship, licenses and notices when implementation code is imported, and record its exact source revision and our changes. Credit here does not claim that we authored those projects.
+Upstream authorship, licenses and notices are preserved alongside the code. The import record identifies the exact source revision and our changes. Credit here does not claim that we authored those projects.
 
 ## More projects we studied
 
@@ -44,6 +53,10 @@ These are additional references, not current dependencies:
 - [Daggerfall Unity](https://github.com/Interkarma/daggerfall-unity) — a Unity recreation with extensive mod support.
 - [OpenMW](https://github.com/OpenMW/openmw) — Morrowind-compatible engine and world editor.
 - [Unleashed Recompiled](https://github.com/hedge-dev/UnleashedRecomp) — Sonic Unleashed recompilation and modding.
+- [universal-modder](https://github.com/rehan-remade/universal-modder) — modding workflows and a Minecraft/GTA V bridge example.
+- [libsm64](https://github.com/libsm64/libsm64) — Mario movement/rendering as an embeddable library.
+
+The [more-games plan](docs/MORE-GAMES.md) covers reusable adapters and an optional CrossOver route for Windows hosts on Mac.
 
 The [source catalog](docs/SOURCES.md) records revisions, license observations, release links and video references. [UPSTREAMS.json](UPSTREAMS.json) is the machine-readable research snapshot.
 
@@ -55,7 +68,7 @@ The [source catalog](docs/SOURCES.md) records revisions, license observations, r
 4. Add one Skyrim creature and one spell through a documented local asset conversion path.
 5. Verify that combat, skating, blocks and the new encounter interact correctly, then hand over a playable build for owner review.
 
-All milestones above are **planned**.
+The baseline compilation and setup app are complete. Rendered baseline verification and the integrated gameplay milestones remain pending game data.
 
 ## Open source and game content
 
