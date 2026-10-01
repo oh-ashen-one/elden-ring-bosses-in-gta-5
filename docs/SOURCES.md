@@ -124,4 +124,3 @@ These are upstream research/tool credits, not dependencies of this repository:
 ## Recording future imports
 
 For every code import, record the source URL, exact revision, copied paths, applicable license/NOTICE files and our modifications. Change the relationship from reference to imported dependency only after that import actually happens.
-

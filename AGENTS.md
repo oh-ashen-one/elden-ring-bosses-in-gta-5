@@ -12,4 +12,3 @@ Read README.md, docs/TERMINAL-PLAN.md, docs/SOURCES.md and HANDOFF.md before con
 - All engine/GPU work runs on a verified Studio using the shared renderer-slot protocol; own only the instance started for this task.
 - Verify actual runtime behavior and performance. Compilation or a screenshot does not establish gameplay acceptance.
 - Maintain one rolling HANDOFF.md with verified state, next steps, blockers and remote branch.
-

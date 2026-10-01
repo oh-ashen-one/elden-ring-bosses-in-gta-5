@@ -64,4 +64,3 @@ This repository does not distribute proprietary game executables, maps, models, 
 This is an unofficial fan project, unaffiliated with Activision, Infinity Ward, EA, Mojang, Microsoft, Bethesda or ZeniMax. Names and trademarks belong to their respective owners.
 
 See [NOTICE](NOTICE), [the integration plan](docs/TERMINAL-PLAN.md) and [HANDOFF.md](HANDOFF.md) for provenance and current status.
-

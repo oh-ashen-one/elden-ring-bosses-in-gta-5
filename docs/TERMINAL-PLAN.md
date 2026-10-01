@@ -92,4 +92,3 @@ Show Terminal working, ask the coding agent for one visible addition, test it, t
 4. Show the real result, including remaining problems.
 
 This is a proposed capture sequence, not footage we already have.
-
