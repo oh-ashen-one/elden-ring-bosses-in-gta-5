@@ -56,3 +56,7 @@ This adds selected authentic creatures and custom combat to GTA. It does not inc
 Original gameplay/profile code is Apache-2.0. The GPL conversion adapters and their dependencies keep their applicable licenses. Script Hook V, RageOpenV and CodeWalker are separately obtained tools; this repository does not redistribute their binaries. Refer to the upstream notices before redistributing anything built with them.
 
 The local private DLC, game archives, DDS/GLB/Blend/native assets, runtime binaries, saves and account stores must not be committed or uploaded. Users need their own game installations. This unofficial fan project is not affiliated with Rockstar, Take-Two, FromSoftware or Bandai Namco.
+
+## Studio launch coordination
+
+After the owner-reported desktop crash, agent launches use `tools/launch_owner.py` with the actual current shared GPU protocol directory. It keeps exclusive GPU ownership until GTA exits, refuses other renderers/unknown GPU readings, and never relaunches a crashed game. `--check` is read-only. Coordinate with the other session first; `--owner-reservation` is only for its explicit PAUSED marker reserving the machine for Hari’s GTA test. It leaves that marker and other sessions’ jobs untouched. This path requests 1920×1080 windowed; it does not establish measured FPS or crash-free operation.
