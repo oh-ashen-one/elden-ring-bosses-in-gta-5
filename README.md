@@ -19,6 +19,8 @@ The proposed foundation is [2010 Rust Rewrite Mashup](https://github.com/chasmlo
 
 [Read the integration plan](docs/TERMINAL-PLAN.md).
 
+The proposed first release is a **ten-minute solo Terminal run**: build a ramp, skate it, earn a dragon killstreak from tricks, then call the strike and extract. The [demo specification](docs/DEMO-SPEC.md) defines the build order, gameplay goals and release checks.
+
 ## Projects our work builds on
 
 We credit the research, tools and implementations that make this direction possible. The projects below are our intended foundations and technical references. This initial repository contains our own planning documents; it does not yet contain their implementation code.

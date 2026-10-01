@@ -6,6 +6,8 @@ Combine MW2, Minecraft, Skate 3 and Skyrim in one playable space. The owner conf
 
 This document is a design proposal. No integrated build has been produced or tested.
 
+The [ten-minute demo specification](DEMO-SPEC.md) narrows this broader proposal into the current proposed release: builder weapon, skating, trick charge and an allied dragon strike. A free-roaming dragon boss is outside that minimum slice.
+
 ## What the first scene could look like
 
 Start in Terminal with the familiar MW2 weapon and HUD. Switch to a skateboard, follow a curated line through the concourse, place a small Minecraft ramp or barricade, and return to combat. A Skyrim creature enters the encounter; the player has one spell or shout in addition to their weapon.
