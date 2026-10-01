@@ -10,6 +10,6 @@ Read README.md, gta/README.md, docs/CROSSOVER-BACKLOG.md and HANDOFF.md before c
 - Never commit proprietary game data, converted retail assets, credentials or local authentication stores.
 - Keep original game installations read-only.
 - All engine/GPU work runs on a verified Studio using the shared renderer-slot protocol; own only the instance started for this task.
-- Hari owns game launches, gameplay, rendering and performance tests for the GTA work. Prepare source, compile, perform data/format checks and run headless asset conversions without rendering. Do not start GTA/Elden Ring or take over their input unless he asks again.
+- Hari owns gameplay and subjective/performance testing. Standing instruction (2026-10-01): after installing a GTA patch, open GTA V Legacy for him without another permission request. Verify host, desktop, process ownership and the shared renderer cap first. Never interrupt unsaved gameplay to install; never automate tutorial/combat input or relaunch repeatedly after a crash. Elden Ring launches still require a separate request.
 - Verify actual runtime behavior and performance. Compilation or a screenshot does not establish gameplay acceptance.
 - Maintain one rolling HANDOFF.md with verified state, next steps, blockers and remote branch.
