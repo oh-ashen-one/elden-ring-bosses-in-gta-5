@@ -6,7 +6,7 @@ The owner asked to leave GTA closed while other sessions use the GPU. Updating t
 
 ## Start
 
-1. Launch **GTA V Legacy** from **Steam inside CrossOver**, as usual.
+1. When the GPU has been explicitly reserved for your GTA test, open **Check Elden Los Santos.command** in `~/Applications/EldenLosSantosPreview/`. If it passes, open **Play Elden Los Santos.command** in the same folder. Play repeats the checks and launches GTA V Legacy through CrossOver under the exclusive shared GPU lock. Keep using these guarded shortcuts for this mod preview.
 2. Choose **Story Mode** and load your free-roam save. The owner has completed the tutorial.
 3. Look for **ELDEN LOS SANTOS** at the top left. Creatures now start **AGGRESSIVE**. Press **4** before spawning to inspect them with combat paused.
 
