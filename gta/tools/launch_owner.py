@@ -56,6 +56,21 @@ def owner_reservation(gpu_root):
                 re.fullmatch(r'OWNER PAUSE \d{1,2}:\d{2}: everything stopped until the owner says resume \(GTA for a few hours\)\s*', reason))
 
 
+def candidate_profile_blockers(bundle, profile_root):
+    """A packaged launcher must launch its own payload, not another candidate."""
+    manifest_path = bundle / 'manifest.json'
+    if not manifest_path.exists(): return []  # Source-tree development helper.
+    try:
+        manifest = json.loads(manifest_path.read_text())
+        state = json.loads((profile_root / 'profile-state.json').read_text())
+        if not manifest.get('files') or manifest['files'] != state.get('files'):
+            return [f"Active profile differs from this candidate: installed={state.get('candidate', 'unknown')}, "
+                    f"requested={manifest.get('candidate', 'unknown')}; install the reviewed candidate before launch"]
+        return []
+    except (OSError, ValueError, KeyError, TypeError) as error:
+        return [f'Cannot verify candidate/profile agreement: {type(error).__name__}']
+
+
 def preflight(gpu_root, reserved=False):
     try:
         output = subprocess.check_output(['ioreg', '-r', '-d', '1', '-c', 'IOAccelerator'], text=True)
@@ -95,6 +110,9 @@ def main():
     if not wrapper.is_file() or not (root / 'locks').is_dir():
         raise RuntimeError('Actual shared GPU protocol not found; no fallback lock directory')
     check = preflight(root, args.owner_reservation)
+    bundle = Path(__file__).resolve().parent.parent
+    local = Path.home() / 'Library/Application Support/EldenLosSantos'
+    check['blockers'].extend(candidate_profile_blockers(bundle, local))
     print(json.dumps(check), flush=True)
     if args.check: return 0 if not check['blockers'] else 75
     gpu_only = check['blockers'] and all(reason.startswith('GPU must be readable') for reason in check['blockers'])

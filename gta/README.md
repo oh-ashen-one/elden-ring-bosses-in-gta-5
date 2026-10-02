@@ -41,6 +41,8 @@ python3 gta/tools/verify_candidate.py \
 
 The check compares package/profile payload hashes, the preserved game executable and supported version, source commit and packaged helper scripts. It also detects overlapping probe plugins and queued automatic import diagnostics. Omit `--profile-root` for an uninstalled candidate; omit `--source` when only checking package/profile agreement. Success establishes consistency, while appearance, attacks and damage still need owner gameplay review.
 
+A packaged `Tools/launch_owner.py` also refuses a profile whose manifest payload differs from that package. Running a new candidate's launcher cannot silently launch the old installed candidate. The source-tree development helper has no package manifest and retains its existing behavior. `profile_manager.py` supports stage/activate/restore/status; it has no upgrade action for an existing active profile.
+
 ## Rebuild owned assets
 
 Read [asset-tool licenses, dependencies and limitations](asset-tools/README.md) first. On a Mac with CrossOver, Blender 5.2, Python 3.13+, Git, CMake and MinGW-w64:

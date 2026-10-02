@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 import importlib.util
+import json
 import unittest
 import tempfile
 from unittest.mock import patch
@@ -51,6 +52,28 @@ class LaunchPreflight(unittest.TestCase):
                 result = module.preflight(Path(folder))
                 self.assertTrue(result['blockers'])
                 self.assertIn('Cannot inspect renderer processes', result['blockers'][0])
+
+    def test_packaged_launcher_rejects_old_installed_candidate(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder);bundle=root/'candidate';profile=root/'profile'
+            bundle.mkdir();profile.mkdir()
+            (bundle/'manifest.json').write_text(json.dumps({'candidate':'pose-repair','files':{'EldenLosSantos.asi':'new'}}))
+            state=profile/'profile-state.json'
+            state.write_text(json.dumps({'candidate':'v8','files':{'EldenLosSantos.asi':'old'}}))
+            reasons=module.candidate_profile_blockers(bundle,profile)
+            self.assertIn('installed=v8',reasons[0]);self.assertIn('requested=pose-repair',reasons[0])
+            state.write_text(json.dumps({'candidate':'pose-repair','files':{'EldenLosSantos.asi':'new'}}))
+            self.assertEqual(module.candidate_profile_blockers(bundle,profile),[])
+
+    def test_packaged_launcher_fails_closed_when_profile_state_unavailable(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder);(root/'manifest.json').write_text('{"files":{"EldenLosSantos.asi":"new"}}')
+            self.assertTrue(module.candidate_profile_blockers(root,root/'missing-profile'))
+
+    def test_unpackaged_source_helper_does_not_claim_candidate_identity(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder)
+            self.assertEqual(module.candidate_profile_blockers(root,root/'missing-profile'),[])
 
     def test_emergency_pause_is_never_an_owner_reservation(self):
         with tempfile.TemporaryDirectory() as folder:
