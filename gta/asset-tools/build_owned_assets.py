@@ -7,6 +7,7 @@ output directory. The resulting retail-derived assets must not be redistributed.
 """
 import argparse
 import os
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -61,6 +62,17 @@ def main():
             "--repo",repo,"--input",glb,"--textures",output/"textures"/character,"--out",output/"gta"/character,"--name",name,env=env)
         if not (output/"gta"/character/(name+".conversion.json")).is_file():raise RuntimeError("Blender conversion did not complete")
     run(sys.executable,tools/"upgrade_visuals.py","--converted",output/"gta","--root",output,"--out",output/"gta-object-materials")
+    # Reconstruct native local animation tracks from source world poses after
+    # material conversion. The original Blender f-curve export stays available
+    # for diagnosis in this new output tree; retail/source files are untouched.
+    for character,name,_ in entries:
+        converted=output/"gta-object-materials"/character
+        template=converted/(name+"_anims.ycd.xml")
+        repaired=output/"animation-repaired"/character/(name+"_anims.ycd.xml")
+        run(sys.executable,tools/"rebuild_animation.py","--glb",output/"interchange"/(character+".glb"),
+            "--drawable",converted/(name+".ydr.xml"),"--template",template,"--out",repaired)
+        template.rename(converted/(name+"_anims.blender-source.xml"))
+        shutil.copy2(repaired,template)
     dotnet=cache/"dotnet/dotnet";bridge=repo/"build/cw-bridge/CodeWalkerBridge.dll"
     run(sys.executable,tools/"build_dlc.py","--converted",output/"gta-object-materials","--out",output/"dlc-build","--dotnet",dotnet,"--bridge",bridge)
     run(dotnet,bridge,"prepare-dlclist",args.gta_game.resolve(),output/"newmods/common/data/dlclist.xml")

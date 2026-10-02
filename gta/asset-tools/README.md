@@ -18,6 +18,8 @@ python gta/asset-tools/rebuild_animation.py \
 
 This data-only operation does not run Blender or a game. Its output still needs native conversion and resource validation before private packaging. It preserves the motion available in the glTF: old exports omitted alternate source frames, and interpolation cannot recover them. The exporter now retains every decoded source sample for a future full-rate rebuild. Numeric pose agreement and native resource checks do not establish visible motion, strike timing or gameplay acceptance.
 
+Future `build_owned_assets.py` runs invoke this repair after material conversion and before DLC packaging, preserving the Blender-exported animation XML as a diagnostic source. The full extraction/Blender pipeline was not rerun during the lightweight 2026-10-02 audit.
+
 ## Verified on the Studio
 
 - Original PC Elden Ring archives remain read-only.
