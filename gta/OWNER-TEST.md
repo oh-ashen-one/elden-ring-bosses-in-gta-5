@@ -19,7 +19,7 @@ Use the **top-row number keys 1–6**. No Fn key is needed. These keys are reser
 | 3 | Remove this mod's creatures. Keeps your helicopter. |
 | 4 | Pause/resume creature aggression. Starts ON. |
 | 5 | Receive a carbine and RPG with ammunition. |
-| 6 | Place an armed Buzzard nearby. Enter/fly it normally. |
+| 6 | Place an armed Buzzard nearby, or replace your destroyed one. Keeps a usable helicopter. |
 
 Use a clear outdoor area for the first test. These are animated creature objects with custom GTA-side combat; they are not a port of the Elden Ring executable or its complete AI.
 

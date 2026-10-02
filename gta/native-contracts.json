@@ -126,6 +126,10 @@
       "name": "SET_ENTITY_HAS_GRAVITY",
       "arguments": 2
     },
+    "0x4C241E39B23DF959": {
+      "name": "IS_VEHICLE_DRIVEABLE",
+      "arguments": 2
+    },
     "0x539E0AE3E6634B9F": {
       "name": "DELETE_OBJECT",
       "arguments": 1
@@ -312,6 +316,10 @@
     },
     "0xE83D4F9BA2A38914": {
       "name": "GET_ENTITY_HEADING",
+      "arguments": 1
+    },
+    "0xEA386986E786A54F": {
+      "name": "DELETE_VEHICLE",
       "arguments": 1
     },
     "0xEBD76F2359F190AC": {

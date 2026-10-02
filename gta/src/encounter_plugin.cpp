@@ -189,15 +189,33 @@ void clear() {
     std::snprintf(notice,sizeof(notice),"Creatures cleared. Your helicopter is kept.");
     record("clear_creatures");
 }
+bool prepare_helicopter_spawn() {
+    if(!exists(owned_helicopter)) {owned_helicopter=0;return true;}
+    // A stale/reused handle must never delete an unrelated entity.
+    if(hook.invoke<std::uint32_t>(0x9F47B058362C84B5ULL,owned_helicopter)!=hash("buzzard")) {
+        record("helicopter_handle_not_owned_model",owned_helicopter);owned_helicopter=0;return true;
+    }
+    if(hook.invoke<int>(0x4C241E39B23DF959ULL,owned_helicopter,false)) {
+        std::snprintf(notice,sizeof(notice),"Your usable helicopter already exists nearby.");return false;
+    }
+    const int wreck=owned_helicopter;
+    hook.invoke(0xAD738C3085FE7E11ULL,wreck,true,true);
+    hook.invoke(0xEA386986E786A54FULL,&owned_helicopter);
+    if(exists(wreck)) {
+        owned_helicopter=wreck;
+        std::snprintf(notice,sizeof(notice),"Could not clear the owned helicopter wreck. See the log.");
+        record("helicopter_wreck_cleanup_failed",wreck);return false;
+    }
+    owned_helicopter=0;record("helicopter_wreck_cleared",wreck);return true;
+}
+
 void begin_spawn(bool vehicle,std::uint32_t now) {
     if (pending.active || diagnostic_index>=0) return;
     if (!vehicle && failed_creatures[selected]) {
         std::snprintf(notice,sizeof(notice),"This creature failed. Retry is locked for this session; its error is in the log.");
         return;
     }
-    if (vehicle && exists(owned_helicopter)) {
-        std::snprintf(notice,sizeof(notice),"Your helicopter already exists nearby."); return;
-    }
+    if (vehicle && !prepare_helicopter_spawn()) return;
     if (!vehicle && std::all_of(actors.begin(),actors.end(),[](const Actor& a){return a.entity!=0;})) {
         std::snprintf(notice,sizeof(notice),"Three creatures are active. 3 clears them."); return;
     }
