@@ -30,6 +30,17 @@ python3 gta/tests/profile_test.py
 
 Main output: `build/gta-win64/EldenLosSantos.asi`. The separate `EldenLosSantosProbe.asi` is a diagnostic using a GTA test actor; do not install both together because their hotkeys overlap.
 
+Before an owner playtest, check the private package without loading any executable:
+
+```sh
+python3 gta/tools/verify_candidate.py \
+  --bundle "$HOME/Applications/EldenLosSantosPreview" \
+  --profile-root "$HOME/Library/Application Support/EldenLosSantos" \
+  --source /path/to/the/exact/source-checkout
+```
+
+The check compares package/profile payload hashes, the preserved game executable and supported version, source commit and packaged helper scripts. It also detects overlapping probe plugins and queued automatic import diagnostics. Omit `--profile-root` for an uninstalled candidate; omit `--source` when only checking package/profile agreement. Success establishes consistency, while appearance, attacks and damage still need owner gameplay review.
+
 ## Rebuild owned assets
 
 Read [asset-tool licenses, dependencies and limitations](asset-tools/README.md) first. On a Mac with CrossOver, Blender 5.2, Python 3.13+, Git, CMake and MinGW-w64:
@@ -60,6 +71,8 @@ The local private DLC, game archives, DDS/GLB/Blend/native assets, runtime binar
 ## Studio launch coordination
 
 After the owner-reported desktop crash, agent launches use `tools/launch_owner.py` with the actual current shared GPU protocol directory. It keeps exclusive GPU ownership until GTA exits, refuses other renderers/unknown GPU readings, and never relaunches a crashed game. `--check` is read-only. Coordinate with the other session first; `--owner-reservation` is only for its explicit PAUSED marker reserving the machine for Hari’s GTA test. It leaves that marker and other sessions’ jobs untouched. This path requests 1920×1080 windowed; it does not establish measured FPS or crash-free operation.
+
+Native IW4L, Roblox and ArkWeb game processes also block an exclusive GTA launch. Process-inventory failures block launch. This protects against native games started from a launcher using a different lock directory; every cooperating launcher should still use the actual shared protocol.
 
 ## Native API contract references
 
