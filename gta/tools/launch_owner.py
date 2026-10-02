@@ -16,7 +16,10 @@ import time
 from pathlib import Path
 
 ENGINES = {'unrealeditor', 'unrealgame', 'unity', 'godot', 'blender',
-           'gta5.exe', 'gta5_enhanced.exe', 'eldenring.exe', 'darksoulsremastered.exe'}
+           'iw4l', 'iw4l.exe', 'robloxstudio', 'robloxplayer',
+           'robloxstudiobeta.exe', 'robloxplayerbeta.exe',
+           'gta5.exe', 'gta5_enhanced.exe', 'eldenring.exe', 'darksoulsremastered.exe',
+           'spider-man.exe', 'batmanak.exe'}
 
 
 def processes():
@@ -54,14 +57,24 @@ def owner_reservation(gpu_root):
 
 
 def preflight(gpu_root, reserved=False):
-    output = subprocess.check_output(['ioreg', '-r', '-d', '1', '-c', 'IOAccelerator'], text=True)
-    values = [int(x) for x in re.findall(r'"Device Utilization %"\s*=\s*(\d+)', output)]
-    gpu = max(values) if values else None
+    try:
+        output = subprocess.check_output(['ioreg', '-r', '-d', '1', '-c', 'IOAccelerator'], text=True)
+        values = [int(x) for x in re.findall(r'"Device Utilization %"\s*=\s*(\d+)', output)]
+        gpu = max(values) if values else None
+    except (OSError, subprocess.SubprocessError):
+        gpu = None
+    # A missing process inventory cannot establish exclusive GPU ownership.
+    # This also covers native IW4L sessions whose launcher uses another lock
+    # directory: quiet GPU samples alone do not make a second renderer safe.
+    try:
+        table = processes()
+    except (OSError, ValueError, subprocess.SubprocessError) as error:
+        return {'gpu_percent': gpu, 'blockers': [f'Cannot inspect renderer processes: {type(error).__name__}']}
     # The Unreal coordinator can reserve the GPU for Hari by pausing its own
     # queue explicitly for GTA. Leave that pause intact throughout gameplay.
     # Desktop-only utilization on this Studio is ~20%; ordinary perf mode
     # retains its stricter 15% measurement gate. Neither mode admits a renderer.
-    reasons = blockers(processes(), gpu, Path('/dev/console').owner(), Path.home().owner(), 30 if reserved else 15)
+    reasons = blockers(table, gpu, Path('/dev/console').owner(), Path.home().owner(), 30 if reserved else 15)
     if reserved and not owner_reservation(gpu_root): reasons.append('Explicit owner GTA reservation is missing')
     if (gpu_root / 'PAUSED').exists() and not (reserved and owner_reservation(gpu_root)):
         reasons.append('Shared GPU protocol is PAUSED')

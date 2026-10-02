@@ -2,6 +2,7 @@
 import importlib.util
 import unittest
 import tempfile
+from unittest.mock import patch
 from pathlib import Path
 
 spec = importlib.util.spec_from_file_location('launch_owner', Path(__file__).resolve().parents[1] / 'tools/launch_owner.py')
@@ -32,6 +33,24 @@ class LaunchPreflight(unittest.TestCase):
         self.assertFalse(module.blockers([],21,'owner','owner',30))
         self.assertTrue(module.blockers([],30,'owner','owner',30))
         self.assertTrue(module.blockers([{'pid':42,'name':'unrealeditor','state':'R','command':'UE -game'}],21,'owner','owner',30))
+
+    def test_native_crossover_game_blocks_exclusive_gta_without_shared_lock(self):
+        # Finder-launched IW4L historically used a different perf.lock. Its
+        # presence must still block GTA even with an idle utilization sample.
+        for executable in ('iw4l', 'iw4l.exe', 'robloxstudio', 'robloxplayer',
+                           'robloxstudiobeta.exe', 'robloxplayerbeta.exe',
+                           'spider-man.exe', 'batmanak.exe'):
+            with self.subTest(executable=executable):
+                reasons = module.blockers([{'pid':42,'name':executable,'state':'S','command':executable}],0,'owner','owner',30)
+                self.assertTrue(any('renderer' in reason for reason in reasons))
+
+    def test_failed_process_inventory_blocks_instead_of_claiming_idle(self):
+        with tempfile.TemporaryDirectory() as folder:
+            with patch.object(module.subprocess, 'check_output', return_value='"Device Utilization %" = 0'), \
+                 patch.object(module, 'processes', side_effect=PermissionError('denied')):
+                result = module.preflight(Path(folder))
+                self.assertTrue(result['blockers'])
+                self.assertIn('Cannot inspect renderer processes', result['blockers'][0])
 
     def test_emergency_pause_is_never_an_owner_reservation(self):
         with tempfile.TemporaryDirectory() as folder:
