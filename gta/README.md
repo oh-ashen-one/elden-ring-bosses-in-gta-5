@@ -2,7 +2,9 @@
 
 Original GTA V Story Mode mod code and a local conversion pipeline for owned Elden Ring creatures. Current characters: **Malenia, Red Wolf of Radagon, Giant Crab**.
 
-**Status: all three original creatures are visible in GTA; the owner confirmed bullet damage.** The v7 test exposed poor materials/deformation and stationary presentation. v8 addresses the material path, hair/normal maps, aggressive NPC targeting, car impacts and boss HUD. The new candidate's visuals, animation and gameplay await owner review. See [owner guide](OWNER-TEST.md).
+**Status: the owner confirmed all three original creatures are visible and take bullet damage.** The 2026-10-02 repair corrects pose conversion, attack playback and parked-car damage after deeper offline checks. Owner review of the repaired game remains pending. See [owner guide](OWNER-TEST.md).
+
+Existing profiles can be updated with `tools/upgrade_profile.py --candidate /path/to/private/candidate --bundle /path/to/installed/preview --root /path/to/profile`. It verifies both packages, holds the profile mutation lock, refuses a running game, backs up changed files, updates package/profile together and rolls back ordinary failures. It never launches GTA or edits retail files, accounts, registry or saves. Preserve the journal/backup until owner acceptance.
 
 ## What is implemented
 

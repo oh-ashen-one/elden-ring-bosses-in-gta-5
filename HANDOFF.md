@@ -1,8 +1,15 @@
 # Handoff
 
-Updated: 2026-10-02 (isolated pre-play audit and source repairs; installed v8 unchanged).
+Updated: 2026-10-02 (owner authorized applying the staged repair; update preparation underway, game remains closed).
 
-## Isolated pre-play repair status
+## Current owner instruction and update ownership
+
+- Hari directly requested “update as much as possible” after the repaired candidate was staged. This authorizes the bounded active-profile/private-package update. The earlier “do not open it yet” still applies: **leave GTA closed** and keep other sessions' GPU reservations untouched.
+- This thread resumed the original authoring checkout on its own successor branch `codex/apply-pose-repair`, based on audited local commit `21e528e`. The independent auditor's `codex/preplay-launch-safety` checkout is read-only input and is not being edited.
+- The added `upgrade_profile.py` uses `profile.lock`, checks the exact six payloads and unchanged game executable, rejects running GTA, stages atomic replacements, preserves a rollback journal and verifies both destinations. No registry, account, save, retail archive or GPU protocol change is part of this update.
+- Source remains local/private under the current no-publication constraint. Do not push this branch or merge a default branch without owner direction. Installation completion must be read from the local receipt and confirmed hashes, not this preparation note.
+
+## Isolated pre-play repair status (prior audit)
 
 - This checkout is `codex/preplay-launch-safety`, based on public/shared `codex/elden-assets-and-combat` commit `6a24a33dd13c8a56942fbc2c3b1b09a4d04ff6cd`. Changes are local and unpublished. The shared source checkout, active profile, retail game, saves and Steam configuration were not edited.
 - Current instruction for this audit: lightweight source/data checks only while the other Unreal session has priority. Do not launch GTA/Elden Ring, acquire renderer slots, run full extraction/Blender conversion, install this candidate or publish. This supersedes the older open-after-install instruction below for this audit.

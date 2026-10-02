@@ -1,6 +1,8 @@
 # Elden Los Santos — owner preview
 
-**v8: aggressive creatures, object materials and redesigned boss bars.** v7's visible imports and bullet damage were confirmed by the owner; the owner also reported crumpled geometry, poor hair/materials and stationary creatures. This patch changes the shader path, repairs packed normal maps and Malenia's hair opacity, enables aggression by default, targets nearby NPCs/drivers, adds speed-based vehicle impact damage and logs animation playback. The improvements still need actual gameplay/visual review.
+**2026-10-02 pose and combat repair.** The patch corrects per-bone animation transforms, keeps attack clips playing through recovery, and fixes stationary-car damage. Malenia, Red Wolf and Giant Crab keep their authentic meshes and source-resolution materials. v7's visible imports and bullet damage were owner-confirmed; this repaired candidate's visual quality, movement, car/explosive damage and performance still need your review. The existing animation samples are retained; full-rate regeneration is separate future work.
+
+The owner asked to leave GTA closed while other sessions use the GPU. Updating the files does not launch it. No automated technical import check is queued.
 
 ## Start
 
