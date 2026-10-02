@@ -55,6 +55,27 @@ class AnimationConversion(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,'bind joints differ'):
             m.TargetRig(drawable([shifted],[-1],['Root']),source)
 
+    def test_static_negative_w_preserves_rotation_after_native_reconstruction(self):
+        original=np.array([0.2,0.3,0.4,-0.5]);original/=np.linalg.norm(original)
+        root=E.Element('Item');m.set_channel_data(root,np.tile(original,(4,1)),True)
+        channel=root.find('Channels/Item')
+        self.assertEqual(channel.find('Type').get('value'),'StaticQuaternion')
+        stored=np.array([float(channel.find('Value').get(a)) for a in 'xyzw'])
+        self.assertGreater(stored[3],0)
+        # Emulate the native XYZ-only format independently of the generator.
+        xyz=stored[:3].astype(np.float32).astype(float)
+        native=np.r_[xyz,np.sqrt(max(0,1-np.dot(xyz,xyz)))]
+        np.testing.assert_allclose(Rotation.from_quat(native).as_matrix(),Rotation.from_quat(original).as_matrix(),atol=1e-6)
+
+    def test_near_half_turn_uses_explicit_four_components(self):
+        original=np.array([0.,1.,0.,0.])
+        root=E.Element('Item');m.set_channel_data(root,np.tile(original,(4,1)),True)
+        channels=root.findall('Channels/Item')
+        self.assertEqual(len(channels),4)
+        self.assertTrue(all(c.find('Type').get('value')=='RawFloat' for c in channels))
+        recovered=[float(c.findtext('Values').split()[0]) for c in channels]
+        np.testing.assert_allclose(recovered,original)
+
     def test_cycles_shear_and_singular_matrices_are_rejected(self):
         with self.assertRaisesRegex(ValueError,'cycle'):m.world_matrices([np.eye(4),np.eye(4)],[1,0])
         value=np.eye(4);value[0,1]=1

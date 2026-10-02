@@ -6,6 +6,8 @@ These standalone conversion tools are separate from the Apache-2.0 GTA gameplay 
 
 `rebuild_animation.py` rebuilds private animation XML from existing source glTF poses and a target drawable's bind skeleton. The converter's source and target bones can have different rest axes; preserving names and counts alone does not preserve animated skinning. The repair maps source world poses through each bone's constant rest-axis correction, then derives target local translation, rotation and scale tracks. It refuses existing output files and mismatched bind positions.
 
+CodeWalker's native compact static-quaternion channel stores XYZ and reconstructs positive W. The adapter flips all four components of a constant negative-W quaternion together, preserving its rotation; near W=0 it stores four explicit float channels to avoid reconstruction precision loss. Native read-back must compare actual channels with the intended values, in addition to checking clip counts and resource types.
+
 ```sh
 python gta/asset-tools/rebuild_animation.py \
   --glb /private/source.glb \

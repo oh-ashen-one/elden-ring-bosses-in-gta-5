@@ -136,11 +136,17 @@ class TargetRig:
 
 def set_channel_data(sequence, values, quaternion=False):
     channels=ET.SubElement(sequence,'Channels')
-    # Raw floats preserve the input precision; the native packer compresses the
-    # resource container. No animation quantization is introduced here.
-    if np.max(np.abs(values-values[0]))<1e-9:
+    constant=np.max(np.abs(values-values[0]))<1e-9
+    # Native StaticQuaternion stores XYZ only and reconstructs POSITIVE W.
+    # q and -q encode the same rotation; flip all four components together.
+    # Near W=0 the square-root reconstruction loses precision, so keep all
+    # four float components explicitly even for a constant rotation.
+    static_value=values[0].copy()
+    if quaternion and static_value[3]<0:static_value=-static_value
+    compact=constant and (not quaternion or static_value[3]>=0.05)
+    if compact:
         item=ET.SubElement(channels,'Item');ET.SubElement(item,'Type',value='StaticQuaternion' if quaternion else 'StaticVector3')
-        ET.SubElement(item,'Value',**{a:format(float(v),'.9g') for a,v in zip('xyzw' if quaternion else 'xyz',values[0])})
+        ET.SubElement(item,'Value',**{a:format(float(v),'.9g') for a,v in zip('xyzw' if quaternion else 'xyz',static_value)})
     else:
         for component in values.T:
             item=ET.SubElement(channels,'Item');ET.SubElement(item,'Type',value='RawFloat')
