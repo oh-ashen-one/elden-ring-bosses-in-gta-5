@@ -34,7 +34,7 @@
   "archetype_animation_collision_texture_bindings": "passed: all three verified after native round-trip",
   "native_models_and_clips_preserved": "skeleton counts and all 12 clips preserved; YDR texture format metadata corrected without changing pixel payloads",
   "plugin_sha256": "c78a77ecd02ac4eb1b3dfe9aea69ed89218256eb81180a8cda3d42a222f43a6a",
-  "installed_payload_checksums": "pending bounded upgrade",
+  "installed_payload_checksums": "passed: active game profile and preview package, all six payloads plus source/helper agreement",
   "owner_guns_working": true,
   "owner_helicopter_spawn_working": true,
   "previous_candidate_outcome": "v7: all three production creatures created; owner saw assets and observed bullet damage. Owner reported crumpled geometry, bald Malenia, poor materials and no visible movement.",
@@ -72,5 +72,10 @@
   "pose_repair": "36 source/target pose samples; maximum RMS below 0.54 mm; native 10332 sample readback max component error below 4.4e-7",
   "asset_changes": "Only three YCDs changed versus v8; all other decompressed archive resource entries verified exact",
   "upgrade_tests": "success, repeatability, rollback on partial replacement, running-game/drift refusal, mutual exclusion, stale-helper repair",
-  "runtime_marker": "loaded_pose_combat_repair_20261002_owner_verification_pending"
+  "runtime_marker": "loaded_pose_combat_repair_20261002_owner_verification_pending",
+  "installed_candidate": "20261002-pose-combat-repair",
+  "backup": "/Users/midir/Applications/EldenLosSantosPreview/Backups/upgrade-20261002T164937Z-c14c5adf",
+  "game_launched_during_update": false,
+  "retail_modified_during_update": false,
+  "source_assets_repaired_copy": "SourceAssets/animation-repaired-20261002"
 }

@@ -1,13 +1,24 @@
 # Handoff
 
-Updated: 2026-10-02 (owner authorized applying the staged repair; update preparation underway, game remains closed).
+Updated: 2026-10-02 (pose/combat repair installed and verified; GTA remains closed by owner instruction).
 
 ## Current owner instruction and update ownership
 
 - Hari directly requested “update as much as possible” after the repaired candidate was staged. This authorizes the bounded active-profile/private-package update. The earlier “do not open it yet” still applies: **leave GTA closed** and keep other sessions' GPU reservations untouched.
 - This thread resumed the original authoring checkout on its own successor branch `codex/apply-pose-repair`, based on audited local commit `21e528e`. The independent auditor's `codex/preplay-launch-safety` checkout is read-only input and is not being edited.
 - The added `upgrade_profile.py` uses `profile.lock`, checks the exact six payloads and unchanged game executable, rejects running GTA, stages atomic replacements, preserves a rollback journal and verifies both destinations. No registry, account, save, retail archive or GPU protocol change is part of this update.
-- Source remains local/private under the current no-publication constraint. Do not push this branch or merge a default branch without owner direction. Installation completion must be read from the local receipt and confirmed hashes, not this preparation note.
+- Source remains local/private under the current no-publication constraint. Do not push this branch or merge a default branch without owner direction. The bounded upgrade completed: all six profile/package payloads match; original retail/profile executables and install symlink verify. Runtime review remains pending.
+
+## Installed pose/combat repair
+
+- Active candidate: `20261002-pose-combat-repair`. Source owner: this thread, `codex/apply-pose-repair`. Main/default branches and other sessions' checkouts were not modified.
+- ASI SHA-256 `c78a77ecd02ac4eb1b3dfe9aea69ed89218256eb81180a8cda3d42a222f43a6a`; DLC SHA-256 `3a74004e0a5c524a565fd5f07f57e9c42b835cf4a4c2065746be22fde47ef50a`. The ASI differs from the audited candidate only by its corrected load identifier: `loaded_pose_combat_repair_20261002_owner_verification_pending`.
+- Installed through `upgrade_profile.py`, under the same `profile.lock` used by the profile manager, with GTA/PlayGTAV absent. All six payloads in both locations passed checks. Retail game, saves, account/registry state and GPU coordinator were not changed. No game or engine launched.
+- Full v8 rollback backup: `~/Applications/EldenLosSantosPreview/Backups/upgrade-20261002T164937Z-c14c5adf/`. Complete journal and original file hashes are preserved. Latest receipts: `~/Library/Application Support/EldenLosSantos/update-receipt-20261002.json` and `update-verification-20261002.json`.
+- Launcher/profile manager/verifier/update helper and owner guide synchronized into `~/Applications/EldenLosSantosPreview/Tools`. Evidence lives at `Evidence/20261002-pose-repair`; corrected editable animation XML/native files at `SourceAssets/animation-repaired-20261002`. `SourceAssets/ACTIVE-CANDIDATE.json` identifies the current inputs. Old source assets remain preserved.
+- Checks: eleven CTest suites passed, including five updater tests (partial-write rollback, running-game/drift refusal, lock conflict, repeatability, helper repair). Tiny single-job Windows ASI build passed. Source helper and package identity checked after installation.
+- Controls remain 1 select, 2 spawn, 3 clear, 4 pause/resume aggression, 5 weapons, 6 Buzzard. No diagnostic queued. Keep GTA CLOSED until Hari requests it. Another session retains GPU priority.
+- Pending: actual visual/animation/combat/performance acceptance. The native three-creature import and bullet damage were owner-confirmed on earlier v7; the current improved candidate has not been played. Current assets still use the previously sampled interchange motion; full-rate regeneration is deferred while Unreal work has priority. Original ER AI/cloth/VFX are not ported.
 
 ## Isolated pre-play repair status (prior audit)
 
@@ -42,7 +53,7 @@ Updated: 2026-10-02 (owner authorized applying the staged repair; update prepara
 - Eight source-only launch guard tests pass, including the previous 97% GPU case, low-util live renderer, unknown GPU, logged-out desktop, stuck exiting headless engine and emergency pause. A current read-only check refused launch until the owner reservation existed and other rendering stopped.
 - Lower-resolution v3 launch succeeded under that reservation at 14:53 America/New_York: GTA5.exe PID 50731, Script Hook initialization and DirectX initialization confirmed. A 20-second startup check sampled GPU values 0–31% (mostly 20–21%); desktop console remained midir. This is startup evidence, not sustained gameplay/FPS or creature verification. The exclusive slot remains held until the actual game process exits; the other coordinator owns its pause/auto-lift. Hari retains gameplay control.
 
-## Current installed candidate: aggressive-visuals-v8
+## Previous installed candidate: aggressive-visuals-v8
 
 - Owner feedback: authentic assets are visibly in GTA and taking bullet damage, but appear crumpled/low quality, Malenia looks bald, and creatures do not visibly move. Owner closed GTA. This establishes a successful import milestone, not visual/combat acceptance.
 - Prepared and installed v8 with GTA/PlayGTAV absent. All six active-profile/private-package hashes match; original retail GTA executable is unchanged. Private rollback: `Backups/2026-10-01-aggressive-visuals-v8/` includes prior ASI/DLC, manifests, and graphics settings.
