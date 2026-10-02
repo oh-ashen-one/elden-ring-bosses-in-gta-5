@@ -1,6 +1,17 @@
 # Handoff
 
-Updated: 2026-10-01 (owner confirmed visible imports and bullet damage; v8 installed, GPU handoff pending).
+Updated: 2026-10-02 (isolated pre-play audit and source repairs; installed v8 unchanged).
+
+## Isolated pre-play repair status
+
+- This checkout is `codex/preplay-launch-safety`, based on public/shared `codex/elden-assets-and-combat` commit `6a24a33dd13c8a56942fbc2c3b1b09a4d04ff6cd`. Changes are local and unpublished. The shared source checkout, active profile, retail game, saves and Steam configuration were not edited.
+- Current instruction for this audit: lightweight source/data checks only while the other Unreal session has priority. Do not launch GTA/Elden Ring, acquire renderer slots, run full extraction/Blender conversion, install this candidate or publish. This supersedes the older open-after-install instruction below for this audit.
+- Fixed stationary/unattributed vehicle contacts leaking native HP loss through the impact threshold. A test compiles the actual `observe_damage` function with fixture native events: ten parked/moving/bullet/explosion/cooldown scenarios pass; the original source fails the parked-contact witness.
+- Fixed attack playback switching to idle at the strike: recovery now keeps the attack clip and lasts at least the remaining measured source clip duration. Combat OFF, stagger and defeat still change playback. Ten CTest suites pass, including synthetic rig-axis checks, and the small Windows x64 ASI builds with one job.
+- Confirmed per-bone rest-axis conversion error in existing animation data. `rebuild_animation.py` derives GTA local tracks from source glTF world poses while preserving the target bind rig. Peer comparisons of 36 poses reduce worst RMS error from 1.19–2.08 metres to below 0.54 millimetres. An independent Malenia text rebuild matches the peer SHA-256 exactly. This is offline evidence; visible deformation is unverified.
+- The source exporter now retains every decoded frame. Existing v6 interchange data still omitted alternate frames, so repair from that data cannot restore the missing samples. Full-rate regeneration remains separate future work.
+- Launcher checks now include native IW4L, Roblox and ArkWeb renderers and fail closed when process inventory cannot be read. `verify_candidate.py` checks private package/profile hashes, supported executable/version, source commit and helper agreement without loading a game or changing the profile. Both package agreement and native format round-trips require separate owner gameplay acceptance.
+- The task workspace contains a separate private candidate and exact audit/patch receipts under `/Users/midir/Documents/Codex/2026-10-02/task`. The installed candidate remains `aggressive-visuals-v8`. Preserve the original ER/GTA data and keep all derived assets out of Git.
 
 ## Current priority and verified state
 

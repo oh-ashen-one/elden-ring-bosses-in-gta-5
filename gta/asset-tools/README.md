@@ -1,6 +1,20 @@
 # Elden Ring asset extraction (GPL-3.0-or-later)
 
-These standalone conversion tools are separate from the Apache-2.0 GTA gameplay plugin. The C/Python adapters link to or import GPL libraries and are distributed under GPL-3.0-or-later; see LICENSE. Exceptions: CodeWalkerBridge, build_dlc.py, normalize_dds.py, dlc_manifest.py, upgrade_visuals.py and bootstrap_tools.py are original Apache-2.0 API/packaging adapters, as stated in their source headers and the root LICENSE. No proprietary assets, game libraries, archive keys, or converted models are distributed here.
+These standalone conversion tools are separate from the Apache-2.0 GTA gameplay plugin. The C/Python adapters link to or import GPL libraries and are distributed under GPL-3.0-or-later; see LICENSE. Exceptions: CodeWalkerBridge, build_dlc.py, normalize_dds.py, dlc_manifest.py, upgrade_visuals.py, bootstrap_tools.py and rebuild_animation.py are original Apache-2.0 adapters, as stated in their source headers and the root LICENSE. No proprietary assets, game libraries, archive keys, or converted models are distributed here.
+
+## Animation pose repair
+
+`rebuild_animation.py` rebuilds private animation XML from existing source glTF poses and a target drawable's bind skeleton. The converter's source and target bones can have different rest axes; preserving names and counts alone does not preserve animated skinning. The repair maps source world poses through each bone's constant rest-axis correction, then derives target local translation, rotation and scale tracks. It refuses existing output files and mismatched bind positions.
+
+```sh
+python gta/asset-tools/rebuild_animation.py \
+  --glb /private/source.glb \
+  --drawable /private/creature.ydr.xml \
+  --template /private/creature_anims.ycd.xml \
+  --out /private/new-output/creature_anims.ycd.xml
+```
+
+This data-only operation does not run Blender or a game. Its output still needs native conversion and resource validation before private packaging. It preserves the motion available in the glTF: old exports omitted alternate source frames, and interpolation cannot recover them. The exporter now retains every decoded source sample for a future full-rate rebuild. Numeric pose agreement and native resource checks do not establish visible motion, strike timing or gameplay acceptance.
 
 ## Verified on the Studio
 

@@ -474,10 +474,11 @@ void update_actor(Actor& actor,int player,int,std::uint32_t now,int dt) {
     auto decision=actor.combat.tick(dt,{position,target,alive,sight,fighting,airborne});
     const auto state=actor.combat.state();
     if(state!=actor.previous_state) {
-        if(state==ergt::CombatState::chasing) animate(actor,actor.spec->move_clip,true);
-        else if(state==ergt::CombatState::melee_windup || state==ergt::CombatState::ranged_windup) animate(actor,actor.spec->attack_clip,false);
-        else if(state==ergt::CombatState::idle || state==ergt::CombatState::recovering || state==ergt::CombatState::staggered) animate(actor,actor.spec->idle_clip,true);
-        else if(state==ergt::CombatState::defeated) {
+        const auto intent=ergt::animation_intent(state);
+        if(intent==ergt::AnimationIntent::move) animate(actor,actor.spec->move_clip,true);
+        else if(intent==ergt::AnimationIntent::attack) animate(actor,actor.spec->attack_clip,false);
+        else if(intent==ergt::AnimationIntent::idle) animate(actor,actor.spec->idle_clip,true);
+        else if(intent==ergt::AnimationIntent::death) {
             animate(actor,actor.spec->death_clip,false);
             hook.invoke(0x1A9205C1B9EE827FULL,actor.entity,false,false);
             std::snprintf(notice,sizeof(notice),"%s defeated. 3 clears creatures.",actor.spec->label);

@@ -35,20 +35,32 @@ struct CreatureSpec {
     int melee_damage;
     int windup_ms;
     int recovery_ms;
+    int attack_clip_ms;
     float minimum_z;
 };
 
 // Initial balance and clip-role hypotheses; owner gameplay review is pending.
 inline constexpr std::array<CreatureSpec, 3> creatures{{
     {"Malenia", "ergt_malenia", "ergt_malenia_anims", "a000_000020", "a000_002000", "a000_003000", "a000_005000",
-     3600, 3.2f, 3.5f, 28, 750, 1500, -0.40835f},
+     3600, 3.2f, 3.5f, 28, 750, 1500, 2734, -0.40835f},
     {"Red Wolf of Radagon", "ergt_redwolf", "ergt_redwolf_anims", "a000_000000", "a000_001020", "a000_003000", "a000_005000",
-     2800, 5.0f, 4.5f, 32, 850, 1300, -0.09578f},
+     2800, 5.0f, 4.5f, 32, 850, 1300, 3934, -0.09578f},
     {"Giant Crab", "ergt_crab", "ergt_crab_anims", "a000_000000", "a000_001020", "a000_003000", "a000_005000",
-     4500, 2.0f, 5.2f, 40, 1200, 1900, -0.86392f},
+     4500, 2.0f, 5.2f, 40, 1200, 1900, 2567, -0.86392f},
 }};
 
 enum class CombatState { idle, chasing, melee_windup, ranged_windup, recovering, staggered, defeated };
+enum class AnimationIntent { keep, idle, move, attack, death };
+inline AnimationIntent animation_intent(CombatState state) {
+    switch(state) {
+    case CombatState::chasing: return AnimationIntent::move;
+    case CombatState::melee_windup:
+    case CombatState::ranged_windup: return AnimationIntent::attack;
+    case CombatState::recovering: return AnimationIntent::keep;
+    case CombatState::defeated: return AnimationIntent::death;
+    default: return AnimationIntent::idle;
+    }
+}
 struct Observation {
     Vec3 actor;
     Vec3 target;
@@ -101,7 +113,7 @@ public:
             out.aim = locked_target_; out.telegraph = remaining_ms_ > 0;
             if (remaining_ms_ == 0) {
                 out.ranged_strike = observation.line_of_sight;
-                state_ = CombatState::recovering; remaining_ms_ = 2200;
+                state_ = CombatState::recovering; remaining_ms_ = std::max(2200, spec_->attack_clip_ms - 1500);
             }
             return out;
         }
@@ -111,7 +123,10 @@ public:
                     horizontal_distance(observation.actor, observation.target) <= spec_->melee_range + 0.5f &&
                     std::abs(observation.actor.z - observation.target.z) < 4.0f;
                 state_ = CombatState::recovering;
-                remaining_ms_ = enraged() ? spec_->recovery_ms * 3 / 4 : spec_->recovery_ms;
+                // Let the native one-shot reach its end before another attack
+                // replaces it. Windup marks the hit, not the clip's endpoint.
+                remaining_ms_ = std::max(spec_->attack_clip_ms - spec_->windup_ms,
+                    enraged() ? spec_->recovery_ms * 3 / 4 : spec_->recovery_ms);
             }
             return out;
         }

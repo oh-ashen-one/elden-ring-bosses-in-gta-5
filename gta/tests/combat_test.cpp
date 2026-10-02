@@ -45,5 +45,21 @@ int main() {
     require(!boss.tick(250,o).melee_strike,"changing target cannot transfer a banked strike");
     boss.damage(10000);boss.cancel_attack();
     require(boss.state()==CombatState::defeated,"target selection cannot revive a defeated creature");
+    for(const auto& spec:creatures) {
+        Combat timing(&spec);Observation close{{0,0,0},{1,0,0},true,true,true,false};
+        timing.tick(1,close);int elapsed=0;bool struck=false;
+        while(elapsed<spec.attack_clip_ms-10) {
+            auto d=timing.tick(10,close);elapsed+=10;struck|=d.melee_strike;
+            if(struck) {
+                require(timing.state()==CombatState::recovering,"recovery covers remaining source attack clip");
+                require(animation_intent(timing.state())==AnimationIntent::keep,"hit must not replace attack with idle");
+            }
+        }
+        require(struck,"attack must still land during its windup window");
+        close.combat_enabled=false;timing.tick(10,close);
+        require(animation_intent(timing.state())==AnimationIntent::idle,"combat OFF cancels playback explicitly");
+        timing.damage(100000);
+        require(animation_intent(timing.state())==AnimationIntent::death,"death replaces attack playback");
+    }
     std::cout << "Combat scenarios passed; no GTA runtime executed\n";
 }
