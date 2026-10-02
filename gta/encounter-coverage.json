@@ -1,0 +1,83 @@
+{
+  "installed_baseline": "c2fc4e2ed7fae8f8ce711af617fbe7fddfcb80b9",
+  "scope": "source-only; no installation or runtime execution",
+  "characters": [
+    {
+      "name": "Malenia",
+      "hp": 3600,
+      "speed_mps": 3.2,
+      "melee_range_m": 3.5,
+      "melee_damage": 28,
+      "windup_ms": 750,
+      "attack_clip_ms": 2734,
+      "attack_clip": "a000_003000",
+      "intended_melee": "sword strike; source clip role awaits visual confirmation"
+    },
+    {
+      "name": "Red Wolf of Radagon",
+      "hp": 2800,
+      "speed_mps": 5,
+      "melee_range_m": 4.5,
+      "melee_damage": 32,
+      "windup_ms": 850,
+      "attack_clip_ms": 3934,
+      "attack_clip": "a000_003000",
+      "intended_melee": "creature bite/strike; source clip role awaits visual confirmation"
+    },
+    {
+      "name": "Giant Crab",
+      "hp": 4500,
+      "speed_mps": 2,
+      "melee_range_m": 5.2,
+      "melee_damage": 40,
+      "windup_ms": 1200,
+      "attack_clip_ms": 2567,
+      "attack_clip": "a000_003000",
+      "intended_melee": "claw strike; source clip role awaits visual confirmation"
+    }
+  ],
+  "common_attacks": {
+    "ranged": "1.5 second telegraph; locked aim point; native GTA type-0 explosion with damageScale0.35, audible and visible; no travelling projectile",
+    "ranged_trigger": "horizontal distance above28m, height difference above6m, or airborne target; target scan limited to90m horizontal/100m vertical",
+    "melee": "line-of-sight/front half-plane/range/height constrained sweep; damages nearby on-foot NPCs/player; occupied cars take engine damage and impulse",
+    "vehicle_damage_multiplier": 5,
+    "aggression": "nearest visible player/NPC with current-target hysteresis and player-hit retaliation",
+    "enrage": "at <=50 percent HP, chase speed x1.25; recovery reduced only where attack duration allows",
+    "heavy_hit": "damage >=250 triggers500ms stagger; reuses idle clip, no dedicated hit-reaction clip",
+    "defeat": "death clip request, collision disabled, further custom damage/attacks stopped"
+  },
+  "incoming_damage": {
+    "bullets": "native HP loss preferred; attributed-player weapon fallback with80ms spacing",
+    "explosions": "native HP/weapon event handling; low unflagged native losses below80 filtered as settling; real explosion flag behavior pending gameplay review",
+    "vehicle_impacts": "only attributable moving contact; speed threshold2.5m/s, speed-squared damage clamped25..1400,650ms cooldown,700ms physical recovery",
+    "event_damage_cap": 1600,
+    "helicopter": "native Buzzard missiles/guns use the same incoming damage path; actual accuracy/flying review pending"
+  },
+  "reset": {
+    "creatures": "key3 clears only model-checked owned creatures; key2 respawns with fresh state; max3; corpse occupies slot until clear; failed import remains locked for the session",
+    "combat_pause": "key4 cancels queued attacks; resume cannot bank a hit",
+    "helicopter": "key6 preserves a usable matching owned Buzzard; replaces matching owned wreck; missing/reused handles do not delete unrelated entities"
+  },
+  "audio": {
+    "available": "GTA native gun/vehicle/explosion audio; ADD_EXPLOSION isAudible=true",
+    "extracted_er_audio_files": [],
+    "implemented_er_voice_or_music": false
+  },
+  "essential_runtime_gates": [
+    "Owner confirms all three visible rig/pose/clip transitions and ground alignment",
+    "Player/NPC aggression, melee tells/hit timing and defeat must be checked in GTA",
+    "Verify bullets, RPG/nearby explosions, moving-car impacts, parked-car no-drain and helicopter weapons separately",
+    "Verify clear/respawn and destroyed-Buzzard recovery",
+    "Measure actual frame rate/stability under exclusive GTA reservation"
+  ],
+  "meaningful_missing_features": [
+    "Obstacle pathfinding beyond line-of-sight chase",
+    "Dedicated stagger/knockdown/get-up animation; current idle substitution is not original ER hit reaction",
+    "Geometric animated limb/weapon hitboxes; current whole-body collision is coarse",
+    "Full source-rate regeneration of existing downsampled interchange clips",
+    "Original ER spell/projectile VFX, voice/music, cloth and engine AI; not needed to establish basic GTA weapon/car fighting but required for close fidelity",
+    "Distinct multi-attack boss movesets and phase-specific moves; current phase is stat-level enrage only"
+  ],
+  "current_source_fix": "Per-strike vehicle deduplication now covers every potential victim; prior 32-car cap could double-hit later cars in a dense synthetic fixture",
+  "not_claimed": "No original ER boss AI, travelling magic projectile, native ER sound, completed gameplay/performance acceptance or ArkWeb/CrossOver dual-engine compatibility"
+}

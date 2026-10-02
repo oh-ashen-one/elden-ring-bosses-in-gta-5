@@ -1,8 +1,17 @@
 # Handoff
 
-Updated: 2026-10-02 (pose/combat repair installed and verified; GTA remains closed by owner instruction).
+Updated: 2026-10-02 (separate source-only encounter follow-up; installed c2fc4e2 remains unchanged).
 
-## Current owner instruction and update ownership
+## Current source-only follow-up
+
+- Worktree: `~/Library/Caches/EldenLosSantos/encounter-source-followup`; branch `codex/encounter-source-followup`, based on installed-source commit `c2fc4e2ed7fae8f8ce711af617fbe7fddfcb80b9`. This owns combat runtime and its tests only. The original authoring checkout, installed package/profile, launcher/verifier ownership and GPU state stay untouched.
+- Exact current attacks, damage/reset behavior, audio inventory and meaningful gaps are recorded in `gta/encounter-coverage.json`. Each creature has one selected melee attack clip and the same telegraphed native GTA explosion; no travelling magic projectile or original ER audio/AI is implemented.
+- Confirmed and fixed a low-priority dense-traffic edge case: the strike helper remembered only 32 vehicle handles. A 33rd car could receive repeat engine damage from multiple occupants in one strike. The remembered set now covers all potential victims. The original actual-helper fixture fails at car 33; repaired source passes on-foot, two-occupant single-car, 33-car and 256-car fixtures.
+- Thirteen CTest suites pass, including the actual melee helper fixture. A single-job Windows ASI build passes. This verifies source behavior against native-event fixtures, not a game or performance test.
+- Not installed or published. No game, renderer, extraction, material/animation regeneration or shared profile mutation occurred in this pass. Retain the local source checkpoint/patch for optional later integration rather than silently replacing the installed candidate.
+- Essential next gate is actual owner verification of rig/clip appearance, ground alignment, NPC aggression, melee timing, bullets/RPG/explosions/vehicle/helicopter damage, clear/respawn and stability. Offline native flags/HP fixtures cannot establish those engine behaviors. Full-rate animation regeneration needs a separate resource window. Additional original spell VFX/audio/movesets need content and runtime validation; ArkWeb supplies no ER/CrossOver bridge.
+
+## Prior applied update and ownership
 
 - Hari directly requested “update as much as possible” after the repaired candidate was staged. This authorizes the bounded active-profile/private-package update. The earlier “do not open it yet” still applies: **leave GTA closed** and keep other sessions' GPU reservations untouched.
 - This thread resumed the original authoring checkout on its own successor branch `codex/apply-pose-repair`, based on audited local commit `21e528e`. The independent auditor's `codex/preplay-launch-safety` checkout is read-only input and is not being edited.

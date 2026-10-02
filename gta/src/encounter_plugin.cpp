@@ -456,7 +456,8 @@ void strike_nearby(Actor& actor,int primary,ergt::Vec3 origin,ergt::Vec3 target)
     std::array<int,513> victims{};int count=0;
     victims[count++]=primary;
     for(int i=0;i<nearby_ped_count;i++) if(nearby_peds[i]!=primary) victims[count++]=nearby_peds[i];
-    std::array<int,32> hit_cars{};int car_count=0;
+    // A strike can visit every victim; retain every distinct vehicle handle.
+    std::array<int,513> hit_cars{};int car_count=0;
     for(int i=0;i<count;i++) {
         const int ped=victims[i];
         if(!exists(ped) || hook.invoke<int>(0x3317DEDB88C95038ULL,ped,true)) continue;
@@ -467,7 +468,7 @@ void strike_nearby(Actor& actor,int primary,ergt::Vec3 origin,ergt::Vec3 target)
         const int car=hook.invoke<int>(0x9A9112A0FE9A4713ULL,ped,false);
         if(car && exists(car)) {
             if(std::find(hit_cars.begin(),hit_cars.begin()+car_count,car)!=hit_cars.begin()+car_count) continue;
-            if(car_count<32) hit_cars[car_count++]=car;
+            if(car_count<static_cast<int>(hit_cars.size())) hit_cars[car_count++]=car;
             const float hp=hook.invoke<float>(0xC45D23BAF168AAB8ULL,car);
             hook.invoke(0x45F6D8EEF34ABEF1ULL,car,hp-actor.spec->melee_damage*5.0f);
             const float length=std::max(1.0f,range);
