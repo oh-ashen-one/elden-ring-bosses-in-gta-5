@@ -314,8 +314,9 @@ def export(root, char, destination, masks, max_animations, clip_names=None):
                 track_bones = decoded.get_track_bone_indices()
                 mapped_tracks = {t: name_to_flver[skeleton.bones[b].name] for t, b in enumerate(track_bones)
                                  if skeleton.bones[b].name in name_to_flver}
-                # Interchange preview samples at approximately 15 Hz; keep endpoints.
-                frames = sorted(set([*range(0, len(armature), 2), len(armature)-1]))
+                # Preserve every decoded source sample. Downsampling here permanently
+                # discards motion before the GTA conversion even starts.
+                frames = list(range(len(armature)))
                 times = np.asarray(frames) * float(container.hkx_animation.duration) / (len(armature)-1)
                 time_accessor = glb.array(times, "SCALAR", bounds=True)
                 samples = {i: {"translation": [], "rotation": [], "scale": []} for i in bone_ids}

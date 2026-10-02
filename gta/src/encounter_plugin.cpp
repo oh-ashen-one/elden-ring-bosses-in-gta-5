@@ -389,6 +389,7 @@ void observe_damage(Actor& actor,int player,std::uint32_t now) {
                 impact=std::max(impact,ergt::impact_damage(std::max(v.speed,v.prior_speed)));
         }
         if(impact>0) { loss=std::max(loss,impact);actor.last_impact=now;record("vehicle_impact",actor.entity,impact); }
+        else if(!weapon) loss=0; // A stationary/unattributed vehicle contact is not an impact.
     } else if(vehicle && !weapon) loss=0;
     if(loss<=0 && weapon && now-actor.last_fallback>=80) {
         // Fallback is explicitly player-attributed; NPC hits use actual HP loss.

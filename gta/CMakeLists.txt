@@ -23,6 +23,7 @@ add_test(NAME owner_launch_safety COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRE
 add_test(NAME native_call_contracts COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/native_contract_test.py")
 add_test(NAME dlc_prop_registration COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/dlc_manifest_test.py")
 add_test(NAME private_candidate_consistency COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/candidate_test.py")
+add_test(NAME damage_intake_regressions COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/damage_intake_test.py")
 
 if(WIN32)
   if(NOT MINGW)
