@@ -100,3 +100,11 @@ The original HairLong material references the shared PCHair normal/opacity atlas
 Run `upgrade_visuals.py --converted /private/old-gta-xml --root /private/extraction --out /private/new-gta-xml`, then package the new directory with `build_dlc.py`. The full owned-assets orchestrator now includes this step. For editable sources, retain both the original Blender scenes and the derived XML/script; these post-export material changes are not saved back into the old Blender scenes.
 
 Schema references: [Sollumz shader conversion](https://github.com/Sollumz/Sollumz/blob/82817d1211e7769bf3b9eb45866b6f8b802864fe/ydr/shader_materials.py) and szio 1.4.0.dev1 `gta5/Shaders.xml`. Runtime motion telemetry uses the pinned native database already listed in `gta/native-contracts.json`; phase advancement is evidence of playback, not human acceptance of the pose or attack timing.
+
+## Motion and ground contact review (2026-10-03)
+
+`audit_motion.py` samples actual glTF joint transforms and reports motion landmarks without a renderer. Its outputs are private derived game data. Inspect poses as well as statistics; neither a speed peak nor a successful export proves a GTA damage contact.
+
+The imported model front is -Y, so the runtime applies a 180-degree heading offset. Provisional melee contact times follow inspected source poses: Malenia 1150 ms, wolf 1350 ms, crab 900 ms. Playback acceptance failures suppress damage; per-strike logs expose engine phase and world coordinates for the owner test.
+
+`align_ground_contact.py` adjusts the verified single-box collision floors to the inspected animated neutral geometry, keeping the matching runtime placement values. It preserves all drawable XML outside `Bounds`, source pixels, rigs, clips and render/culling bounds. A native reader confirmed the composite and child floors. Only 31–40 decompressed resource bytes changed in each existing YDR; the animation binaries are identical to the accepted pose repair. This improves the initial ground reference but remains a coarse collider, not original ER limb hitboxes. Terrain contact, physics and scale still require actual GTA review.

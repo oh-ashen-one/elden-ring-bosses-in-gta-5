@@ -1,6 +1,6 @@
 # Elden Los Santos — owner preview
 
-**2026-10-02 pose and combat repair.** The patch corrects per-bone animation transforms, keeps attack clips playing through recovery, and fixes stationary-car damage. Malenia, Red Wolf and Giant Crab keep their authentic meshes and source-resolution materials. v7's visible imports and bullet damage were owner-confirmed; this repaired candidate's visual quality, movement, car/explosive damage and performance still need your review. The existing animation samples are retained; full-rate regeneration is separate future work.
+**2026-10-03 motion polish.** The update retains the repaired bone transforms, corrects model facing and floor placement, adjusts strike timing from inspected source motion, suppresses damage when an attack animation request fails, and includes both parked-car and duplicate vehicle-hit fixes. Malenia, Red Wolf and Giant Crab keep their authentic meshes and source-resolution materials. v7's visible imports and bullet damage were owner-confirmed; this repaired candidate's visual quality, movement, car/explosive damage and performance still need your review. The existing animation samples are retained; full-rate regeneration is separate future work.
 
 The owner asked to leave GTA closed while other sessions use the GPU. Updating the files does not launch it. No automated technical import check is queued.
 
@@ -27,7 +27,7 @@ Use a clear outdoor area for the first test. These are animated creature objects
 
 1. Start with **Malenia** (the default selection), press **4** to pause combat and press **2 once** outdoors. If she fails to appear, stop here; don’t cycle through other creatures or repeatedly retry. The log now distinguishes model loading, animation loading and creation. A failed creature is locked for that session.
 2. Shoot it while combat is OFF. Confirm the health bar drops.
-3. Press **4** to resume aggression. Check pursuit and attacks against you and nearby NPCs/drivers; movement and animation should both be visible. The red warning sphere marks a ranged blast targeting you.
+3. Press **4** to resume aggression. Check that the creature faces you while pursuing, its feet/claws meet the ground, and damage coincides with the visible strike. Check attacks against you and nearby NPCs/drivers; movement and animation should both be visible. The red warning sphere marks a ranged blast targeting you.
 4. Use the RPG, a moving-car impact, then helicopter weapons. A parked car touching the creature should not repeatedly drain its health. Check each damage channel separately.
 5. Defeat the creature, clear it with 3, then spawn another one.
 

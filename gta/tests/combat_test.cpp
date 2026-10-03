@@ -11,7 +11,7 @@ int main() {
     require(!boss.tick(16,o).melee_strike, "melee attack must give a warning window");
     o.target = {20,0,0};
     bool hit = false;
-    for (int i=0;i<60;i++) hit |= boss.tick(16,o).melee_strike;
+    for (int i=0;i<90;i++) hit |= boss.tick(16,o).melee_strike;
     require(!hit, "moving out of range must dodge the committed strike");
     boss.reset(&creatures[1]); o.target={0,0,30}; o.airborne_target=true;
     require(boss.tick(16,o).telegraph, "airborne target receives a telegraph");
@@ -61,5 +61,23 @@ int main() {
         timing.damage(100000);
         require(animation_intent(timing.state())==AnimationIntent::death,"death replaces attack playback");
     }
+    for(const Vec3 target:std::array<Vec3,4>{{{0,10,0},{10,0,0},{0,-10,0},{-10,0,0}}}) {
+        const float angle=heading_to_target({0,0,0},target,180)*3.1415926535f/180;
+        // Rotate the measured model-forward vector (0,-1,0) into world space.
+        const Vec3 forward{std::sin(angle),-std::cos(angle),0};
+        require((forward.x*target.x+forward.y*target.y)/10>0.999f,"imported model must face toward its target");
+    }
+    for(int encounter=0;encounter<50;encounter++) {
+        const auto& spec=creatures[encounter%3];boss.reset(&spec);
+        require(boss.health()==spec.maximum_health && boss.state()==CombatState::idle,"respawn starts with fresh health and no queued attack");
+        o={{0,0,0},{1,0,0},true,true,true,false};boss.tick(1,o);
+        bool hit=false;int elapsed=0;
+        while(!hit && elapsed<5000) {hit=boss.tick(10,o).melee_strike;elapsed+=10;}
+        require(hit && elapsed>=spec.windup_ms && elapsed<spec.windup_ms+10,"hit occurs at configured motion landmark");
+        boss.damage(100000);require(!boss.tick(250,o).ranged_strike,"defeated encounter stays inert");
+    }
+    boss.reset(&creatures[0]);o={{0,0,0},{1,0,0},true,true,true,false};boss.tick(16,o);
+    o.target.x=std::numeric_limits<float>::quiet_NaN();auto invalid=boss.tick(250,o);
+    require(!invalid.melee_strike && !invalid.ranged_strike && finite_vec(invalid.movement),"invalid target transform cannot create damage or NaN movement");
     std::cout << "Combat scenarios passed; no GTA runtime executed\n";
 }

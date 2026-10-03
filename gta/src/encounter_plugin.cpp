@@ -30,6 +30,7 @@ struct Actor {
     std::uint32_t last_log = 0;
     float damage_since_log = 0;
     bool animation_failed = false;
+    bool animation_accepted = false;
     const char* active_clip = nullptr;
     bool clip_loop = false;
     int target = 0;
@@ -116,7 +117,7 @@ void initialize_log() {
     log_file=_wfopen(path,L"a");
     std::wcscpy(slash+1,L"EldenLosSantos.import-check.request");
     std::wcscpy(diagnostic_request_path,path);
-    record("loaded_pose_combat_repair_20261002_owner_verification_pending");
+    record("loaded_motion_polish_20261003_owner_verification_pending");
 }
 void text(float x,float y,const char* line,float scale=0.32f) {
     hook.invoke(0x66E0276CC5F6B9DAULL,0);
@@ -134,7 +135,10 @@ void marker(ergt::Vec3 p) {
                 255,55,40,90,false,false,2,false,static_cast<const char*>(nullptr),static_cast<const char*>(nullptr),false);
 }
 void animate(Actor& actor,const char* clip,bool loop) {
-    if (!hook.invoke<int>(0xD031A9162D01088CULL,actor.spec->dictionary)) return;
+    actor.animation_accepted=false;
+    if (!hook.invoke<int>(0xD031A9162D01088CULL,actor.spec->dictionary)) {
+        record("animation_dictionary_unavailable",actor.entity);return;
+    }
     actor.active_clip=clip;actor.clip_loop=loop;
     actor.animation_started=hook.invoke<std::uint32_t>(0x9CD27B0045628463ULL);
     actor.animation_sample=actor.animation_started;actor.animation_samples=0;actor.previous_phase=-1;
@@ -143,7 +147,8 @@ void animate(Actor& actor,const char* clip,bool loop) {
     hook.invoke(0xACAD101E1FB66689ULL,actor.entity,true);
     const bool accepted=hook.invoke<int>(0x7FB218262B810701ULL,actor.entity,clip,actor.spec->dictionary,4.0f,loop,!loop,false,0.0f,0)!=0;
     hook.invoke(0x28D1A16553C51776ULL,actor.entity,actor.spec->dictionary,clip,1.0f);
-    if (!accepted) { record("animation_call_failed",actor.entity); actor.animation_failed=true; }
+    actor.animation_accepted=accepted;actor.animation_failed=!accepted;
+    if (!accepted) record("animation_call_failed",actor.entity);
     if(log_file) {
         std::fprintf(log_file,"event=animation_started entity=%d clip=%s accepted=%d loop=%d\n",actor.entity,clip,accepted,loop);
         std::fflush(log_file);
@@ -452,6 +457,22 @@ int choose_target(Actor& actor,int player,std::uint32_t now) {
     if(best!=actor.target) {actor.combat.cancel_attack();actor.target=best;record("target_changed",actor.entity,static_cast<float>(best));}
     return best;
 }
+bool attack_playback_ready(const Actor& actor,const char* kind,ergt::Vec3 origin,ergt::Vec3 target,std::uint32_t now) {
+    const bool requested=actor.animation_accepted && actor.active_clip &&
+        std::strcmp(actor.active_clip,actor.spec->attack_clip)==0;
+    const float phase=requested?hook.invoke<float>(0x346D81500D088F42ULL,actor.entity,actor.spec->dictionary,actor.active_clip):0.0f;
+    const int playing=requested?hook.invoke<int>(0x1F0B79228E461EC9ULL,actor.entity,actor.spec->dictionary,actor.active_clip,3):0;
+    if(log_file) {
+        std::fprintf(log_file,"event=attack_contact entity=%d kind=%s requested=%d playing=%d phase=%.5f elapsed_ms=%u actor_xyz=%.3f,%.3f,%.3f target_xyz=%.3f,%.3f,%.3f\n",
+            actor.entity,kind,requested,playing,phase,now-actor.animation_started,origin.x,origin.y,origin.z,target.x,target.y,target.z);
+        std::fflush(log_file);
+    }
+    // A definite rejected animation cannot produce an invisible strike. Phase
+    // telemetry is evidence for the owner test, not assumed object-task proof.
+    if(!requested) record("attack_suppressed_animation_not_accepted",actor.entity);
+    return requested;
+}
+
 void strike_nearby(Actor& actor,int primary,ergt::Vec3 origin,ergt::Vec3 target) {
     std::array<int,513> victims{};int count=0;
     victims[count++]=primary;
@@ -507,7 +528,7 @@ void update_actor(Actor& actor,int player,int,std::uint32_t now,int dt) {
     }
     observe_animation(actor,now);
     if(fighting && state!=ergt::CombatState::defeated && alive && !impact_recovery) {
-        const float heading=std::atan2(position.x-target.x,target.y-position.y)*57.2957795f;
+        const float heading=ergt::heading_to_target(position,target,actor.spec->model_heading_offset);
         hook.invoke(0x8E2530AA8ADA980EULL,actor.entity,heading);
     }
     if(!impact_recovery && (decision.movement.x!=0 || decision.movement.y!=0)) {
@@ -519,8 +540,8 @@ void update_actor(Actor& actor,int player,int,std::uint32_t now,int dt) {
         }
     }
     if(decision.telegraph && target_entity==player) marker(decision.aim);
-    if(decision.melee_strike && !impact_recovery) strike_nearby(actor,target_entity,position,target);
-    if(decision.ranged_strike && !impact_recovery) {
+    if(decision.melee_strike && !impact_recovery && attack_playback_ready(actor,"melee",position,target,now)) strike_nearby(actor,target_entity,position,target);
+    if(decision.ranged_strike && !impact_recovery && attack_playback_ready(actor,"ranged_area",position,decision.aim,now)) {
         const auto p=decision.aim;
         hook.invoke(0xE3AD2BDBAEE269ACULL,p.x,p.y,p.z,0,0.35f,true,false,0.15f,false);
         record("ranged_strike",actor.entity);

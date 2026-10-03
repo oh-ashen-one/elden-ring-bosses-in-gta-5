@@ -7,6 +7,7 @@
 
 namespace ergt {
 struct Vec3 { float x = 0, y = 0, z = 0; };
+inline bool finite_vec(Vec3 p) { return std::isfinite(p.x) && std::isfinite(p.y) && std::isfinite(p.z); }
 inline float horizontal_distance(Vec3 a, Vec3 b) {
     return std::hypot(a.x - b.x, a.y - b.y);
 }
@@ -15,6 +16,13 @@ inline float horizontal_distance(Vec3 a, Vec3 b) {
 inline float impact_damage(float speed) {
     if (!std::isfinite(speed) || speed < 2.5f) return 0;
     return std::clamp(speed * speed * 2.4f, 25.0f, 1400.0f);
+}
+
+// The imported rigs face model -Y (feet/head/claws inspected in animated
+// source poses). GTA heading zero faces +Y, so apply the model-space offset.
+inline float heading_to_target(Vec3 actor, Vec3 target, float model_offset) {
+    float heading=std::atan2(actor.x-target.x,target.y-actor.y)*57.2957795f+model_offset;
+    return std::fmod(heading+360.0f,360.0f);
 }
 
 inline float target_score(float distance, bool current, bool attacker) {
@@ -37,16 +45,18 @@ struct CreatureSpec {
     int recovery_ms;
     int attack_clip_ms;
     float minimum_z;
+    float model_heading_offset = 180.0f;
 };
 
-// Initial balance and clip-role hypotheses; owner gameplay review is pending.
+// Hit timers now follow inspected source attack-motion landmarks. Contact
+// timing, clip roles and GTA playback still require owner gameplay review.
 inline constexpr std::array<CreatureSpec, 3> creatures{{
     {"Malenia", "ergt_malenia", "ergt_malenia_anims", "a000_000020", "a000_002000", "a000_003000", "a000_005000",
-     3600, 3.2f, 3.5f, 28, 750, 1500, 2734, -0.40835f},
+     3600, 3.2f, 3.5f, 28, 1150, 1500, 2734, -0.005f},
     {"Red Wolf of Radagon", "ergt_redwolf", "ergt_redwolf_anims", "a000_000000", "a000_001020", "a000_003000", "a000_005000",
-     2800, 5.0f, 4.5f, 32, 850, 1300, 3934, -0.09578f},
+     2800, 5.0f, 4.5f, 32, 1350, 1300, 3934, -0.075f},
     {"Giant Crab", "ergt_crab", "ergt_crab_anims", "a000_000000", "a000_001020", "a000_003000", "a000_005000",
-     4500, 2.0f, 5.2f, 40, 1200, 1900, 2567, -0.86392f},
+     4500, 2.0f, 5.2f, 40, 900, 1900, 2567, -0.355f},
 }};
 
 enum class CombatState { idle, chasing, melee_windup, ranged_windup, recovering, staggered, defeated };
@@ -102,7 +112,7 @@ public:
     Decision tick(int elapsed_ms, const Observation& observation) {
         Decision out{};
         if (state_ == CombatState::defeated) return out;
-        if (!observation.target_alive || !observation.combat_enabled) {
+        if (!observation.target_alive || !observation.combat_enabled || !finite_vec(observation.actor) || !finite_vec(observation.target)) {
             // Turning combat off cancels queued attacks instead of banking a hit.
             state_ = CombatState::idle; remaining_ms_ = 0; return out;
         }

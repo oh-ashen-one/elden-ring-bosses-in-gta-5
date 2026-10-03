@@ -24,6 +24,8 @@ add_test(NAME native_call_contracts COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CUR
 add_test(NAME dlc_prop_registration COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/dlc_manifest_test.py")
 add_test(NAME private_candidate_consistency COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/candidate_test.py")
 add_test(NAME damage_intake_regressions COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/damage_intake_test.py")
+add_test(NAME animated_ground_contact COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/ground_contact_test.py")
+add_test(NAME attack_playback_acceptance COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/attack_playback_test.py")
 add_test(NAME melee_vehicle_deduplication COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/strike_test.py")
 add_test(NAME helicopter_reset_regressions COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/helicopter_test.py")
 add_test(NAME profile_upgrade_regressions COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/upgrade_test.py")

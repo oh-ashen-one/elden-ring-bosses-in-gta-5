@@ -1,6 +1,6 @@
 {
   "installed_baseline": "c2fc4e2ed7fae8f8ce711af617fbe7fddfcb80b9",
-  "scope": "source-only; no installation or runtime execution",
+  "scope": "2026-10-03 motion polish; owner runtime review pending",
   "characters": [
     {
       "name": "Malenia",
@@ -8,10 +8,12 @@
       "speed_mps": 3.2,
       "melee_range_m": 3.5,
       "melee_damage": 28,
-      "windup_ms": 750,
+      "windup_ms": 1150,
       "attack_clip_ms": 2734,
       "attack_clip": "a000_003000",
-      "intended_melee": "sword strike; source clip role awaits visual confirmation"
+      "intended_melee": "sword strike; source clip role awaits visual confirmation",
+      "model_heading_offset_degrees": 180,
+      "ground_reference_min_z": -0.005
     },
     {
       "name": "Red Wolf of Radagon",
@@ -19,10 +21,12 @@
       "speed_mps": 5,
       "melee_range_m": 4.5,
       "melee_damage": 32,
-      "windup_ms": 850,
+      "windup_ms": 1350,
       "attack_clip_ms": 3934,
       "attack_clip": "a000_003000",
-      "intended_melee": "creature bite/strike; source clip role awaits visual confirmation"
+      "intended_melee": "creature bite/strike; source clip role awaits visual confirmation",
+      "model_heading_offset_degrees": 180,
+      "ground_reference_min_z": -0.075
     },
     {
       "name": "Giant Crab",
@@ -30,10 +34,12 @@
       "speed_mps": 2,
       "melee_range_m": 5.2,
       "melee_damage": 40,
-      "windup_ms": 1200,
+      "windup_ms": 900,
       "attack_clip_ms": 2567,
       "attack_clip": "a000_003000",
-      "intended_melee": "claw strike; source clip role awaits visual confirmation"
+      "intended_melee": "claw strike; source clip role awaits visual confirmation",
+      "model_heading_offset_degrees": 180,
+      "ground_reference_min_z": -0.355
     }
   ],
   "common_attacks": {
@@ -44,7 +50,8 @@
     "aggression": "nearest visible player/NPC with current-target hysteresis and player-hit retaliation",
     "enrage": "at <=50 percent HP, chase speed x1.25; recovery reduced only where attack duration allows",
     "heavy_hit": "damage >=250 triggers500ms stagger; reuses idle clip, no dedicated hit-reaction clip",
-    "defeat": "death clip request, collision disabled, further custom damage/attacks stopped"
+    "defeat": "death clip request, collision disabled, further custom damage/attacks stopped",
+    "playback_gate": "A rejected/missing/wrong attack animation request suppresses damage. Accepted requests still require actual GTA phase/pose review; event log records engine phase, playing flag, elapsed time and actor/target world coordinates."
   },
   "incoming_damage": {
     "bullets": "native HP loss preferred; attributed-player weapon fallback with80ms spacing",
@@ -78,6 +85,13 @@
     "Original ER spell/projectile VFX, voice/music, cloth and engine AI; not needed to establish basic GTA weapon/car fighting but required for close fidelity",
     "Distinct multi-attack boss movesets and phase-specific moves; current phase is stat-level enrage only"
   ],
-  "current_source_fix": "Per-strike vehicle deduplication now covers every potential victim; prior 32-car cap could double-hit later cars in a dense synthetic fixture",
-  "not_claimed": "No original ER boss AI, travelling magic projectile, native ER sound, completed gameplay/performance acceptance or ArkWeb/CrossOver dual-engine compatibility"
+  "current_source_fix": "Model-forward heading correction, source-motion hit timing, failed-animation damage suppression, invalid-target safety, and full per-strike vehicle deduplication",
+  "not_claimed": "No original ER boss AI, travelling magic projectile, native ER sound, completed gameplay/performance acceptance or ArkWeb/CrossOver dual-engine compatibility",
+  "ground_alignment_risk": "Contact floors and runtime placement now agree with inspected neutral-pose minima; meshes/rigs/textures/clips and culling bounds are preserved. Body colliders remain coarse, and native floor/terrain behavior still needs owner review.",
+  "future_memory_interface": {
+    "current": "Combat::tick is local, deterministic and independent of network calls. Movement, health, damage and hit timing stay here.",
+    "extension": "Optional nonblocking intent mailbox: encounter generation, actor ID, target suggestion, stance, issued tick and short TTL. Validate locally; discard stale/mismatched intents.",
+    "memory": "Summaries of encounters can be persisted by an external worker after bounded event emission. Text/model replies must not supply coordinates, health edits or native commands.",
+    "fallback": "Missing, late or invalid replies keep the existing local behavior running. No API/server/listener added in this pass."
+  }
 }

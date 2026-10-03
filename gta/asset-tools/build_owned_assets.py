@@ -73,8 +73,9 @@ def main():
             "--drawable",converted/(name+".ydr.xml"),"--template",template,"--out",repaired)
         template.rename(converted/(name+"_anims.blender-source.xml"))
         shutil.copy2(repaired,template)
+    run(sys.executable,tools/"align_ground_contact.py","--converted",output/"gta-object-materials","--animations",output/"animation-repaired","--out",output/"gta-grounded")
     dotnet=cache/"dotnet/dotnet";bridge=repo/"build/cw-bridge/CodeWalkerBridge.dll"
-    run(sys.executable,tools/"build_dlc.py","--converted",output/"gta-object-materials","--out",output/"dlc-build","--dotnet",dotnet,"--bridge",bridge)
+    run(sys.executable,tools/"build_dlc.py","--converted",output/"gta-grounded","--out",output/"dlc-build","--dotnet",dotnet,"--bridge",bridge)
     run(dotnet,bridge,"prepare-dlclist",args.gta_game.resolve(),output/"newmods/common/data/dlclist.xml")
     print("Private owned-asset DLC prepared. No game launched. Runtime verification is still required.")
 

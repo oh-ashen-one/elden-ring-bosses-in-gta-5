@@ -1,8 +1,20 @@
 # Handoff
 
-Updated: 2026-10-02 (separate source-only encounter follow-up; installed c2fc4e2 remains unchanged).
+Updated: 2026-10-03 (owner-directed motion polish; bounded update prepared, GTA remains closed).
 
-## Current source-only follow-up
+## Current owner-directed motion polish
+
+- Hari reaffirmed ownership: prioritize existing bosses' visual/motion fidelity, native ASI/Script Hook V, GTA gun/explosion/vehicle combat, reversible offline installs and truthful verification. Leave the other projects alone; avoid heavy work. Keep GTA closed under the earlier launch hold.
+- Current task branch is `codex/boss-motion-polish`, continuing the task-owned follow-up worktree from `89263bc`. The installed source was freshly verified as `c2fc4e2`; both copies of all six payloads and helpers matched, and the repaired build has not yet appeared in the game log. The parked-impact fix was installed; the dense-traffic dedup fix was still staged.
+- Inspected actual skinned geometry in private CPU pose sheets and sampled existing source animation world/model transforms. All three models face -Y while the script assumed +Y; apply a 180-degree heading offset. Cardinal-direction tests verify the resulting front points at the target.
+- Adjusted provisional damage landmarks to Malenia 1150 ms, wolf 1350 ms, crab 900 ms after inspecting attack poses/trajectories. Old Malenia damage occurred with the blade raised behind her; old crab damage lagged its downward strike. These are source-motion-derived starting values, not owner-approved in-game timing.
+- Definite failed/missing attack-animation requests now suppress damage. Each attempted strike logs playback phase, playing flag, elapsed time and actor/target world positions. Accepted native calls alone still do not prove correct animation.
+- Added finite target-transform checks and 50 deterministic reset/attack/defeat cycles. Fifteen CTest suites and the single-job Windows ASI build pass. Includes the staged per-strike vehicle deduplication fix. No engine/GPU or full extraction/pipeline rebuild was used; three existing drawables were repacked after the bounded contact-field edit.
+- Ground placement was incorrectly based on full rest-pose bounds: inspected idle skin minima predict roughly 40 cm excess lift for Malenia and 50 cm for Crab. `align_ground_contact.py` raises the verified one-box collider floors and matches runtime placement minima (-0.005/-0.075/-0.355 m). Render bounds, vertices, materials, textures, skeletons and clips are preserved; only 31-40 native decompressed bytes change per YDR. Native reader confirms both composite and child floors. Colliders are still coarse and gameplay contact must be reviewed; no original ER limb hitboxes are claimed.
+- Future player-memory AI fits as an optional asynchronous, expiring advisory intent. Local Combat::tick must keep movement/damage/timing authoritative and fall back without waiting. No API or listener added. See `gta/encounter-coverage.json` for exact coverage, limitations and the proposed boundary.
+- Private motion reports/pose sheets live at `~/Library/Caches/EldenLosSantos/motion-polish-20261003`; these contain derived retail geometry and must never enter Git. Original source only belongs on the task branch; no default/main merge is authorized.
+
+## Prior source-only follow-up
 
 - Worktree: `~/Library/Caches/EldenLosSantos/encounter-source-followup`; branch `codex/encounter-source-followup`, based on installed-source commit `c2fc4e2ed7fae8f8ce711af617fbe7fddfcb80b9`. This owns combat runtime and its tests only. The original authoring checkout, installed package/profile, launcher/verifier ownership and GPU state stay untouched.
 - Exact current attacks, damage/reset behavior, audio inventory and meaningful gaps are recorded in `gta/encounter-coverage.json`. Each creature has one selected melee attack clip and the same telegraphed native GTA explosion; no travelling magic projectile or original ER audio/AI is implemented.

@@ -74,7 +74,8 @@ def main():
             source = conversion if extension == "ydr" else folder
             invoke("convert", source / f"{stem}.{extension}.xml", models / f"{stem}.{extension}")
             (models / f"{stem}.{extension}.json").rename(output / f"{stem}.{extension}.verification.json")
-        low, high = receipt["collision"]["min"], receipt["collision"]["max"]
+        render_bounds = receipt.get("render_bounds", receipt["collision"])
+        low, high = render_bounds["min"], render_bounds["max"]
         centre = [(a+b)/2 for a,b in zip(low,high)]
         radius = math.sqrt(sum(((b-a)/2)**2 for a,b in zip(low,high)))
         item = ET.SubElement(archetypes, "Item", {"type": "CBaseArchetypeDef"})
