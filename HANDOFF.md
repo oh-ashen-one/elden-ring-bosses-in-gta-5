@@ -1,9 +1,12 @@
 # Handoff
 
-Updated: 2026-10-03 (owner-directed motion polish; bounded update prepared, GTA remains closed).
+Updated: 2026-10-03 (motion polish installed and package verified; GTA remains closed, owner runtime review pending).
 
 ## Current owner-directed motion polish
 
+- Installed candidate: `20261003-motion-polish`, verified in both active profile and preview package. Runtime marker `loaded_motion_polish_20261003_owner_verification_pending`. ASI `8c1c04e9426df4021de18dda83fb505d85db49ad22949bb43080a3401d459f94`; DLC `a4046610368589073f3c8dce455707df521f1a0b4a3ca96cdf504ece97da0c72`. The parked-impact and formerly staged melee vehicle-dedup fixes are both included.
+- Reversible update used `upgrade_profile.py` with GTA/PlayGTAV absent. Full prior-candidate backup: `~/Applications/EldenLosSantosPreview/Backups/upgrade-20261003T212919Z-85e8b89c`. Original game/registry/accounts/saves and other sessions were untouched. No game or renderer started.
+- Current editable input copy: `SourceAssets/gta/grounded-20261003`; private pose sheets/motion reports/native-contact checks: `Evidence/20261003-motion-polish`. These are asset-level diagnostics, not GTA screenshots. Keep all derived asset files private. Current source belongs on the task branch under the shared Git rules; no main/default merge is authorized.
 - Hari reaffirmed ownership: prioritize existing bosses' visual/motion fidelity, native ASI/Script Hook V, GTA gun/explosion/vehicle combat, reversible offline installs and truthful verification. Leave the other projects alone; avoid heavy work. Keep GTA closed under the earlier launch hold.
 - Current task branch is `codex/boss-motion-polish`, continuing the task-owned follow-up worktree from `89263bc`. The installed source was freshly verified as `c2fc4e2`; both copies of all six payloads and helpers matched, and the repaired build has not yet appeared in the game log. The parked-impact fix was installed; the dense-traffic dedup fix was still staged.
 - Inspected actual skinned geometry in private CPU pose sheets and sampled existing source animation world/model transforms. All three models face -Y while the script assumed +Y; apply a 180-degree heading offset. Cardinal-direction tests verify the resulting front points at the target.
