@@ -103,7 +103,7 @@
     "Malenia": "Native clip phase drives extracted horizontal root movement. Run playback speed matches configured pursuit speed. Locked attack heading; upright pose frame restored after vehicle impact recovery. Three asynchronous overlapping sphere probes precede each <=0.35 m step; pending/hit/stale/invalid results stop movement. No obstacle pathfinding.",
     "others": "Previous line-of-sight chase retained."
   },
-  "installed_candidate": "20261004-malenia-root-motion",
+  "installed_candidate": "20261004-malenia-streaming-isolation",
   "installed_source_code_commit": "b4ec51e94f11f07a4c18ffebdc45fd4724ec3494",
   "last_owner_test": {
     "candidate": "20261004-malenia-root-motion",
@@ -114,7 +114,7 @@
   },
   "streaming_repair": {
     "candidate": "20261004-malenia-streaming-isolation",
-    "status": "prepared for reversible install and owner test; not a proven crash fix",
+    "status": "installed reversibly; owner test pending; live crash resolution unverified",
     "only_changed_resource": "ergt_malenia.ydr texture storage",
     "before_inflated_bytes": 77922304,
     "after_inflated_bytes": 23396352,
