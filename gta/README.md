@@ -2,7 +2,9 @@
 
 Original GTA V Story Mode mod code and a local conversion pipeline for owned Elden Ring creatures. Current characters: **Malenia, Red Wolf of Radagon, Giant Crab**.
 
-**Status: the owner confirmed all three original creatures are visible and take bullet damage.** The current repair corrects pose conversion, facing, ground reference, attack timing/playback and vehicle damage after offline pose inspection and native-file checks. Owner review of the repaired game remains pending. See [owner guide](OWNER-TEST.md).
+**Status: an earlier build was owner-confirmed to show the three creatures and take bullet damage.** The 2026-10-04 candidate focuses on Malenia: full-rate source clips, separate root motion, collision probes, animated blade contact, proper stagger and kneeling defeat. Native-file and code checks pass; the current encounter has not been rendered or played. The owner has kept launches on hold. See [current coverage](encounter-coverage.json) and [owner guide](OWNER-TEST.md).
+
+[ER Mario lessons and concrete application](ER-MARIO-LESSONS.md) records the reference review without claiming its engine hooks work in GTA.
 
 Existing profiles can be updated with `tools/upgrade_profile.py --candidate /path/to/private/candidate --bundle /path/to/installed/preview --root /path/to/profile`. It verifies both packages, holds the profile mutation lock, refuses a running game, backs up changed files, updates package/profile together and rolls back ordinary failures. It never launches GTA or edits retail files, accounts, registry or saves. Preserve the journal/backup until owner acceptance.
 
@@ -10,7 +12,7 @@ Existing profiles can be updated with `tools/upgrade_profile.py --candidate /pat
 
 - Original Windows x64 ASI: creature selection/spawning, up to three active creatures, health bars, native health-loss/hit-flag damage intake, custom melee/ranged/chase/stagger/enrage behavior, source-animation playback, reset, optional weapons and an armed helicopter.
 - Offline asset extraction from owned Elden Ring archives, rigged interchange exports, textures/material adaptation, background data-only Blender/Sollumz conversion, native GTA resource conversion and DLC packaging.
-- Twelve original animation clips, coarse collision, and a three-archetype local DLC. Assets, textures and game-derived metadata are private, not Git contents.
+- Thirteen selected animation clips, coarse body collision, and a three-archetype local DLC. Assets, textures and game-derived metadata are private, not Git contents.
 - A reversible APFS profile manager that keeps original retail bytes intact and scopes the Wine DLL override to GTA5.exe.
 - Independent rule/ABI tests plus fixture tests for clone isolation and profile restoration. These checks do not prove game behavior.
 
@@ -23,14 +25,17 @@ cmake -S gta -B build/gta-native -DCMAKE_BUILD_TYPE=Release
 cmake --build build/gta-native
 ctest --test-dir build/gta-native --output-on-failure
 
-cmake -S gta -B build/gta-win64 -DCMAKE_TOOLCHAIN_FILE=tools/mingw.cmake -DCMAKE_BUILD_TYPE=Release
+cmake -S gta -B build/gta-win64 -DCMAKE_TOOLCHAIN_FILE=tools/mingw.cmake -DCMAKE_BUILD_TYPE=Release \
+  -DERGT_MOTION_HEADER=/path/to/private/ergt-assets/motion/malenia.hpp
 cmake --build build/gta-win64
 
 # macOS/APFS synthetic fixture checks; does not touch real games or registry
 python3 gta/tests/profile_test.py
 ```
 
-Main output: `build/gta-win64/EldenLosSantos.asi`. The separate `EldenLosSantosProbe.asi` is a diagnostic using a GTA test actor; do not install both together because their hotkeys overlap.
+Run the owned-assets conversion below first to create the private motion header. Without it the source-only plugin refuses Malenia spawning instead of substituting fake movement. The header contains derived animation/weapon samples and stays private.
+
+Main output: `build/gta-win64/EldenLosSantos.asi`. **A motion-enabled ASI contains owned-game motion data; keep it private alongside the DLC.** The separate `EldenLosSantosProbe.asi` is a diagnostic using a GTA test actor; do not install both together because their hotkeys overlap.
 
 Before an owner playtest, check the private package without loading any executable:
 
@@ -62,7 +67,7 @@ Create a separate accountless **ERGTA-Tools** Windows 10 64-bit CrossOver bottle
   --out '/path/to/private/ergt-assets'
 ```
 
-This reconstructs local artifacts and does not launch either game. The dependency bootstrap and complete conversion orchestration were exercised on the Studio with a fresh asset output directory. The rebuilt DLC matched the installed candidate byte-for-byte. A separate-machine rebuild and actual GTA playtest remain unverified. Dependency revisions and downloaded runtime hashes are recorded in [dependencies.json](dependencies.json).
+This reconstructs local artifacts and does not launch either game. The dependency bootstrap and complete conversion orchestration were exercised on the Studio with a fresh asset output directory. The earlier rebuilt DLC matched its installed candidate byte-for-byte. The revised Malenia pipeline has been rebuilt from preserved private inputs without running Blender again. A separate-machine rebuild and actual GTA playtest remain unverified. Dependency revisions and downloaded runtime hashes are recorded in [dependencies.json](dependencies.json).
 
 ## Scope and publication
 

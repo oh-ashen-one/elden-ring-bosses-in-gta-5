@@ -6,6 +6,10 @@
     "same_build_worked_example": "https://github.com/rehan-remade/universal-modder/blob/15d6f9d5fbd32de9b1884f29ddec3be9133bd912/examples/minecraft-gta5-passthrough/gta/src/natives.h"
   },
   "natives": {
+    "0x03E8D3D5F549087A": {
+      "name": "GET_MODEL_DIMENSIONS",
+      "arguments": 3
+    },
     "0x07C837F9A01C34C9": {
       "name": "SET_TEXT_SCALE",
       "arguments": 2
@@ -54,6 +58,10 @@
       "name": "IS_ENTITY_PLAYING_ANIM",
       "arguments": 4
     },
+    "0x2274BC1C4885E333": {
+      "name": "GET_OFFSET_FROM_ENTITY_GIVEN_WORLD_COORDS",
+      "arguments": 4
+    },
     "0x239A3351AC1DA385": {
       "name": "SET_ENTITY_COORDS_NO_OFFSET",
       "arguments": 7
@@ -69,6 +77,10 @@
     "0x28477EC23D892089": {
       "name": "DRAW_MARKER",
       "arguments": 24
+    },
+    "0x28579D1B8F8AAC80": {
+      "name": "START_SHAPE_TEST_CAPSULE",
+      "arguments": 10
     },
     "0x28D1A16553C51776": {
       "name": "SET_ENTITY_ANIM_SPEED",
@@ -101,6 +113,10 @@
     "0x3A618A217E5154F0": {
       "name": "DRAW_RECT",
       "arguments": 9
+    },
+    "0x3D87450E15D98694": {
+      "name": "GET_SHAPE_TEST_RESULT",
+      "arguments": 5
     },
     "0x3FEF770D40960D5A": {
       "name": "GET_ENTITY_COORDS",
@@ -169,6 +185,10 @@
     "0x7FB218262B810701": {
       "name": "PLAY_ENTITY_ANIM",
       "arguments": 9
+    },
+    "0x8524A8B0171D5E07": {
+      "name": "SET_ENTITY_ROTATION",
+      "arguments": 6
     },
     "0x8E2530AA8ADA980E": {
       "name": "SET_ENTITY_HEADING",

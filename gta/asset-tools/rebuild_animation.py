@@ -9,6 +9,7 @@ No game/renderer is launched, no source file is overwritten, no retail data is
 redistributed. Output XML remains private derived game data.
 """
 import argparse
+import copy
 import json
 import struct
 from pathlib import Path
@@ -153,10 +154,27 @@ def set_channel_data(sequence, values, quaternion=False):
             ET.SubElement(item,'Values').text=' '.join(format(float(v),'.9g') for v in component)
 
 
-def rebuild(glb,drawable,template,out):
+def rebuild(glb,drawable,template,out,source_clips=None):
     if out.exists():raise ValueError('Use a new output; existing files are preserved')
     source=SourceGLB(glb);rig=TargetRig(ET.parse(drawable),source)
     document=ET.parse(template);report=[]
+    if source_clips:
+        animations=document.find('Animations');clips=document.find('Clips')
+        prototype=copy.deepcopy(animations[0]);clip_prototype=copy.deepcopy(clips[0])
+        original_name=clip_prototype.findtext('Hash');prefix=prototype.findtext('Hash').removesuffix(original_name)
+        for parent in (animations,clips):
+            for child in list(parent):parent.remove(child)
+        for name in source_clips:
+            if name not in source.animations:raise ValueError('Source clip absent: '+name)
+            samplers=source.animations[name]['samplers'];times=source.accessor(samplers[0]['input'])[:,0]
+            if any(not np.array_equal(source.accessor(s['input'])[:,0],times) for s in samplers):raise ValueError('Mismatched sample times')
+            if len(times)<2 or times[0]!=0 or not np.allclose(times,np.linspace(0,times[-1],len(times)),atol=1e-5):raise ValueError('Uniform bounded source samples required')
+            animation=copy.deepcopy(prototype);clip=copy.deepcopy(clip_prototype)
+            animation.find('Hash').text=prefix+name;animation.find('Duration').set('value',str(times[-1]))
+            animation.find('FrameCount').set('value',str(len(times)));animation.find('SequenceFrameLimit').set('value',str(len(times)+30))
+            clip.find('Hash').text=name;clip.find('Name').text='pack:/'+name;clip.find('AnimationHash').text=prefix+name
+            clip.find('StartTime').set('value','0');clip.find('EndTime').set('value',str(times[-1]));clip.find('Rate').set('value','1')
+            animations.append(animation);clips.append(clip)
     for animation in document.findall('Animations/Item'):
         encoded=animation.findtext('Hash');matches=[n for n in source.animations if encoded.endswith('_'+n)]
         if len(matches)!=1:raise ValueError('Animation name mapping is ambiguous')
@@ -191,4 +209,5 @@ def rebuild(glb,drawable,template,out):
 if __name__=='__main__':
     p=argparse.ArgumentParser(description=__doc__)
     for key in ['glb','drawable','template','out']:p.add_argument('--'+key,type=Path,required=True)
-    a=p.parse_args();print(json.dumps(rebuild(a.glb,a.drawable,a.template,a.out),indent=2))
+    p.add_argument('--source-clips',nargs='+',help='Replace clip list with exact full-rate source samples')
+    a=p.parse_args();print(json.dumps(rebuild(a.glb,a.drawable,a.template,a.out,a.source_clips),indent=2))

@@ -5,6 +5,7 @@
 #include <cstring>
 #include "scripthook.hpp"
 #include "combat.hpp"
+#include "motion.hpp"
 
 extern "C" __declspec(dllimport) int ergt_runtime_dependency();
 
@@ -39,6 +40,20 @@ struct Actor {
     float previous_phase = -1, trail_health = 1;
     int animation_samples = 0;
     bool playback_repaired = false;
+    const ergt::MotionTrack* motion = nullptr;
+    ergt::MotionCursor motion_cursor;
+    float playback_rate = 1, blade_phase = -1;
+    bool melee_clip = false, cleanup_requested = false, cleanup_failed = false;
+    unsigned played_reaction = 0;
+    bool pose_transition_required = false;
+    bool corpse_settled = false;
+    float committed_heading = 0;
+    ergt::Vec3 blade_origin{}, queued_movement{}, sweep_from{}, sweep_to{};
+    std::array<int,3> sweep_handles{};
+    bool sweep_blocked = false;
+    std::uint32_t sweep_started = 0, sweep_animation = 0;
+    std::array<int,513> blade_victims{};
+    int blade_victim_count = 0;
 };
 std::array<Actor, 3> actors;
 std::array<int, 512> nearby_peds{};
@@ -117,7 +132,7 @@ void initialize_log() {
     log_file=_wfopen(path,L"a");
     std::wcscpy(slash+1,L"EldenLosSantos.import-check.request");
     std::wcscpy(diagnostic_request_path,path);
-    record("loaded_motion_polish_20261003_owner_verification_pending");
+    record("loaded_root_motion_20261004_runtime_verification_pending");
 }
 void text(float x,float y,const char* line,float scale=0.32f) {
     hook.invoke(0x66E0276CC5F6B9DAULL,0);
@@ -140,13 +155,20 @@ void animate(Actor& actor,const char* clip,bool loop) {
         record("animation_dictionary_unavailable",actor.entity);return;
     }
     actor.active_clip=clip;actor.clip_loop=loop;
+    actor.motion=ergt::find_motion(actor.spec->model,clip);actor.motion_cursor={};
+    actor.blade_phase=-1;actor.blade_victim_count=0;actor.queued_movement={};
+    actor.playback_rate=1;
+    if(actor.motion && std::strcmp(clip,actor.spec->move_clip)==0) {
+        const float speed=ergt::length(ergt::subtract(actor.motion->samples[actor.motion->count-1].root,actor.motion->samples[0].root))/actor.motion->duration;
+        if(speed>0.01f)actor.playback_rate=std::clamp(actor.spec->speed*(actor.combat.enraged()?1.25f:1.0f)/speed,0.25f,2.0f);
+    }
     actor.animation_started=hook.invoke<std::uint32_t>(0x9CD27B0045628463ULL);
     actor.animation_sample=actor.animation_started;actor.animation_samples=0;actor.previous_phase=-1;
     actor.playback_repaired=false;
     // Objects need their animated transform updated even when physics sleeps.
     hook.invoke(0xACAD101E1FB66689ULL,actor.entity,true);
     const bool accepted=hook.invoke<int>(0x7FB218262B810701ULL,actor.entity,clip,actor.spec->dictionary,4.0f,loop,!loop,false,0.0f,0)!=0;
-    hook.invoke(0x28D1A16553C51776ULL,actor.entity,actor.spec->dictionary,clip,1.0f);
+    hook.invoke(0x28D1A16553C51776ULL,actor.entity,actor.spec->dictionary,clip,actor.playback_rate);
     actor.animation_accepted=accepted;actor.animation_failed=!accepted;
     if (!accepted) record("animation_call_failed",actor.entity);
     if(log_file) {
@@ -162,22 +184,36 @@ void observe_animation(Actor& actor,std::uint32_t now) {
     const int playing=hook.invoke<int>(0x1F0B79228E461EC9ULL,actor.entity,actor.spec->dictionary,actor.active_clip,3);
     const float phase=hook.invoke<float>(0x346D81500D088F42ULL,actor.entity,actor.spec->dictionary,actor.active_clip);
     if(log_file) {
-        std::fprintf(log_file,"event=animation_sample entity=%d clip=%s playing=%d phase=%.5f sample=%d\n",actor.entity,actor.active_clip,playing,phase,actor.animation_samples);
+        const auto p=coords(actor.entity);
+        std::fprintf(log_file,"event=animation_sample entity=%d clip=%s playing=%d phase=%.5f sample=%d root_track=%d rate=%.3f xyz=%.3f,%.3f,%.3f\n",actor.entity,actor.active_clip,playing,phase,actor.animation_samples,actor.motion!=nullptr,actor.playback_rate,p.x,p.y,p.z);
         std::fflush(log_file);
     }
     // One bounded recovery only, never restart a healthy looping clip each tick.
     if(actor.clip_loop && actor.animation_samples==1 && (!playing || phase==actor.previous_phase) && !actor.playback_repaired) {
         hook.invoke(0x7FB218262B810701ULL,actor.entity,actor.active_clip,actor.spec->dictionary,4.0f,true,false,false,0.0f,0);
-        hook.invoke(0x28D1A16553C51776ULL,actor.entity,actor.spec->dictionary,actor.active_clip,1.0f);
+        hook.invoke(0x28D1A16553C51776ULL,actor.entity,actor.spec->dictionary,actor.active_clip,actor.playback_rate);
+        actor.motion_cursor={};actor.queued_movement={};
         actor.playback_repaired=true;record("animation_recovery_once",actor.entity);
     }
     actor.previous_phase=phase;actor.animation_samples++;
 }
 void remove_actor(Actor& actor) {
+    actor.cleanup_requested=true;
+    // Poll owned async casts to completion before releasing the Actor slot.
+    // Repeated clear/reset cannot leak shape-test handles.
+    bool pending_cast=false;
+    for(auto& handle:actor.sweep_handles)if(handle){
+        int hit=0,entity=0;ergt::NativeVector end{},normal{};
+        if(hook.invoke<int>(0x3D87450E15D98694ULL,handle,&hit,&end,&normal,&entity)==1)pending_cast=true;
+        else handle=0;
+    }
+    if(pending_cast)return;
     if (exists(actor.entity) && actor.spec &&
         hook.invoke<std::uint32_t>(0x9F47B058362C84B5ULL,actor.entity)==hash(actor.spec->model)) {
         int entity=actor.entity;
         hook.invoke(0x539E0AE3E6634B9FULL,&entity);
+        if(exists(actor.entity)){record("creature_cleanup_failed",actor.entity);actor.cleanup_failed=true;return;}
+        record("creature_removed",actor.entity);
     }
     actor=Actor{};
 }
@@ -190,8 +226,8 @@ void clear() {
     if (reference_probe_active) {
         hook.invoke(0xE532F5D78798DAABULL,reference_probe_hash); reference_probe_active=false;
     }
-    for (auto& actor:actors) remove_actor(actor);
-    std::snprintf(notice,sizeof(notice),"Creatures cleared. Your helicopter is kept.");
+    for (auto& actor:actors) {actor.cleanup_failed=false;remove_actor(actor);}
+    std::snprintf(notice,sizeof(notice),"Clearing creatures. Your helicopter is kept.");
     record("clear_creatures");
 }
 bool prepare_helicopter_spawn() {
@@ -216,6 +252,10 @@ bool prepare_helicopter_spawn() {
 
 void begin_spawn(bool vehicle,std::uint32_t now) {
     if (pending.active || diagnostic_index>=0) return;
+    if(!vehicle && selected==0 && !ergt::find_motion(ergt::creatures[0].model,ergt::creatures[0].attack_clip)) {
+        std::snprintf(notice,sizeof(notice),"Malenia requires the locally generated motion build. See the setup guide.");
+        record("owned_motion_missing");return;
+    }
     if (!vehicle && failed_creatures[selected]) {
         std::snprintf(notice,sizeof(notice),"This creature failed. Retry is locked for this session; its error is in the log.");
         return;
@@ -454,9 +494,104 @@ int choose_target(Actor& actor,int player,std::uint32_t now) {
     };
     consider(player);
     for(int i=0;i<nearby_ped_count;i++) consider(nearby_peds[i]);
-    if(best!=actor.target) {actor.combat.cancel_attack();actor.target=best;record("target_changed",actor.entity,static_cast<float>(best));}
+    if(best!=actor.target) {actor.combat.cancel_attack();actor.pose_transition_required=actor.combat.state()!=ergt::CombatState::staggered;actor.target=best;record("target_changed",actor.entity,static_cast<float>(best));}
     return best;
 }
+void move_with_collision(Actor& actor,ergt::Vec3 desired,std::uint32_t now,bool enabled) {
+    using namespace ergt;
+    if(!finite_vec(desired))enabled=false;
+    const auto origin=coords(actor.entity);
+    const bool had_cast=std::any_of(actor.sweep_handles.begin(),actor.sweep_handles.end(),[](int x){return x!=0;});
+    bool pending_cast=false;
+    for(auto& handle:actor.sweep_handles)if(handle){
+        int hit=0,entity=0;NativeVector end{},normal{};
+        const int result=hook.invoke<int>(0x3D87450E15D98694ULL,handle,&hit,&end,&normal,&entity);
+        if(result==1)pending_cast=true;
+        else {handle=0;if(result!=2||hit)actor.sweep_blocked=true;}
+    }
+    if(had_cast && !pending_cast){
+        const bool current=sweep_still_current(actor.sweep_from,origin,now-actor.sweep_started,actor.sweep_animation==actor.animation_started);
+        if(enabled && current && !actor.sweep_blocked)
+            hook.invoke(0x239A3351AC1DA385ULL,actor.entity,actor.sweep_to.x,actor.sweep_to.y,actor.sweep_to.z,true,true,false);
+        else actor.queued_movement={};
+    }
+    if(!enabled){actor.queued_movement={};return;}
+    actor.queued_movement=add(actor.queued_movement,desired);
+    // Bound frame stalls and asynchronous backlog; never teleport to catch up.
+    const float distance=length(actor.queued_movement);
+    if(distance>0.75f)actor.queued_movement=scale(actor.queued_movement,0.75f/distance);
+    if(pending_cast || length(actor.queued_movement)<0.001f)return;
+    const auto from=coords(actor.entity);
+    Vec3 step=actor.queued_movement;const float size=length(step);
+    if(size>0.35f)step=scale(step,0.35f/size);
+    auto to=add(from,step);float ground=0;
+    if(!hook.invoke<int>(0xC906A7DAB05C8D2BULL,to.x,to.y,from.z+3.0f,&ground,false,false)){actor.queued_movement={};return;}
+    to.z=ground-actor.spec->minimum_z+0.05f;
+    if(!finite_vec(to)||std::abs(to.z-from.z)>0.35f){actor.queued_movement={};return;}
+    actor.queued_movement=subtract(actor.queued_movement,step);
+    actor.sweep_from=from;actor.sweep_to=to;actor.sweep_started=now;actor.sweep_animation=actor.animation_started;actor.sweep_blocked=false;
+    // Three overlapping swept spheres cover Malenia's upright body. These are
+    // GTA-side conservative movement probes, not imported Havok limb colliders.
+    for(int i=0;i<3;i++){
+        const float z=0.55f+i*0.75f;
+        actor.sweep_handles[i]=hook.invoke<int>(0x28579D1B8F8AAC80ULL,from.x,from.y,from.z+z,to.x,to.y,to.z+z,0.5f,31,actor.entity,7);
+        if(!actor.sweep_handles[i])actor.sweep_blocked=true;
+    }
+    if(std::all_of(actor.sweep_handles.begin(),actor.sweep_handles.end(),[](int x){return x==0;}))actor.queued_movement={};
+}
+
+void blade_contacts(Actor& actor,int primary,std::uint32_t now,bool enabled) {
+    using namespace ergt;
+    if(!actor.motion || !actor.motion->has_blade || !actor.melee_clip || !actor.active_clip)return;
+    const float phase=hook.invoke<float>(0x346D81500D088F42ULL,actor.entity,actor.spec->dictionary,actor.active_clip);
+    const auto origin=coords(actor.entity);const float previous=actor.blade_phase;const auto previous_origin=actor.blade_origin;
+    actor.blade_phase=phase;actor.blade_origin=origin;
+    if(!enabled || !actor.animation_accepted || !std::isfinite(phase) || previous<0 || phase<=previous || phase>1 ||
+       (phase-previous)*actor.motion->duration>0.30f || length(subtract(origin,previous_origin))>1.0f ||
+       !hook.invoke<int>(0x1F0B79228E461EC9ULL,actor.entity,actor.spec->dictionary,actor.active_clip,3))return;
+    // Provisional active window from inspected source blade poses, separate
+    // from anticipation/recovery. Needs actual GTA contact review.
+    const float first=std::max(previous,1.03f/actor.motion->duration),last=std::min(phase,1.36f/actor.motion->duration);
+    if(last<first)return;
+    const float heading=hook.invoke<float>(0xE83D4F9BA2A38914ULL,actor.entity);
+    if(!std::isfinite(heading))return;
+    std::array<int,513> victims{};int count=0;victims[count++]=primary;
+    for(int i=0;i<nearby_ped_count;i++)if(nearby_peds[i]!=primary)victims[count++]=nearby_peds[i];
+    for(int i=0;i<count;i++){
+        const int ped=victims[i];
+        if(!exists(ped)||hook.invoke<int>(0x3317DEDB88C95038ULL,ped,true))continue;
+        const auto victim=coords(ped);
+        if(!finite_vec(victim)||length(subtract(victim,origin))>8.0f)continue;
+        const int car=hook.invoke<int>(0x9A9112A0FE9A4713ULL,ped,false);
+        const int id=exists(car)?car:ped;
+        if(std::find(actor.blade_victims.begin(),actor.blade_victims.begin()+actor.blade_victim_count,id)!=actor.blade_victims.begin()+actor.blade_victim_count)continue;
+        NativeVector minimum{},maximum{};
+        if(id==car)hook.invoke(0x03E8D3D5F549087AULL,hook.invoke<std::uint32_t>(0x9F47B058362C84B5ULL,car),&minimum,&maximum);
+        bool hit=false;
+        for(int sample=0;sample<=8&&!hit;sample++){
+            const float t=first+(last-first)*sample/8;
+            const auto pose=sample_motion(*actor.motion,t);
+            const auto base=mix(previous_origin,origin,(t-previous)/(phase-previous));
+            const auto a=add(base,rotate_heading(pose.blade_base,heading)),b=add(base,rotate_heading(pose.blade_tip,heading));
+            if(id==car){
+                const auto x=hook.invoke<NativeVector>(0x2274BC1C4885E333ULL,car,a.x,a.y,a.z);
+                const auto y=hook.invoke<NativeVector>(0x2274BC1C4885E333ULL,car,b.x,b.y,b.z);
+                hit=segment_box({x.x,x.y,x.z},{y.x,y.y,y.z},{minimum.x-.1f,minimum.y-.1f,minimum.z-.1f},{maximum.x+.1f,maximum.y+.1f,maximum.z+.1f});
+            }else hit=segment_distance_squared(a,b,add(victim,{0,0,-0.65f}),add(victim,{0,0,0.65f}))<=0.35f*0.35f;
+        }
+        if(!hit||!hook.invoke<int>(0xFCDFF7B72D23A1ACULL,actor.entity,ped,17))continue;
+        if(actor.blade_victim_count>=static_cast<int>(actor.blade_victims.size()))return;
+        actor.blade_victims[actor.blade_victim_count++]=id;
+        if(id==car){
+            const float hp=hook.invoke<float>(0xC45D23BAF168AAB8ULL,car);
+            hook.invoke(0x45F6D8EEF34ABEF1ULL,car,hp-actor.spec->melee_damage*5.0f);
+            const auto push=rotate_heading({0,-3.0f,1.2f},heading);
+            hook.invoke(0x18FF00FC7EFF559EULL,car,1,push.x,push.y,push.z,false,false,true,false);
+        }else hook.invoke(0x697157CED63F18D4ULL,ped,actor.spec->melee_damage,true,0,0u);
+        if(log_file){std::fprintf(log_file,"event=blade_contact entity=%d victim=%d phase=%.5f tick=%u\n",actor.entity,id,phase,now);std::fflush(log_file);}
+    }
+}
+
 bool attack_playback_ready(const Actor& actor,const char* kind,ergt::Vec3 origin,ergt::Vec3 target,std::uint32_t now) {
     const bool requested=actor.animation_accepted && actor.active_clip &&
         std::strcmp(actor.active_clip,actor.spec->attack_clip)==0;
@@ -500,12 +635,15 @@ void strike_nearby(Actor& actor,int primary,ergt::Vec3 origin,ergt::Vec3 target)
 }
 void update_actor(Actor& actor,int player,int,std::uint32_t now,int dt) {
     if(!actor.entity) return;
-    if(!exists(actor.entity)) {record("actor_lost_not_a_confirmed_kill",actor.entity);actor=Actor{};return;}
+    if(actor.cleanup_requested){if(!actor.cleanup_failed)remove_actor(actor);return;}
+    if(!exists(actor.entity) || hook.invoke<std::uint32_t>(0x9F47B058362C84B5ULL,actor.entity)!=hash(actor.spec->model)) {
+        record("actor_lost_not_a_confirmed_kill",actor.entity);remove_actor(actor);return;
+    }
     const auto position=coords(actor.entity),owner=coords(player);
     if(!finite(position) || !finite(owner)) return;
     if(ergt::horizontal_distance(position,owner)>500) {remove_actor(actor);return;}
     if(actor.combat.state()!=ergt::CombatState::defeated) observe_damage(actor,player,now);
-    const int target_entity=fighting?choose_target(actor,player,now):0;
+    const int target_entity=fighting && actor.combat.state()!=ergt::CombatState::defeated?choose_target(actor,player,now):0;
     const bool alive=exists(target_entity) && !hook.invoke<int>(0x3317DEDB88C95038ULL,target_entity,true);
     const auto target=alive?coords(target_entity):position;
     const bool sight=alive && hook.invoke<int>(0xFCDFF7B72D23A1ACULL,actor.entity,target_entity,17);
@@ -513,25 +651,68 @@ void update_actor(Actor& actor,int player,int,std::uint32_t now,int dt) {
     const bool impact_recovery=now-actor.last_impact<700;
     auto decision=actor.combat.tick(dt,{position,target,alive,sight,fighting,airborne});
     const auto state=actor.combat.state();
-    if(state!=actor.previous_state) {
+    if(state!=actor.previous_state || actor.pose_transition_required || (state==ergt::CombatState::staggered && actor.played_reaction!=actor.combat.reaction_generation())) {
+        actor.pose_transition_required=false;
+        actor.played_reaction=actor.combat.reaction_generation();
+        if(state==ergt::CombatState::melee_windup || state==ergt::CombatState::ranged_windup){
+            actor.committed_heading=ergt::heading_to_target(position,target,actor.spec->model_heading_offset);
+            hook.invoke(0x8E2530AA8ADA980EULL,actor.entity,actor.committed_heading);
+        }
+        if(state!=ergt::CombatState::recovering)actor.melee_clip=state==ergt::CombatState::melee_windup;
         const auto intent=ergt::animation_intent(state);
         if(intent==ergt::AnimationIntent::move) animate(actor,actor.spec->move_clip,true);
         else if(intent==ergt::AnimationIntent::attack) animate(actor,actor.spec->attack_clip,false);
         else if(intent==ergt::AnimationIntent::idle) animate(actor,actor.spec->idle_clip,true);
+        else if(intent==ergt::AnimationIntent::stagger) animate(actor,actor.spec->stagger_clip?actor.spec->stagger_clip:actor.spec->idle_clip,actor.spec->stagger_clip==nullptr);
         else if(intent==ergt::AnimationIntent::death) {
             animate(actor,actor.spec->death_clip,false);
-            hook.invoke(0x1A9205C1B9EE827FULL,actor.entity,false,false);
             std::snprintf(notice,sizeof(notice),"%s defeated. 3 clears creatures.",actor.spec->label);
             hud_until=now+6000;record("defeated",actor.entity);
         }
         actor.previous_state=state;
     }
     observe_animation(actor,now);
-    if(fighting && state!=ergt::CombatState::defeated && alive && !impact_recovery) {
+    if(state==ergt::CombatState::defeated && !actor.corpse_settled){
+        // Let an airborne vehicle/explosion victim land before freezing the
+        // final pose. Disabling collision in mid-air would remove ground contact.
+        float ground=0;
+        if(hook.invoke<int>(0xC906A7DAB05C8D2BULL,position.x,position.y,position.z+2.0f,&ground,false,false) &&
+           std::abs(position.z-(ground-actor.spec->minimum_z+.05f))<.3f &&
+           hook.invoke<float>(0xD5037BA82E12416FULL,actor.entity)<.5f){
+            const float heading=hook.invoke<float>(0xE83D4F9BA2A38914ULL,actor.entity);
+            hook.invoke(0x8524A8B0171D5E07ULL,actor.entity,0.0f,0.0f,heading,2,true);
+            hook.invoke(0x239A3351AC1DA385ULL,actor.entity,position.x,position.y,ground-actor.spec->minimum_z+.05f,true,true,false);
+            hook.invoke(0x428CA6DBD1094446ULL,actor.entity,true);
+            hook.invoke(0x1A9205C1B9EE827FULL,actor.entity,false,false);
+            actor.corpse_settled=true;record("corpse_settled",actor.entity);
+        }
+    }
+    if(fighting && (state==ergt::CombatState::chasing || state==ergt::CombatState::idle) && alive && !impact_recovery) {
         const float heading=ergt::heading_to_target(position,target,actor.spec->model_heading_offset);
         hook.invoke(0x8E2530AA8ADA980EULL,actor.entity,heading);
     }
-    if(!impact_recovery && (decision.movement.x!=0 || decision.movement.y!=0)) {
+    if(actor.motion && state!=ergt::CombatState::defeated && !impact_recovery){
+        const float heading=actor.melee_clip?actor.committed_heading:hook.invoke<float>(0xE83D4F9BA2A38914ULL,actor.entity);
+        // Pose/root/blade math assumes an upright model; restore that exact
+        // frame after physical impact recovery, preserving committed facing.
+        if(std::isfinite(heading))hook.invoke(0x8524A8B0171D5E07ULL,actor.entity,0.0f,0.0f,heading,2,true);
+    }
+    if(actor.motion) {
+        if(state==ergt::CombatState::chasing){
+            const float speed=ergt::length(ergt::subtract(actor.motion->samples[actor.motion->count-1].root,actor.motion->samples[0].root))/actor.motion->duration;
+            const float rate=speed>0.01f?std::clamp(actor.spec->speed*(actor.combat.enraged()?1.25f:1.0f)/speed,0.25f,2.0f):1.0f;
+            if(std::abs(rate-actor.playback_rate)>0.001f){actor.playback_rate=rate;hook.invoke(0x28D1A16553C51776ULL,actor.entity,actor.spec->dictionary,actor.active_clip,rate);}
+        }
+        const float phase=hook.invoke<float>(0x346D81500D088F42ULL,actor.entity,actor.spec->dictionary,actor.active_clip);
+        ergt::Vec3 root_delta{};
+        const bool advancing=actor.motion_cursor.advance(*actor.motion,phase,actor.clip_loop,dt*0.001f*actor.playback_rate+0.08f,root_delta);
+        const bool moving=state==ergt::CombatState::chasing || (actor.melee_clip && (state==ergt::CombatState::melee_windup || state==ergt::CombatState::recovering));
+        const bool enabled=moving && fighting && alive && !impact_recovery && actor.animation_accepted;
+        if(!advancing || !hook.invoke<int>(0x1F0B79228E461EC9ULL,actor.entity,actor.spec->dictionary,actor.active_clip,3))root_delta={};
+        const float heading=hook.invoke<float>(0xE83D4F9BA2A38914ULL,actor.entity);
+        move_with_collision(actor,ergt::rotate_heading(root_delta,heading),now,enabled);
+        blade_contacts(actor,target_entity,now,enabled && sight);
+    } else if(!impact_recovery && (decision.movement.x!=0 || decision.movement.y!=0)) {
         const float x=position.x+decision.movement.x,y=position.y+decision.movement.y;
         float ground=0;
         if(hook.invoke<int>(0xC906A7DAB05C8D2BULL,x,y,position.z+4.0f,&ground,false,false)) {
@@ -540,7 +721,7 @@ void update_actor(Actor& actor,int player,int,std::uint32_t now,int dt) {
         }
     }
     if(decision.telegraph && target_entity==player) marker(decision.aim);
-    if(decision.melee_strike && !impact_recovery && attack_playback_ready(actor,"melee",position,target,now)) strike_nearby(actor,target_entity,position,target);
+    if(decision.melee_strike && !actor.motion && !impact_recovery && attack_playback_ready(actor,"melee",position,target,now)) strike_nearby(actor,target_entity,position,target);
     if(decision.ranged_strike && !impact_recovery && attack_playback_ready(actor,"ranged_area",position,decision.aim,now)) {
         const auto p=decision.aim;
         hook.invoke(0xE3AD2BDBAEE269ACULL,p.x,p.y,p.z,0,0.35f,true,false,0.15f,false);

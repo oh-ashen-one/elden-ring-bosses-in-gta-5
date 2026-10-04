@@ -48,13 +48,13 @@ def main():
     # Current material index includes parameters as well as samplers.
     (output/"materials-with-params.json").write_bytes((output/"materials.json").read_bytes())
     run(sys.executable,tools/"prepare_material_overrides.py","--root",output)
-    entries=[("c2120","ergt_malenia",["a000_000020","a000_002000","a000_003000","a000_005000"]),
+    entries=[("c2120","ergt_malenia",["a000_000020","a000_002100","a000_003000","a000_008030","a000_010000"]),
              ("c3181","ergt_redwolf",["a000_000000","a000_001020","a000_003000","a000_005000"]),
              ("c2270","ergt_crab",["a000_000000","a000_001020","a000_003000","a000_005000"])]
     for character,name,clips in entries:
         glb=output/"interchange"/(character+".glb")
         command=[sys.executable,tools/"export_character_glb.py","--root",output,"--character",character,"--out",glb,
-                 "--animations","4","--clip-names",*clips]
+                 "--animations",str(len(clips)),"--clip-names",*clips]
         if character=="c2120":command.extend(["--masks","0","10","21"])
         run(*command)
         env=dict(os.environ,BLENDER_USER_CONFIG=str(cache/"blender-profile"))
@@ -74,6 +74,8 @@ def main():
         template.rename(converted/(name+"_anims.blender-source.xml"))
         shutil.copy2(repaired,template)
     run(sys.executable,tools/"align_ground_contact.py","--converted",output/"gta-object-materials","--animations",output/"animation-repaired","--out",output/"gta-grounded")
+    run(sys.executable,tools/"export_motion.py","--raw",output/"raw/c2120","--glb",output/"interchange/c2120.glb",
+        "--model","ergt_malenia","--clips",*entries[0][2],"--weapon-mesh","#00#_Sword","--out",output/"motion/malenia.hpp")
     dotnet=cache/"dotnet/dotnet";bridge=repo/"build/cw-bridge/CodeWalkerBridge.dll"
     run(sys.executable,tools/"build_dlc.py","--converted",output/"gta-grounded","--out",output/"dlc-build","--dotnet",dotnet,"--bridge",bridge)
     run(dotnet,bridge,"prepare-dlclist",args.gta_game.resolve(),output/"newmods/common/data/dlclist.xml")

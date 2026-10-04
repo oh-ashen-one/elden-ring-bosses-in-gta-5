@@ -141,7 +141,33 @@ try
         RpfFile.LoadResourceFile(loaded, data, 46);
         if (loaded.ClipMap.Count == 0 || loaded.AnimMap.Count == 0)
             throw new InvalidDataException("Binary animation dictionary is empty");
-        details = new { clips = loaded.ClipMap.Count, animations = loaded.AnimMap.Count };
+        // Validate decoded native samples, including last frames and compact
+        // quaternions. Bone/clip counts alone previously hid a broken pose.
+        if (loaded.AnimMap.Count != original.AnimMap.Count || loaded.ClipMap.Count != original.ClipMap.Count)
+            throw new InvalidDataException("Animation/clip count changed");
+        int checkedSamples = 0; float maxError = 0;
+        foreach (var pair in original.AnimMap)
+        {
+            var expected = pair.Value.Animation;
+            if (!loaded.AnimMap.TryGetValue(pair.Key, out var entry)) throw new InvalidDataException("Missing animation");
+            var actual = entry.Animation;
+            if (actual.Frames != expected.Frames || Math.Abs(actual.Duration - expected.Duration) > 1e-5f ||
+                actual.BoneIds.data_items.Length != expected.BoneIds.data_items.Length)
+                throw new InvalidDataException("Animation timing/layout changed");
+            for (int frame = 0; frame < expected.Frames; frame++)
+            for (int bone = 0; bone < expected.BoneIds.data_items.Length; bone++)
+            {
+                var id = expected.BoneIds.data_items[bone]; var readId = actual.BoneIds.data_items[bone];
+                if (id.BoneId != readId.BoneId || id.Track != readId.Track) throw new InvalidDataException("Bone mapping changed");
+                var a = expected.Sequences.data_items[frame / expected.SequenceFrameLimit].Sequences[bone].EvaluateVector(frame % expected.SequenceFrameLimit);
+                var b = actual.Sequences.data_items[frame / actual.SequenceFrameLimit].Sequences[bone].EvaluateVector(frame % actual.SequenceFrameLimit);
+                var error = Math.Max(Math.Max(Math.Abs(a.X-b.X),Math.Abs(a.Y-b.Y)),Math.Max(Math.Abs(a.Z-b.Z),Math.Abs(a.W-b.W)));
+                if (!float.IsFinite(error) || error > 2e-5f) throw new InvalidDataException("Native animation sample changed");
+                maxError = Math.Max(maxError,error); checkedSamples++;
+            }
+        }
+        details = new { clips = loaded.ClipMap.Count, animations = loaded.AnimMap.Count,
+            checked_native_samples = checkedSamples, max_component_error = maxError };
     }
     else if (source.EndsWith(".ytyp.xml", StringComparison.OrdinalIgnoreCase))
     {

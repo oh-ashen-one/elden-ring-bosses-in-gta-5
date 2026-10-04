@@ -1,8 +1,8 @@
 # Elden Los Santos — owner preview
 
-**2026-10-03 motion polish.** The update retains the repaired bone transforms, corrects model facing and floor placement, adjusts strike timing from inspected source motion, suppresses damage when an attack animation request fails, and includes both parked-car and duplicate vehicle-hit fixes. Malenia, Red Wolf and Giant Crab keep their authentic meshes and source-resolution materials. v7's visible imports and bullet damage were owner-confirmed; this repaired candidate's visual quality, movement, car/explosive damage and performance still need your review. The existing animation samples are retained; full-rate regeneration is separate future work.
+**2026-10-04 Malenia motion candidate.** Malenia now has five full-rate source clips, separate root movement, a real stagger reaction and a kneeling defeat animation. Her sword damage follows sampled blade geometry during the strike window. Movement probes check walls, vehicles and pedestrians before changing her position. These changes have passed offline checks; their appearance, actual contacts and performance in GTA remain unverified.
 
-The owner asked to leave GTA closed while other sessions use the GPU. Updating the files does not launch it. No automated technical import check is queued.
+**GTA stays closed for now, at Hari’s request.** The shared Studio renderer coordinator is emergency-paused. This thread will perform the technical rendered encounter checks after runtime work resumes; Hari’s final playtest comes afterward. No automatic game test is queued.
 
 ## Start
 
@@ -27,7 +27,7 @@ Use a clear outdoor area for the first test. These are animated creature objects
 
 1. Start with **Malenia** (the default selection), press **4** to pause combat and press **2 once** outdoors. If she fails to appear, stop here; don’t cycle through other creatures or repeatedly retry. The log now distinguishes model loading, animation loading and creation. A failed creature is locked for that session.
 2. Shoot it while combat is OFF. Confirm the health bar drops.
-3. Press **4** to resume aggression. Check that the creature faces you while pursuing, its feet/claws meet the ground, and damage coincides with the visible strike. Check attacks against you and nearby NPCs/drivers; movement and animation should both be visible. The red warning sphere marks a ranged blast targeting you.
+3. Press **4** to resume aggression. Check that the creature faces you while pursuing, its feet/claws meet the ground, and damage coincides with the visible strike. Check attacks against you and nearby NPCs/drivers; movement and animation should both be visible. For Malenia, watch the committed sword swing: she should not spin to follow you halfway through it. Her generic explosion attack is disabled; Wolf and Crab retain their earlier blast behavior.
 4. Use the RPG, a moving-car impact, then helicopter weapons. A parked car touching the creature should not repeatedly drain its health. Check each damage channel separately.
 5. Defeat the creature, clear it with 3, then spawn another one.
 
@@ -54,13 +54,13 @@ The command restores the exact original directory to Steam's path and restores t
 
 ## Known limits
 
-- Script Hook V, the ASI loader and this script ran under CrossOver on GTA 1.0.3889.0. The v2 package failed creature creation and later crashed after a crab request. The v3 texture repair still failed object creation. v4 proved stock-object creation works, while the custom model still failed. v5 registration alone still failed. Runtime isolation then identified the Dynamic archetype flag; v7 applied it and the owner confirmed all three visible imports. v8 appearance, animation and aggressive combat are still unverified.
-- Malenia uses selected phase-one meshes. The AI is custom: chase, melee wind-up, stagger, increased aggression below half health and telegraphed ranged blasts.
-- Ranged effects and damage use GTA explosions; original Elden Ring VFX, spell systems, AI, sounds and cloth simulation are not ported.
-- Collision uses whole-body boxes. Direct line-of-sight movement is simple, with no pathfinding around buildings. Animation-role choices and strike timing need owner review.
+- Script Hook V, the ASI loader and this script ran under CrossOver on GTA 1.0.3889.0. The v2 package failed creature creation and later crashed after a crab request. The v3 texture repair still failed object creation. v4 proved stock-object creation works, while the custom model still failed. v5 registration alone still failed. Runtime isolation then identified the Dynamic archetype flag; v7 applied it and the owner confirmed all three visible imports. The current candidate’s appearance, animation and aggressive combat are still unverified.
+- Malenia uses selected phase-one meshes. Her GTA-side behavior includes chase, a committed sword swing, stagger and faster pursuit below half health. The five selected clips were inspected offline; original ER AI, the full moveset and second phase are not ported.
+- Wolf/Crab ranged effects and damage use GTA explosions; original Elden Ring VFX, spell systems, AI, sounds and cloth simulation are not ported.
+- Malenia uses a conservative torso box for GTA bullets/physics and a separate sampled sword sweep for attacks. Her movement probes stop at obstacles; they do not plan a route around buildings. Wolf and Crab retain coarse whole-body boxes. Real contact timing needs the guarded technical run.
 - Native health loss is preferred for incoming damage. Hit flags provide a logged fallback where drawable objects do not reduce native health. Weapon/explosion/vehicle balance still needs calibration.
 - Materials preserve source image dimensions and use GTA's skinned-object normal/specular shader. Hair opacity comes from the HairLong material's actual normal atlas. Specular response, layered shading and shell fur remain approximations; this is not yet Elden Ring visual parity. Optional meshes may need visibility tuning.
 - No FPS, controller compatibility or completed ten-minute gameplay claim is made.
 - Story Mode only. The plugin guards network sessions; Script Hook V itself does not support GTA Online.
 
-**Do not upload or share the private package:** it contains assets extracted from your games and separately obtained runtime files. The public repository distributes original source and conversion/setup instructions, not those files.
+**Do not upload or share the private package or its motion-enabled ASI:** it contains assets extracted from your games and separately obtained runtime files. The public repository distributes original source and conversion/setup instructions, not those files.

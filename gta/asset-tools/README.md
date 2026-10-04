@@ -108,3 +108,25 @@ Schema references: [Sollumz shader conversion](https://github.com/Sollumz/Sollum
 The imported model front is -Y, so the runtime applies a 180-degree heading offset. Provisional melee contact times follow inspected source poses: Malenia 1150 ms, wolf 1350 ms, crab 900 ms. Playback acceptance failures suppress damage; per-strike logs expose engine phase and world coordinates for the owner test.
 
 `align_ground_contact.py` adjusts the verified single-box collision floors to the inspected animated neutral geometry, keeping the matching runtime placement values. It preserves all drawable XML outside `Bounds`, source pixels, rigs, clips and render/culling bounds. A native reader confirmed the composite and child floors. Only 31–40 decompressed resource bytes changed in each existing YDR; the animation binaries are identical to the accepted pose repair. This improves the initial ground reference but remains a coarse collider, not original ER limb hitboxes. Terrain contact, physics and scale still require actual GTA review.
+
+
+## Full-rate Malenia and root motion (2026-10-04)
+
+`rebuild_animation.py --source-clips ...` creates the chosen clip list with each source sample and duration, while retaining the verified drawable bind rig. CodeWalkerBridge now compares every decoded native frame/channel with the XML input; successful counts alone are insufficient.
+
+`export_motion.py` reads the owned HKX reference frames and the matching full-rate glTF. It keeps root motion separate from skeletal pose and samples the actual skinned sword endpoints. It validates source axes, duration and sample count, rejects turning/jumping moves outside this grounded runtime’s supported contract, and writes a **private** C++ header plus hashes. No Blender/game/renderer is used in this step.
+
+```sh
+python gta/asset-tools/export_motion.py \
+  --raw /private/ergt-assets/raw/c2120 \
+  --glb /private/ergt-assets/interchange/c2120.glb \
+  --model ergt_malenia --weapon-mesh '#00#_Sword' \
+  --clips a000_000020 a000_002100 a000_003000 a000_008030 a000_010000 \
+  --out /private/ergt-assets/motion/malenia.hpp
+```
+
+The complete owned-assets orchestrator now generates that header. Pass its absolute path as `-DERGT_MOTION_HEADER=...` when compiling the Windows plugin. Neither the header nor that asset-bearing ASI may be published with the open-source code.
+
+Malenia’s old death selection `a000_005000` is a turn, with a -90-degree reference-frame rotation and upright source poses. Inspected `a000_008030` recoils and recovers; `a000_010000` ends kneeling. Her run and attack contain metres of previously discarded root motion. These findings were checked against skinned source poses; actual GTA playback remains a separate required gate.
+
+`align_ground_contact.py` also gives Malenia a conservative one-metre-wide torso box. The old rest-pose bounds included the extended sword and were nearly four metres wide. Her attack sweep now samples the weapon separately. Body boxes and victim capsules remain GTA-side approximations, not imported original ER hitboxes or Havok physics.

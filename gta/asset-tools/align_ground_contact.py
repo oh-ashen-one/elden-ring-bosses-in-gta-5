@@ -17,6 +17,26 @@ from xml.etree import ElementTree as ET
 # Keep consistent with CreatureSpec.minimum_z; clearances remain in the runtime.
 CONTACTS={'c2120':('ergt_malenia',-0.005),'c3181':('ergt_redwolf',-0.075),'c2270':('ergt_crab',-0.355)}
 
+def body_box(root,half_width=0.5):
+    """Conservative torso box; the weapon sweep is a separate runtime contact.
+
+    A rest-pose sword stretched the old physical box almost four metres wide.
+    This gameplay approximation keeps the inspected height/ground reference.
+    It is neither limb-accurate bullet collision nor the original Havok shape.
+    """
+    bound=root.find('Bounds');children=bound.findall('Children/Item')
+    if bound.get('type')!='Composite' or len(children)!=1 or children[0].get('type')!='Box':raise ValueError('Unsupported body collider')
+    if not 0.1<=half_width<=1:raise ValueError('Invalid body width')
+    for item in [bound,children[0]]:
+        lo=item.find('BoxMin');hi=item.find('BoxMax')
+        for axis in 'xy':lo.set(axis,str(-half_width));hi.set(axis,str(half_width))
+        lower=[float(lo.get(k)) for k in 'xyz'];upper=[float(hi.get(k)) for k in 'xyz'];size=[b-a for a,b in zip(lower,upper)]
+        item.find('Volume').set('value',format(math.prod(size),'.9g'))
+        for i,axis in enumerate('xyz'):item.find('Inertia').set(axis,format(sum(size[j]**2 for j in range(3) if j!=i)/12,'.9g'))
+        centre=[float(item.find('SphereCenter').get(k)) for k in 'xyz']
+        radius=math.sqrt(sum(max(abs(a-c),abs(b-c))**2 for a,b,c in zip(lower,upper,centre)))
+        item.find('SphereRadius').set('value',format(radius,'.9g'))
+
 
 def adjust(root, floor):
     bound=root.find('Bounds')
@@ -52,6 +72,7 @@ def prepare(converted,animations,out):
         shutil.copytree(source/name,dest/name)
         drawable=ET.parse(source/(name+'.ydr.xml'))
         old=adjust(drawable.getroot(),floor);ET.indent(drawable)
+        if character=='c2120':body_box(drawable.getroot())
         drawable.write(dest/(name+'.ydr.xml'),encoding='utf-8',xml_declaration=True)
         # Use the current repaired animation, never regress to the older
         # f-curve conversion that accompanies the material-conversion folder.
@@ -59,6 +80,9 @@ def prepare(converted,animations,out):
         receipt=json.loads((source/(name+'.conversion.json')).read_text())
         receipt['render_bounds']=receipt.get('render_bounds',{'min':receipt['collision']['min'][:],'max':receipt['collision']['max'][:]})
         receipt['collision']['min'][2]=floor;receipt['collision']['ground_reference']='inspected animated idle mesh; runtime contact unverified'
+        if character=='c2120':
+            receipt['collision']['min'][:2]=[-.5,-.5];receipt['collision']['max'][:2]=[.5,.5]
+            receipt['collision']['note']='Conservative body box; sword contact is sampled separately at runtime; limb hitboxes not imported'
         (dest/(name+'.conversion.json')).write_text(json.dumps(receipt,indent=2)+'\n')
         reports.append({'model':name,'prior_floor':old,'new_floor':floor,'render_bounds_preserved':True,'gta_runtime_verified':False})
     (out/'ground-contact-report.json').write_text(json.dumps(reports,indent=2)+'\n');return reports

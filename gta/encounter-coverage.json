@@ -1,6 +1,6 @@
 {
-  "installed_baseline": "c2fc4e2ed7fae8f8ce711af617fbe7fddfcb80b9",
-  "scope": "2026-10-03 motion polish; owner runtime review pending",
+  "installed_baseline": "bb643985f29c6172c51e3084b97f2fa37b4b4470",
+  "scope": "2026-10-04 Malenia root-motion candidate; GTA launch held by owner; actual rendered encounter unverified",
   "characters": [
     {
       "name": "Malenia",
@@ -11,9 +11,15 @@
       "windup_ms": 1150,
       "attack_clip_ms": 2734,
       "attack_clip": "a000_003000",
-      "intended_melee": "sword strike; source clip role awaits visual confirmation",
+      "intended_melee": "sampled skinned sword segment against victim capsules/vehicle model boxes; provisional active window 1.03-1.36 s; GTA contact review pending",
       "model_heading_offset_degrees": 180,
-      "ground_reference_min_z": -0.005
+      "ground_reference_min_z": -0.005,
+      "move_clip": "a000_002100",
+      "stagger_clip": "a000_008030",
+      "stagger_ms": 1334,
+      "death_clip": "a000_010000",
+      "source_rate": "all frames retained",
+      "ranged_enabled": false
     },
     {
       "name": "Red Wolf of Radagon",
@@ -43,15 +49,15 @@
     }
   ],
   "common_attacks": {
-    "ranged": "1.5 second telegraph; locked aim point; native GTA type-0 explosion with damageScale0.35, audible and visible; no travelling projectile",
+    "ranged": "Wolf and Crab only: 1.5 s telegraph then native GTA type-0 explosion; no travelling projectile",
     "ranged_trigger": "horizontal distance above28m, height difference above6m, or airborne target; target scan limited to90m horizontal/100m vertical",
-    "melee": "line-of-sight/front half-plane/range/height constrained sweep; damages nearby on-foot NPCs/player; occupied cars take engine damage and impulse",
+    "melee": "Malenia uses native animation phase and sampled blade sweep with per-attack victim/vehicle dedup; other two creatures retain front-half-plane sweep",
     "vehicle_damage_multiplier": 5,
     "aggression": "nearest visible player/NPC with current-target hysteresis and player-hit retaliation",
     "enrage": "at <=50 percent HP, chase speed x1.25; recovery reduced only where attack duration allows",
-    "heavy_hit": "damage >=250 triggers500ms stagger; reuses idle clip, no dedicated hit-reaction clip",
-    "defeat": "death clip request, collision disabled, further custom damage/attacks stopped",
-    "playback_gate": "A rejected/missing/wrong attack animation request suppresses damage. Accepted requests still require actual GTA phase/pose review; event log records engine phase, playing flag, elapsed time and actor/target world coordinates."
+    "heavy_hit": "Malenia: >=250 damage starts/restarts 1334 ms source stagger clip; others retain 500 ms idle substitution",
+    "defeat": "Stop outgoing damage; Malenia requests source kneeling defeat. Retain physics until settled near ground, then freeze and disable collision. Native behavior unverified.",
+    "playback_gate": "Malenia blade contact requires accepted, playing, advancing native phase in the active interval; phase jumps/stalls/pause cannot bank a hit. Other actors retain request-acceptance gate."
   },
   "incoming_damage": {
     "bullets": "native HP loss preferred; attributed-player weapon fallback with80ms spacing",
@@ -61,7 +67,7 @@
     "helicopter": "native Buzzard missiles/guns use the same incoming damage path; actual accuracy/flying review pending"
   },
   "reset": {
-    "creatures": "key3 clears only model-checked owned creatures; key2 respawns with fresh state; max3; corpse occupies slot until clear; failed import remains locked for the session",
+    "creatures": "Key3 deletes model-checked owned actors, draining pending shape tests first. Failed deletion retains slot and logs once; key3 retries. Key2 creates fresh state. Max3; corpse retains slot until clear.",
     "combat_pause": "key4 cancels queued attacks; resume cannot bank a hit",
     "helicopter": "key6 preserves a usable matching owned Buzzard; replaces matching owned wreck; missing/reused handles do not delete unrelated entities"
   },
@@ -71,27 +77,30 @@
     "implemented_er_voice_or_music": false
   },
   "essential_runtime_gates": [
-    "Owner confirms all three visible rig/pose/clip transitions and ground alignment",
-    "Player/NPC aggression, melee tells/hit timing and defeat must be checked in GTA",
-    "Verify bullets, RPG/nearby explosions, moving-car impacts, parked-car no-drain and helicopter weapons separately",
-    "Verify clear/respawn and destroyed-Buzzard recovery",
-    "Measure actual frame rate/stability under exclusive GTA reservation"
+    "Resume with owner-authorized exclusive shared GPU reservation after emergency recovery; do not launch during current hold",
+    "This original thread inspects actual Malenia idle/run/attack/stagger/kneeling defeat, materials/hair/skin and world alignment",
+    "Check blade misses/dodges and actual damage timing against player, NPC and vehicle",
+    "Verify bullets, RPG/nearby explosions, moving-car impact, parked-car no-drain and Buzzard weapons separately",
+    "Repeat defeat/clear/respawn, pause/cancel and helicopter cleanup; inspect logs and actual frame stability",
+    "Only after technical failures are repaired, ask Hari for subjective playtest"
   ],
   "meaningful_missing_features": [
-    "Obstacle pathfinding beyond line-of-sight chase",
-    "Dedicated stagger/knockdown/get-up animation; current idle substitution is not original ER hit reaction",
-    "Geometric animated limb/weapon hitboxes; current whole-body collision is coarse",
-    "Full source-rate regeneration of existing downsampled interchange clips",
-    "Original ER spell/projectile VFX, voice/music, cloth and engine AI; not needed to establish basic GTA weapon/car fighting but required for close fidelity",
-    "Distinct multi-attack boss movesets and phase-specific moves; current phase is stat-level enrage only"
+    "Obstacle pathfinding",
+    "Original ER limb physics/hitboxes, full moveset/second phase, cloth, layered shaders, voice/music and spell VFX",
+    "Root-motion/stagger/death fidelity work for Wolf and Crab",
+    "Actual current-candidate GTA rendering, combat and performance verification"
   ],
-  "current_source_fix": "Model-forward heading correction, source-motion hit timing, failed-animation damage suppression, invalid-target safety, and full per-strike vehicle deduplication",
+  "current_source_fix": "Full-rate Malenia, real source reaction/defeat clips, root motion, guarded movement, blade contact, committed facing, cleanup protection and native animation sample verification",
   "not_claimed": "No original ER boss AI, travelling magic projectile, native ER sound, completed gameplay/performance acceptance or ArkWeb/CrossOver dual-engine compatibility",
-  "ground_alignment_risk": "Contact floors and runtime placement now agree with inspected neutral-pose minima; meshes/rigs/textures/clips and culling bounds are preserved. Body colliders remain coarse, and native floor/terrain behavior still needs owner review.",
+  "ground_alignment_risk": "Malenia collision now approximates torso instead of extended rest-pose sword; render bounds/geometry/textures preserved. Native terrain, impact and corpse settling need runtime review.",
   "future_memory_interface": {
     "current": "Combat::tick is local, deterministic and independent of network calls. Movement, health, damage and hit timing stay here.",
     "extension": "Optional nonblocking intent mailbox: encounter generation, actor ID, target suggestion, stance, issued tick and short TTL. Validate locally; discard stale/mismatched intents.",
     "memory": "Summaries of encounters can be persisted by an external worker after bounded event emission. Text/model replies must not supply coordinates, health edits or native commands.",
     "fallback": "Missing, late or invalid replies keep the existing local behavior running. No API/server/listener added in this pass."
+  },
+  "movement": {
+    "Malenia": "Native clip phase drives extracted horizontal root movement. Run playback speed matches configured pursuit speed. Locked attack heading; upright pose frame restored after vehicle impact recovery. Three asynchronous overlapping sphere probes precede each <=0.35 m step; pending/hit/stale/invalid results stop movement. No obstacle pathfinding.",
+    "others": "Previous line-of-sight chase retained."
   }
 }

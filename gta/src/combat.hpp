@@ -46,13 +46,16 @@ struct CreatureSpec {
     int attack_clip_ms;
     float minimum_z;
     float model_heading_offset = 180.0f;
+    const char* stagger_clip = nullptr;
+    int stagger_ms = 500;
+    bool ranged_enabled = true;
 };
 
 // Hit timers now follow inspected source attack-motion landmarks. Contact
 // timing, clip roles and GTA playback still require owner gameplay review.
 inline constexpr std::array<CreatureSpec, 3> creatures{{
-    {"Malenia", "ergt_malenia", "ergt_malenia_anims", "a000_000020", "a000_002000", "a000_003000", "a000_005000",
-     3600, 3.2f, 3.5f, 28, 1150, 1500, 2734, -0.005f},
+    {"Malenia", "ergt_malenia", "ergt_malenia_anims", "a000_000020", "a000_002100", "a000_003000", "a000_010000",
+     3600, 3.2f, 3.5f, 28, 1150, 1500, 2734, -0.005f,180.0f,"a000_008030",1334,false},
     {"Red Wolf of Radagon", "ergt_redwolf", "ergt_redwolf_anims", "a000_000000", "a000_001020", "a000_003000", "a000_005000",
      2800, 5.0f, 4.5f, 32, 1350, 1300, 3934, -0.075f},
     {"Giant Crab", "ergt_crab", "ergt_crab_anims", "a000_000000", "a000_001020", "a000_003000", "a000_005000",
@@ -60,7 +63,7 @@ inline constexpr std::array<CreatureSpec, 3> creatures{{
 }};
 
 enum class CombatState { idle, chasing, melee_windup, ranged_windup, recovering, staggered, defeated };
-enum class AnimationIntent { keep, idle, move, attack, death };
+enum class AnimationIntent { keep, idle, move, attack, stagger, death };
 inline AnimationIntent animation_intent(CombatState state) {
     switch(state) {
     case CombatState::chasing: return AnimationIntent::move;
@@ -68,6 +71,7 @@ inline AnimationIntent animation_intent(CombatState state) {
     case CombatState::ranged_windup: return AnimationIntent::attack;
     case CombatState::recovering: return AnimationIntent::keep;
     case CombatState::defeated: return AnimationIntent::death;
+    case CombatState::staggered: return AnimationIntent::stagger;
     default: return AnimationIntent::idle;
     }
 }
@@ -96,6 +100,7 @@ public:
     float ratio() const { return std::clamp(health_ / spec_->maximum_health, 0.0f, 1.0f); }
     bool enraged() const { return ratio() <= 0.5f; }
     CombatState state() const { return state_; }
+    unsigned reaction_generation() const { return reaction_generation_; }
     void cancel_attack() {
         if (state_ != CombatState::defeated && state_ != CombatState::staggered) {
             state_ = CombatState::idle; remaining_ms_ = 0;
@@ -106,7 +111,7 @@ public:
         if (!std::isfinite(value) || value <= 0 || state_ == CombatState::defeated) return;
         health_ = std::max(0.0f, health_ - value);
         if (health_ == 0) { state_ = CombatState::defeated; remaining_ms_ = 0; }
-        else if (value >= 250) { state_ = CombatState::staggered; remaining_ms_ = 500; }
+        else if (value >= 250) { state_ = CombatState::staggered; remaining_ms_ = spec_->stagger_ms; ++reaction_generation_; }
     }
 
     Decision tick(int elapsed_ms, const Observation& observation) {
@@ -146,15 +151,16 @@ public:
         }
         const float distance = horizontal_distance(observation.actor, observation.target);
         if (!observation.line_of_sight || distance > 200.0f) { state_ = CombatState::idle; return out; }
-        if (observation.airborne_target || std::abs(observation.actor.z - observation.target.z) > 6.0f || distance > 28.0f) {
+        if (spec_->ranged_enabled && (observation.airborne_target || std::abs(observation.actor.z - observation.target.z) > 6.0f || distance > 28.0f)) {
             locked_target_ = observation.target;
             state_ = CombatState::ranged_windup; remaining_ms_ = 1500;
             out.telegraph = true; out.aim = locked_target_;
-        } else if (distance <= spec_->melee_range) {
+        } else if (distance <= spec_->melee_range && std::abs(observation.actor.z-observation.target.z)<4.0f) {
             state_ = CombatState::melee_windup; remaining_ms_ = spec_->windup_ms;
         } else {
             state_ = CombatState::chasing;
             const float speed = spec_->speed * (enraged() ? 1.25f : 1.0f);
+            if(distance<=spec_->melee_range){state_=CombatState::idle;return out;}
             const float step = std::min(speed * dt / 1000.0f, distance - spec_->melee_range);
             out.movement = {(observation.target.x - observation.actor.x) / distance * step,
                             (observation.target.y - observation.actor.y) / distance * step, 0};
@@ -168,5 +174,6 @@ private:
     CombatState state_ = CombatState::idle;
     int remaining_ms_ = 0;
     Vec3 locked_target_{};
+    unsigned reaction_generation_ = 0;
 };
 } // namespace ergt
