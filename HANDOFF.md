@@ -1,245 +1,79 @@
-# Handoff
+# GTA V × Elden Ring handoff
 
-Updated: 2026-10-03 (motion polish installed and package verified; GTA remains closed, owner runtime review pending).
+Updated 2026-10-04. This original thread owns the GTA crossover. **Malenia candidate installed; GTA remains closed; actual rendered encounter is NOT yet verified.**
 
-## Current owner-directed motion polish
+## Authority and current launch hold
 
-- Installed candidate: `20261003-motion-polish`, verified in both active profile and preview package. Runtime marker `loaded_motion_polish_20261003_owner_verification_pending`. ASI `8c1c04e9426df4021de18dda83fb505d85db49ad22949bb43080a3401d459f94`; DLC `a4046610368589073f3c8dce455707df521f1a0b4a3ca96cdf504ece97da0c72`. The parked-impact and formerly staged melee vehicle-dedup fixes are both included.
-- Reversible update used `upgrade_profile.py` with GTA/PlayGTAV absent. Full prior-candidate backup: `~/Applications/EldenLosSantosPreview/Backups/upgrade-20261003T212919Z-85e8b89c`. Original game/registry/accounts/saves and other sessions were untouched. No game or renderer started.
-- Current editable input copy: `SourceAssets/gta/grounded-20261003`; private pose sheets/motion reports/native-contact checks: `Evidence/20261003-motion-polish`. These are asset-level diagnostics, not GTA screenshots. Keep all derived asset files private. Current source belongs on the task branch under the shared Git rules; no main/default merge is authorized.
-- Hari reaffirmed ownership: prioritize existing bosses' visual/motion fidelity, native ASI/Script Hook V, GTA gun/explosion/vehicle combat, reversible offline installs and truthful verification. Leave the other projects alone; avoid heavy work. Keep GTA closed under the earlier launch hold.
-- Current authoring checkout is `/Users/midir/Documents/Codex/2026-09-30/yo-take-a-look-at-this/modern-warfare-2-ai`, branch `codex/boss-motion-polish`. The temporary follow-up worktree was consolidated here and removed after its source branch was pushed. The installed source was freshly verified as `c2fc4e2`; both copies of all six payloads and helpers matched, and the repaired build has not yet appeared in the game log. The parked-impact fix was installed; the dense-traffic dedup fix was still staged.
-- Inspected actual skinned geometry in private CPU pose sheets and sampled existing source animation world/model transforms. All three models face -Y while the script assumed +Y; apply a 180-degree heading offset. Cardinal-direction tests verify the resulting front points at the target.
-- Adjusted provisional damage landmarks to Malenia 1150 ms, wolf 1350 ms, crab 900 ms after inspecting attack poses/trajectories. Old Malenia damage occurred with the blade raised behind her; old crab damage lagged its downward strike. These are source-motion-derived starting values, not owner-approved in-game timing.
-- Definite failed/missing attack-animation requests now suppress damage. Each attempted strike logs playback phase, playing flag, elapsed time and actor/target world positions. Accepted native calls alone still do not prove correct animation.
-- Added finite target-transform checks and 50 deterministic reset/attack/defeat cycles. Fifteen CTest suites and the single-job Windows ASI build pass. Includes the staged per-strike vehicle deduplication fix. No engine/GPU or full extraction/pipeline rebuild was used; three existing drawables were repacked after the bounded contact-field edit.
-- Ground placement was incorrectly based on full rest-pose bounds: inspected idle skin minima predict roughly 40 cm excess lift for Malenia and 50 cm for Crab. `align_ground_contact.py` raises the verified one-box collider floors and matches runtime placement minima (-0.005/-0.075/-0.355 m). Render bounds, vertices, materials, textures, skeletons and clips are preserved; only 31-40 native decompressed bytes change per YDR. Native reader confirms both composite and child floors. Colliders are still coarse and gameplay contact must be reviewed; no original ER limb hitboxes are claimed.
-- Future player-memory AI fits as an optional asynchronous, expiring advisory intent. Local Combat::tick must keep movement/damage/timing authoritative and fall back without waiting. No API or listener added. See `gta/encounter-coverage.json` for exact coverage, limitations and the proposed boundary.
-- Private motion reports/pose sheets and their reproduction adapter are preserved under `~/Applications/EldenLosSantosPreview/Evidence/20261003-motion-polish`; temporary generation/build caches were removed. These contain derived retail geometry and must never enter Git. Original source only belongs on the task branch; no default/main merge is authorized.
+- Hari requested one convincing boss fight end to end, applying er-mario lessons, with this thread performing technical rendered gameplay checks before his final subjective playtest.
+- After a read-only launch check found the shared emergency pause, Hari explicitly answered **“Keep working without launching for now.”** That is the current launch instruction. No game/renderer was launched in this update and no technical test is queued.
+- Verified host: `midirstudio.local`, Mac15,14, Apple M3 Ultra, 256 GiB, console owner `midir`. Desktop accessibility was available after the reboot. Recheck before any future launch.
+- Actual shared GPU root: `/Users/midir/sm2-n1/_scratch/gpu`. Its unchanged PAUSED marker says `23:42 auto-pause by health_monitor: WindowServer starved (gpu 100% ws_cpu 0)`. This predates the current boot. Do not clear/rename it, substitute another lock root, or stop another session's processes.
+- GTA requires exclusive GPU use despite the global cap of two renderers. Use `gta/tools/launch_owner.py`, current host identity and the full shared safety protocol. Emergency pauses always block it. Keep 1920×1080 windowed/VSync. Never enter a crash/relaunch loop.
+- Leave Midir's Dark Souls × MW2, Spider-Man, M5 benchmark, Unity and completed Minecraft × MW2 work alone. Do not create another thread or message another session without the required human authorization.
 
-## Prior source-only follow-up
+## Source ownership and publication
 
-- Worktree: `~/Library/Caches/EldenLosSantos/encounter-source-followup`; branch `codex/encounter-source-followup`, based on installed-source commit `c2fc4e2ed7fae8f8ce711af617fbe7fddfcb80b9`. This owns combat runtime and its tests only. The original authoring checkout, installed package/profile, launcher/verifier ownership and GPU state stay untouched.
-- Exact current attacks, damage/reset behavior, audio inventory and meaningful gaps are recorded in `gta/encounter-coverage.json`. Each creature has one selected melee attack clip and the same telegraphed native GTA explosion; no travelling magic projectile or original ER audio/AI is implemented.
-- Confirmed and fixed a low-priority dense-traffic edge case: the strike helper remembered only 32 vehicle handles. A 33rd car could receive repeat engine damage from multiple occupants in one strike. The remembered set now covers all potential victims. The original actual-helper fixture fails at car 33; repaired source passes on-foot, two-occupant single-car, 33-car and 256-car fixtures.
-- Thirteen CTest suites pass, including the actual melee helper fixture. A single-job Windows ASI build passes. This verifies source behavior against native-event fixtures, not a game or performance test.
-- Not installed or published. No game, renderer, extraction, material/animation regeneration or shared profile mutation occurred in this pass. Retain the local source checkpoint/patch for optional later integration rather than silently replacing the installed candidate.
-- Essential next gate is actual owner verification of rig/clip appearance, ground alignment, NPC aggression, melee timing, bullets/RPG/explosions/vehicle/helicopter damage, clear/respawn and stability. Offline native flags/HP fixtures cannot establish those engine behaviors. Full-rate animation regeneration needs a separate resource window. Additional original spell VFX/audio/movesets need content and runtime validation; ArkWeb supplies no ER/CrossOver bridge.
+- Authoring checkout: `/Users/midir/Documents/Codex/2026-09-30/yo-take-a-look-at-this/modern-warfare-2-ai`.
+- Task branch: `codex/boss-motion-polish`; remote `origin`, repository `oh-ashen-one/modern-warfare-2-ai`.
+- The chat default cwd `/Users/midir/Documents/ChatGPT/combiing games` belongs to another lane. Always set this GTA workdir explicitly.
+- Implementation commit: `b4ec51e94f11f07a4c18ffebdc45fd4724ec3494`. A subsequent handoff commit does not change the compiled runtime. Push this task branch in the same session; never merge/push main without explicit permission.
+- Original public code only. Generated motion headers, motion-enabled ASIs, native DLCs, GLB/DDS/Blender files, game archives, saves and credentials remain private. The ASI now embeds derived motion samples and therefore is NOT an asset-free redistributable binary.
+- ER Mario reviewed at `deltarooo/er-mario@ff6b9b2d44c7bb211ef289ebc500c3fd354c9a65`; no source/model/ROM code copied. See `gta/ER-MARIO-LESSONS.md` and `UPSTREAMS.json`.
 
-## Prior applied update and ownership
+## Installed candidate and rollback
 
-- Hari directly requested “update as much as possible” after the repaired candidate was staged. This authorizes the bounded active-profile/private-package update. The earlier “do not open it yet” still applies: **leave GTA closed** and keep other sessions' GPU reservations untouched.
-- This thread resumed the original authoring checkout on its own successor branch `codex/apply-pose-repair`, based on audited local commit `21e528e`. The independent auditor's `codex/preplay-launch-safety` checkout is read-only input and is not being edited.
-- The added `upgrade_profile.py` uses `profile.lock`, checks the exact six payloads and unchanged game executable, rejects running GTA, stages atomic replacements, preserves a rollback journal and verifies both destinations. No registry, account, save, retail archive or GPU protocol change is part of this update.
-- Source remains local/private under the current no-publication constraint. Do not push this branch or merge a default branch without owner direction. The bounded upgrade completed: all six profile/package payloads match; original retail/profile executables and install symlink verify. Runtime review remains pending.
+- Candidate: `20261004-malenia-root-motion`.
+- Private bundle: `~/Applications/EldenLosSantosPreview`.
+- Active profile: `~/Library/Application Support/EldenLosSantos/Game`; preserved original: sibling `Retail`; state: `profile-state.json`.
+- Windows Steam's `Grand Theft Auto V` directory in the CrossOver Steam bottle points to the active APFS profile. Account/client data remains internal. The SD migration was cancelled and the reminder deleted; do not recreate either.
+- GTA V Legacy `1.0.3889.0`. Original executable SHA-256 remains `677e4e355cfbdb13273b1d992407e3c261b3a108dc4dd5c8a0c4c1da651802e5`.
+- ASI SHA-256: `c1280e7863bc37c847e06caf4fb789a3a06a7d312cd86630ba6254c0ea55ef3d`.
+- DLC SHA-256: `d547c9bf3390d86885ca10356e5018bf2b527596038ec6ffc416bc1b7828dc26`.
+- Runtime marker: `loaded_root_motion_20261004_runtime_verification_pending`. It has not been observed in a game session.
+- Reversible installation used `upgrade_profile.py`, the profile lock, stopped-game checks and six-payload verification. Both package/profile passed, with original executables unchanged. Full prior-candidate backup: `~/Applications/EldenLosSantosPreview/Backups/upgrade-20261004T063226Z-363f606e`.
+- Guarded shortcut host names were corrected to `midirstudio.local`; the previous shortcuts are saved under that backup's `shortcuts/`. No shortcut was run.
+- Installation receipt: `~/Library/Application Support/EldenLosSantos/update-receipt-20261004.json`. Final source-pointer and verification receipts use the same date. Preserve this and the older full rollback backups.
 
-## Installed pose/combat repair
+## What changed
 
-- Active candidate: `20261002-pose-combat-repair`. Source owner: this thread, `codex/apply-pose-repair`. Main/default branches and other sessions' checkouts were not modified.
-- Current ASI/source checksums are recorded in `~/Applications/EldenLosSantosPreview/manifest.json`; DLC SHA-256 `3a74004e0a5c524a565fd5f07f57e9c42b835cf4a4c2065746be22fde47ef50a`. The ASI includes a safe destroyed-Buzzard replacement on key 6 and its corrected load identifier: `loaded_pose_combat_repair_20261002_owner_verification_pending`.
-- Installed through `upgrade_profile.py`, under the same `profile.lock` used by the profile manager, with GTA/PlayGTAV absent. All six payloads in both locations passed checks. Retail game, saves, account/registry state and GPU coordinator were not changed. No game or engine launched.
-- Full v8 rollback backup: `~/Applications/EldenLosSantosPreview/Backups/upgrade-20261002T164937Z-c14c5adf/`. Complete journal and original file hashes are preserved. Latest receipts: `~/Library/Application Support/EldenLosSantos/update-receipt-20261002.json` and `update-verification-20261002.json`.
-- Launcher/profile manager/verifier/update helper and owner guide synchronized into `~/Applications/EldenLosSantosPreview/Tools`. Evidence lives at `Evidence/20261002-pose-repair`; corrected editable animation XML/native files at `SourceAssets/animation-repaired-20261002`. `SourceAssets/ACTIVE-CANDIDATE.json` identifies the current inputs. Old source assets remain preserved.
-- Checks: twelve CTest suites passed, including the actual helicopter-helper ownership fixture and five updater tests (partial-write rollback, running-game/drift refusal, lock conflict, repeatability, helper repair). Tiny single-job Windows ASI build passed. Source helper and package identity checked after installation.
-- The preview now includes `Check Elden Los Santos.command` and `Play Elden Los Santos.command`; their source is `gta/tools/shortcuts/`. These Studio-specific adapters use the reviewed packaged launcher, verified Python path, shared GPU root and explicit GTA reservation. The owner guide now points to these guards instead of direct Steam launch. Shell syntax is checked; Play was not executed.
-- Controls remain 1 select, 2 spawn, 3 clear, 4 pause/resume aggression, 5 weapons, 6 Buzzard. No diagnostic queued. Keep GTA CLOSED until Hari requests it. Another session retains GPU priority.
-- Pending: actual visual/animation/combat/performance acceptance. The native three-creature import and bullet damage were owner-confirmed on earlier v7; the current improved candidate has not been played. Current assets still use the previously sampled interchange motion; full-rate regeneration is deferred while Unreal work has priority. Original ER AI/cloth/VFX are not ported.
+- **Actual source discovery:** `a000_005000`, previously assigned as Malenia's death, is a 90-degree turn with upright poses. Skinned source-pose inspection identified `a000_008030` as a recoil/recovery and `a000_010000` as a kneeling defeat. Neither is an imported ER AI state machine.
+- Malenia now uses five full-rate source clips: idle `a000_000020` (136 frames), run `a000_002100` (24), sword `a000_003000` (83), stagger `a000_008030` (41), defeat `a000_010000` (221). The other two creatures retain their earlier four clips each.
+- Rest-axis-corrected YCD channels preserve the existing rig. The run and attack have separate HKX extracted motion (previously discarded). Native playback phase drives that horizontal root displacement; invalid/stalled/jumping phases cannot produce catch-up teleports. Run playback rate matches pursuit speed, including the below-half-health increase.
+- Attack facing is committed. The upright entity frame is restored after impact recovery so pose/root/blade calculations agree. Native car physics gets its recovery interval before scripted movement resumes.
+- Malenia's physical box now approximates her torso, one metre wide. The old rest-pose sword made it nearly four metres wide. Mesh, rig, materials, pixels and render/culling bounds are unchanged. This remains coarse bullet/physics collision, not original ER limb hitboxes.
+- Three asynchronous overlapping sphere probes check each <=0.35 m scripted movement step. Pending, obstructed, invalid or stale results do not move her. An external impact or animation change invalidates an old planned move. There is no pathfinding around buildings.
+- Malenia's sword sweep samples actual skinned sword endpoints at the native animation phase. Damage requires the provisional 1.03–1.36 second active window, advancing/playing/accepted playback, victim capsule or vehicle-box intersection, and line of sight. One hit per victim/vehicle per attack. Stalls/pause/phase jumps cannot bank a hit.
+- Her generic GTA explosion attack is disabled. Wolf/Crab retain their old telegraphed GTA explosions; none is a travelling magic projectile. This is a grounded, single-attack Malenia encounter, not her full moveset or phase two.
+- Heavy damage uses/restarts the 1.334-second source stagger. Defeated actors stop damage, retain physics until near-ground settling, then freeze and disable collision. Actual landing/corpse behavior is unverified.
+- Clear drains pending shape tests before releasing slots. Failed deletion keeps ownership/slot and logs failure; key3 explicitly retries. Reused model handles are not controlled/deleted. Retargeting restarts the correct animation even if the combat state immediately re-enters the same attack.
+- Previous parked-vehicle impact filtering and dense-traffic dedup fixes are included. Native gun/explosion/vehicle/Buzzard incoming damage still needs current-candidate runtime checks.
 
-## Isolated pre-play repair status (prior audit)
+## Evidence and exact verification boundary
 
-- This checkout is `codex/preplay-launch-safety`, based on public/shared `codex/elden-assets-and-combat` commit `6a24a33dd13c8a56942fbc2c3b1b09a4d04ff6cd`. Changes are local and unpublished. The shared source checkout, active profile, retail game, saves and Steam configuration were not edited.
-- Current instruction for this audit: lightweight source/data checks only while the other Unreal session has priority. Do not launch GTA/Elden Ring, acquire renderer slots, run full extraction/Blender conversion, install this candidate or publish. This supersedes the older open-after-install instruction below for this audit.
-- Fixed stationary/unattributed vehicle contacts leaking native HP loss through the impact threshold. A test compiles the actual `observe_damage` function with fixture native events: ten parked/moving/bullet/explosion/cooldown scenarios pass; the original source fails the parked-contact witness.
-- Fixed attack playback switching to idle at the strike: recovery now keeps the attack clip and lasts at least the remaining measured source clip duration. Combat OFF, stagger and defeat still change playback. Ten CTest suites pass, including synthetic rig-axis checks, and the small Windows x64 ASI builds with one job.
-- Confirmed per-bone rest-axis conversion error in existing animation data. `rebuild_animation.py` derives GTA local tracks from source glTF world poses while preserving the target bind rig. Peer comparisons of 36 poses reduce worst RMS error from 1.19–2.08 metres to below 0.54 millimetres. An independent Malenia text rebuild matches the peer SHA-256 exactly. This is offline evidence; visible deformation is unverified.
-- Native read-back also exposed compact static quaternions reconstructing positive W after storing only XYZ. The adapter now flips the entire constant quaternion when needed and retains four explicit floats near a half-turn. Six synthetic pose/encoding cases pass; all three corrected YCDs pass 10,332 sampled native channels with maximum component error below 4.4e-7. The first private animation/DLC candidate was rejected and preserved separately.
-- The source exporter now retains every decoded frame. Existing v6 interchange data still omitted alternate frames, so repair from that data cannot restore the missing samples. Full-rate regeneration remains separate future work.
-- Launcher checks now include native IW4L, Roblox and ArkWeb renderers and fail closed when process inventory cannot be read. `verify_candidate.py` checks private package/profile hashes, supported executable/version, source commit and helper agreement without loading a game or changing the profile. Both package agreement and native format round-trips require separate owner gameplay acceptance.
-- The task workspace contains a separate private candidate and exact audit/patch receipts under `/Users/midir/Documents/Codex/2026-10-02/task`. The installed candidate remains `aggressive-visuals-v8`. Preserve the original ER/GTA data and keep all derived assets out of Git.
+- **17 CTest suites passed**, including actual runtime-helper fixtures for pending/blocked/stale movement and blade misses, playback stop, phase jumps, pause and duplicate vehicle damage. Existing damage/ABI/launcher/update/pose/cleanup fixtures remain passing.
+- Single-job Windows x64 ASI build passed with the private generated header. Source-only builds without that header deliberately refuse Malenia spawning.
+- Native CodeWalker read-back compared **145,440 Malenia frame/channel values**, maximum component error `1.4901161e-7`; five animation/clip bindings survived. All three native models/resources and 35 textures passed packaging checks. This is not rendering proof.
+- Private CPU-skinned pose sheets were inspected for the old turn, stagger and kneeling defeat. They are clearly labelled offline diagnostics, NOT GTA images. No current-candidate appearance, native contact/damage, FPS, complete encounter or subjective gameplay pass is claimed.
+- Earlier v7 owner evidence: all three real creatures visible and bullet health loss, but crumpled/bald/low-quality/stationary appearance. Subsequent material/pose repairs have not yet been visually verified in GTA.
+- Private evidence: `~/Applications/EldenLosSantosPreview/Evidence/20261004-root-motion`.
 
-## Current priority and verified state
+## Private editable inputs and reproducibility
 
-- This thread owns GTA V × Elden Ring. Midir owns Dark Souls × MW2. Keep those lanes separate.
-- Repo: https://github.com/oh-ashen-one/modern-warfare-2-ai; branch `codex/elden-assets-and-combat`; draft PR #2 targets `codex/gta-damage-probe`. No merge permission.
-- Chat default cwd points at another lane (`/Users/midir/Documents/ChatGPT/combiing games`). ALWAYS pass this GTA checkout as the working directory.
-- All six games finished installing. Hari CANCELLED the slow SD-card migration; leave games internal. The task-owned partial copy was removed without removing source game files. Do not resume migration.
-- The `move-steam-games-after-downloads-finish` automation was deleted at Hari's request. Do not recreate it.
-- Latest standing instruction: **open GTA V Legacy after installing patches**, without asking again. Hari owns gameplay, rendering review and performance testing. Use the shared renderer slot and verified Studio desktop; do not interrupt active unsaved gameplay or enter a crash/relaunch loop. No tutorial/combat input automation is authorized.
-- Hari now reports the tutorial completed. The previous window was saved at 800×600; he was given in-game window/resolution steps. Mac and Windows Steam both recognized DualSense; an empty GTA mapping was observed and Steam Input instructions supplied. Controller resolution is not independently confirmed.
-- Actual GTA build is 1.0.3889.0. Script Hook V initialized successfully, registered and executed `EldenLosSantos.asi`; ASI loader also loaded RageOpenV. Earlier candidates failed creature creation after streaming. v7 created all three original creatures; Hari confirmed the assets are visible and bullets reduce their health. He reported crumpled shapes, bald Malenia, very poor quality and no visible movement. v8 below is the response; it is not visually/gameplay verified yet.
+- `SourceAssets/ACTIVE-CANDIDATE.json` points to `gta/root-motion-20261004`, `interchange/20261004/c2120-phase1.glb`, `motion-20261004/malenia.hpp` and `dlc-build/root-motion-20261004`. Old inputs were preserved.
+- `export_motion.py` validates source axes, durations and full-rate frame correspondence. It rejects unsupported turning/jumping root data. It emits private motion/weapon samples and hashes; it does not bake root translation into the pose a second time.
+- `rebuild_animation.py --source-clips ...` selects full-rate source clips against the existing bind rig. `CodeWalkerBridge` now validates every decoded animation channel, including compact quaternions and end frames.
+- Build the plugin with `-DERGT_MOTION_HEADER=/absolute/private/malenia.hpp`. `build_owned_assets.py` generates this header during future full reconstruction. Current update reused the preserved model/material sources and did not run Blender, extraction tools or any renderer.
+- Pinned Soulstruct 2.6.0 / Havok 1.5.0, CodeWalker/Sollumz revisions and requirements remain in `gta/dependencies.json` and `gta/asset-tools/requirements-mac.lock`. Read the conversion docs before rebuilding. Keep the proven native ASI/Script Hook V route.
+- Preserve the decisive runtime import fixes: eight-argument CREATE_OBJECT_NO_OFFSET; CONTENTS_PROPS registration; Dynamic+HasAnim archetype flags **131584**; normalized texture formats; rest-axis-corrected tracks with canonical static quaternion encoding.
 
-## Launch recovery after the computer restart
+## Next work when Hari resumes runtime testing
 
-- Hari reported the previous GTA launch froze the whole computer. Live host boot time confirms a restart at 14:26:36 America/New_York. The prior launch receipt recorded GPU utilization at 100% before launch; using a second renderer at that load was inappropriate even below the old process cap.
-- Root coordination error: the prior GTA helper locked `~/.cache/gpu-slot`, while active Unreal jobs use `/Users/midir/sm2-n1/_scratch/gpu`. Future GTA launches must share the ACTUAL current lock directory and be exclusive. Do not use the old private owner_launch.py helper (now retired).
-- Also found GTA saved at 3440×2752, RefreshRate 0. Backed up its display settings locally, changed to 1920×1080 windowed, requested 60 Hz and retained half VSync. Launch flags pin 1920×1080. Actual FPS and full stability are unverified; keep this lower resolution for now.
-- Hari authorized asking the Unreal session to pause. It is an external Claude session, unavailable through Codex task messaging. No message was sent through another terminal. Hari relayed the pause request himself; the coordinator stopped its renderer and wrote `owner opening GTA V 14:48 - renders paused; auto-lift after GTA5.exe exits` to its PAUSED marker. Only the null-RHI import remained; desktop-only GPU baseline was ~20%.
-- New original `gta/tools/launch_owner.py` uses that protocol's existing exclusive perf.lock for the entire actual GTA process lifetime. Normal launch uses the protocol's 15%-for-10s idle gate; the explicit owner reservation supports the measured desktop baseline below 30% over 12 seconds, while admitting NO other renderer. It never clears/renames PAUSED, stops another process, raises the shared cap or auto-relaunches. An emergency/non-owner pause always blocks it. This reservation is not an FPS benchmark.
-- Eight source-only launch guard tests pass, including the previous 97% GPU case, low-util live renderer, unknown GPU, logged-out desktop, stuck exiting headless engine and emergency pause. A current read-only check refused launch until the owner reservation existed and other rendering stopped.
-- Lower-resolution v3 launch succeeded under that reservation at 14:53 America/New_York: GTA5.exe PID 50731, Script Hook initialization and DirectX initialization confirmed. A 20-second startup check sampled GPU values 0–31% (mostly 20–21%); desktop console remained midir. This is startup evidence, not sustained gameplay/FPS or creature verification. The exclusive slot remains held until the actual game process exits; the other coordinator owns its pause/auto-lift. Hari retains gameplay control.
+1. Recheck current rules, Studio/console identity, desktop, process ownership and shared GPU protocol. Emergency hold must be released by its owner; no workaround lock root. Use the guarded launcher under an exclusive GTA reservation.
+2. Verify exact installed candidate/marker, load the existing completed-tutorial Story Mode save, and inspect actual rendered Malenia close up: skin deformation, normals, hair/materials, scale and ground reference.
+3. Inspect run/attack/root motion through the committed swing and recovery. Use `animation_sample` phase/rate/world-coordinate logs and `blade_contact` events alongside visible frames. Fix visible or timing failures, not just log assertions.
+4. Verify guns, RPG/explosions, moving-car impact, parked-car no-drain, occupied-vehicle blade contacts and Buzzard weapons. Inspect actual stagger, airborne impact recovery, kneeling defeat, corpse settling and repeated clear/respawn. Check pause/retarget cancellation and destroyed-helicopter replacement. No claimed passing result yet.
+5. Capture actual performance/stability under the reservation. Stop after the safety crash threshold. Once technical issues are resolved, ask Hari only for the final subjective gameplay/video-quality review.
 
-## Previous installed candidate: aggressive-visuals-v8
+Controls: **1 select, 2 spawn, 3 clear, 4 aggression toggle, 5 carbine/RPG, 6 Buzzard**. Combat starts ON. Up to three owned creatures; helicopter persists across clear. The future AI-memory interface remains an optional expiring advisory mailbox: local gameplay timing, movement and damage must never wait for network replies.
 
-- Owner feedback: authentic assets are visibly in GTA and taking bullet damage, but appear crumpled/low quality, Malenia looks bald, and creatures do not visibly move. Owner closed GTA. This establishes a successful import milestone, not visual/combat acceptance.
-- Prepared and installed v8 with GTA/PlayGTAV absent. All six active-profile/private-package hashes match; original retail GTA executable is unchanged. Private rollback: `Backups/2026-10-01-aggressive-visuals-v8/` includes prior ASI/DLC, manifests, and graphics settings.
-- ASI SHA-256 `e9f45353b1436a6418e4e35cec0a3550040a5b81561988eca7236feb8e974759`; DLC SHA-256 `f889ca6084fb4825036a656c043b026de861c1cfa80b2009eda62e3120341e21` (57,730,048 bytes). Source assets: `SourceAssets/gta/v8-object-materials`; package: `SourceAssets/dlc-build/v8-object-materials`.
-- Material candidate diagnosis: the original converter used specialized `ped_default` shaders on animated objects, leaving pedestrian body/palette/volume inputs unbound. v8 uses generic skinned `normal_spec`/cutout shaders and generated tangents. This is a plausible crumpling repair, NOT a verified cause/fix yet. Source vertices, normals, UVs, indices, weights, bone indices, skeleton and animation XML are unchanged and compared numerically/byte-for-byte.
-- Confirmed hair issue: original HairLong material references `AAT500_PCHair_n`/`_3m`; the prior fallback borrowed unrelated 512×512 `c2120_hair2_a`. v8 uses the actual 2048×1024 normal/opacity atlas plus local tint parameters. Normal RG is reconstructed to RGB; packed B/A are no longer mistaken for normal XYZ. Full mip chains and original source resolutions retained, no upscaling. Specular response/layered shaders/shell fur remain approximate. Editable Blender originals are preserved but do not contain the new post-export XML material changes.
-- Aggression defaults ON per owner request. **4 pauses/resumes**, **1 selects**, **2 spawns**, **3 clears**, **5 weapons**, **6 Buzzard**. Targets nearby pedestrians/drivers and player; retaliation biases toward a player who hits it; target changes cancel queued strikes. Uses optional official ScriptHook `worldGetAllPeds`/`worldGetAllVehicles` exports, verified present in installed runtime.
-- Vehicle contact damage scales with measured recent impact speed, has a 650 ms repeat cooldown, ignores parked/creeping contacts, and briefly lets collision physics move the creature before pursuit resumes. Small unsourced settling HP losses are filtered. NPC bullets use native health loss; player fallback stays attributed/logged. Real car/helicopter damage still needs owner testing.
-- Animation requests explicitly set speed and always-prerender/force-update. Logs `animation_started` and three `animation_sample` phase readings after each transition; one bounded recovery for a stuck looping clip. These are diagnostic/repair candidates; visible movement/rig correctness remain unverified. State marker `loaded_aggressive_visuals_v8_owner_verification_pending`. No new automatic import diagnostic is queued.
-- HUD now uses slimmer bottom bars, gold trim and delayed damage trails; controls fade after a few seconds. ShaderQuality changed 0→2 and anisotropic filtering 0→16; existing TextureQuality 2, 1920×1080 window and conservative distance/shadow settings retained. Performance is unmeasured.
-- Verified: all seven CTest groups; Windows x64 compilation; native round-trip of three rigs/12 clips/35 textures; correct DLC resource types; source geometry preservation and finite unit orthogonal tangents. No claim of Elden Ring visual parity or completed encounter.
-- Launch guard refused before starting GTA: GPU 0%, but the shared PAUSED marker now reads `OWNER RESERVATION: DSR-MW2 startup and owner play; background renders remain paused.` Do not alter it or stop the other session. Requested owner permission to message that Codex session for a GPU handoff. No message has been sent yet. Keep source pushed while waiting.
-
-## Previous installed candidate: dynamic-creatures-v7
-
-- On the owner-requested reopen, GTA5.exe PID 49563 remained running beyond three minutes under the exclusive reservation. The v7 log records valid existing entities for Malenia (2562/2818), Red Wolf (3074/3330) and Giant Crab (3586/3842), with native dynamic=false/true respectively. Stock reference also passed; `import_diagnostics_complete value=0`. This verifies object creation for every production model, not their appearance, animation, damage or encounter quality. Do not repeat the diagnostic unless a new failure warrants it.
-- **Runtime isolation found the decisive setting:** the full Malenia asset with Dynamic+HasAnim flags (`131584`) created valid objects in every v6 run, with both native dynamic arguments. Examples: handles 2306/2562, 3586/3842, 9218/9474. The baseline (flags 512), static+animation/default-clip variant (544), collisionless variant and unskinned/static variant returned zero. This is native creation proof for the real rigged/collidable Malenia asset, not visual/gameplay acceptance.
-- v7 applies `Dynamic (131072) | HasAnim (512)` to ALL THREE original archetypes. Original YDR/YCD mesh, rig, texture, collision and animation resources are byte-identical to the texture-corrected v3 originals. No placeholder/proxy/ped replacement is used. Experimental aliases and the default-clip alias were removed from the production DLC.
-- Normal controls are restored to **1–6**. Temporary key 7 removed; file-only, fixed-command technical verification remains. The owner-approved one-shot check of stock object + original Malenia/Wolf/Crab has run and passed on their real model names. It deleted the technical samples immediately and consumed the request file. Press 2 for a persistent normal creature with combat OFF.
-- ASI SHA-256: `6971f83a331654d8b79aaabe9c2bb240f3ce0917b038a8dbcdf53706a6bb62df`.
-- DLC SHA-256: `ccad3b6a638074c46edcdf478ba96458b6612f2c89086f301c3ee6e6f321c28b`, 27,295,744 bytes; build `SourceAssets/dlc-build/v7-dynamic-creatures/`.
-- v7 script marker: `loaded_dynamic_creatures_v7_owner_verification_pending`; technical sweep completion has `value=0` if the production native call succeeded for every model. Normal persistent spawns log `creature_created` and native HP; animation failures are separate events.
-- Owner saved/closed GTA for this patch. It was installed with no GTA/PlayGTAV process present; six payload hashes verified and original retail executable unchanged. Rollback: `~/Applications/EldenLosSantosPreview/Backups/2026-10-01-dynamic-creatures-v7/`.
-- v7 guarded launch requested under the explicit OWNER PAUSE reservation, 1080p/windowed; check actual launch/runtime logs. Await current model checks plus owner visual/combat review before upgrading completion claims. All six source test suites and Windows x64 compilation pass.
-
-## Previous import-diagnostics-v6 checkpoint
-
-- v5 also FAILED for all three custom creatures; stock reference object still succeeded (2306). Do not repeat claims that arity/texture/CONTENTS_PROPS corrections completed spawning. Root custom-asset failure remains unresolved.
-- Hari explicitly approved the model-only technical import check: briefly create/remove six model variants and log acceptance. This authorizes the fixed file command for this diagnostic, not tutorial/combat/controller automation. One request is queued at `Game/EldenLosSantos.import-check.request` containing `CHECK_IMPORTS_ONCE` plus newline. It waits for Story Mode (scripts skip pause/cutscenes/network), then is consumed once. Key **7** triggers the same check; **3** cancels it. No listener/server.
-- Models tested: stock `prop_box_wood01a`, baseline `ergt_malenia`, full rig+collision/static-animation/default clip `ergt_test_sta`, full rig+collision/dynamic-animation `ergt_test_dyn`, rig without collision `ergt_test_nocol`, and unskinned ordinary-shader/no-collision `ergt_test_rigid`. Each tries the native creation dynamic argument false and true, logging `import_check`. Successful diagnostic objects are deleted in the same tick below the player. They are not playable bosses or visual acceptance.
-- The static animated probe includes an additional default clip keyed to its model name, backed by CodeWalker's renderer lookup (`ycd.ClipMap.TryGetValue(arche.Hash,...)`). Existing dictionaries only had the ER clip names. Other original clips remain. Native YCD round-trip: 5 Malenia dictionary clips, 4 animations; no animation data was regenerated.
-- Offline format checks: 7 archetypes, 11 native resource entries of correct versions, textures validated. Static/dynamic/collisionless probes retain 96 bones; rigid probe has no skeleton and removes only skinning channels while retaining vertex positions/UVs. This is a diagnostic package, not a finished repair.
-- ASI SHA-256: `b14d1ae35f51d1977e2f13b785fcc9ef9bd2ceb261806e7cc7b4d7cd709cca8e`.
-- DLC SHA-256: `fb3092a8faeab8c5ac0859416b4b87054241801a6d16ade411654ca5eb281fa9`, 73,625,088 bytes. Build at `SourceAssets/dlc-build/v6-default-clip-checks/`.
-- v6 script marker: `loaded_import_diagnostics_v6_owner_verification_pending`. Await `import_diagnostics_complete` and all `import_check` lines. Failed load stage/creation must remain distinguished.
-- Owner says he paused ALL Unreal work. Live GPU registry confirmed no Unreal engines/holders, with an explicit marker: `OWNER PAUSE 15:41: everything stopped until the owner says resume (GTA for a few hours)`. Launcher recognizes this exact owner reservation, never an emergency pause, and leaves the marker untouched. One initial v6 launch attempt was refused before launching due to a GPU spike (84%). The guard now waits up to 60 seconds for the same below-30% condition to hold for 12 seconds; it does not relax the limit. No game was started by that refused attempt.
-- A new guarded v6 launch is requested, with the approved one-shot import check queued. Check launch status and the runtime log. Hari must enter Story Mode himself if at the menu; no automatic menu clicks.
-
-## Previous prop-registration-v5 checkpoint
-
-- v4 owner test FAILED to create Malenia, but its stock-object A/B probe returned entity 2050 and deleted it immediately. This proves the native object factory works after the signature corrections and isolates custom asset setup. Owner confirmed the visible failure and then saved/closed GTA for replacement.
-- Found missing `<contents>CONTENTS_PROPS</contents>` on this project's DLC_ITYP_REQUEST, present in prop-pack declaration references. v5 adds only that field to content.xml. Nested ergt_assets.rpf is byte-identical, and the v4 ASI remains installed. This is a focused registration test, not another model/texture rewrite.
-- New manifest validation rejects the previous missing prop classification and any disabled file never enabled by GROUP_STARTUP. Archive verification confirms all seven native entries are resource entries, with YDR=165, YCD=46, YTYP=2. All six CTest suites pass.
-- v5 DLC SHA-256: `43ea11054ee6dfeb6cd63ce48087ab621c22e43ca478cc12ec87a3adbd1bd771`, 27,295,744 bytes. ASI remains `1057fbd214f863aa84751ed874e0295e0450f32ede34d153f0c065c29b6a5f4a`, so its runtime log marker remains `loaded_native_contract_v4_owner_verification_pending`.
-- Installed while game stopped; six payload hashes verified in package/profile, original retail bytes unchanged. Rollback at `~/Applications/EldenLosSantosPreview/Backups/2026-10-01-prop-registration-v5/`. Source build under `SourceAssets/dlc-build/v5-prop-registration/`.
-- Owner explicitly asked the Unreal coordinator to keep rendering paused across restarts. v5 relaunch requested through the exclusive guard at 1080p; prelaunch GPU 9%, no other renderer. Await one owner press of 2 outdoors with Malenia selected and combat off. Do not claim a creature spawned until the log and owner confirm it.
-
-## Previous native-contract-v4 checkpoint
-
-- Owner reported all creatures still failed in v3; guns/helicopter worked. Logs now prove all three custom models passed model and animation streaming gates, then returned zero from CREATE_OBJECT_NO_OFFSET. No new crash was reported for this bounded test. GTA subsequently exited; no game files were replaced while running.
-- Revisited user-supplied `rehan-remade/universal-modder` at commit 15d6f9d5fbd32de9b1884f29ddec3be9133bd912. Its working Minecraft/GTA example uses GTA Legacy 3889 + SHV 3889. Its native wrapper passes EIGHT arguments to CREATE_OBJECT_NO_OFFSET (last 0); our code passed seven. The same eight-argument signature is in alloc8or native DB revision 424fb51b089049a9fbcebcc641500b1d44d255b4.
-- Corrected 12 incomplete call sites in the main plugin and 6 in the older probe: object/vehicle creation, ground queries, entity health/invincibility, ped damage, explosions, HUD text/rectangles and probe death query. No geometry/texture changes in this patch.
-- Added `gta/native-contracts.json` (72 API interface facts with pinned source links) and a parser-based regression suite checking every literal-hash native call in both plugins. The original seven-argument object call is explicitly rejected. All five CTest suites and both Windows x64 plugin builds pass. Arity is a verified bug; whether it completely fixes creature spawning is still an owner test.
-- If a creature still fails, one owner-triggered reference check creates/removes universal-modder's known stock prop `prop_box_wood01a` in the same tick below the player. See `reference_object_creation_result`: nonzero isolates custom assets, zero suggests a general object/native path issue. Never claim this diagnostic prop is a boss or a completed import.
-- v4 loading marker: `loaded_native_contract_v4_owner_verification_pending`.
-- Current ASI SHA-256: `1057fbd214f863aa84751ed874e0295e0450f32ede34d153f0c065c29b6a5f4a`.
-- DLC remains the v3 texture-corrected package, SHA-256 `af119ef181a0f02ef7457a64a35f83c399c050992035b3258376ebb54d341765` (27,295,744 bytes). Prior v2 had 11 invalid texture enums; v3 corrected them and all 22 textures pass offline format checks, but that did not by itself fix spawning.
-- v4 installed with GTA stopped; six payload hashes match active profile and private bundle; original retail checksum unchanged. Backup: `~/Applications/EldenLosSantosPreview/Backups/2026-10-01-native-contract-v4/`.
-- Hari relayed another request to the external Unreal session to keep rendering paused ACROSS GTA restarts until this test finishes. Observed coordinator marker: `owner reopening GTA 15:02 - renders paused by game_watch.sh (pre-emptive)`. Launcher now recognizes this exact reservation shape as well as the earlier opening-GTA-V marker; emergency pause remains blocked. No other session processes or pause files were changed.
-- v4 relaunch requested under the exclusive owner reservation at 1080p. Read local launch status for actual outcome. Owner should press **2 once** outdoors, default Malenia, combat OFF. Read log rather than repeating identical failed attempts. No creature success is claimed yet.
-
-## Local profile and asset boundaries
-
-- Private bundle: `~/Applications/EldenLosSantosPreview/`; owner guide `START-HERE.md`; editable inputs `SourceAssets/`; latest private DLC build `SourceAssets/dlc-build/v5-prop-registration/`.
-- Steam's existing GTA path is a symlink to `~/Library/Application Support/EldenLosSantos/Game`. Exact original retail directory remains `~/Library/Application Support/EldenLosSantos/Retail`. APFS clonefile shares original blocks, not a second full-size copy.
-- Profile state: `~/Library/Application Support/EldenLosSantos/profile-state.json`. Only GTA5.exe's Wine `dinput8` override is `native,builtin`, with prior absence recorded. Account stores and saves were not changed.
-- Restore with GTA closed: `python3 ~/Applications/EldenLosSantosPreview/Tools/profile_manager.py restore`; use `activate` to reactivate. Do not unlink game/profile paths manually.
-- Owned-game data, converted assets, runtime files, saves and account stores must never be published. Public `gta/` contains original tools/code and source references.
-- ERGTA-Tools is a separate accountless conversion bottle. Data-only conversion is permitted; all rendered/gameplay validation belongs to Hari.
-- Custom GTA AI, coarse whole-body collision and approximate materials remain experimental. Original ER AI/cloth/VFX/audio are not ported. No verified boss encounter, damage balance or FPS claim.
-
-## Source groundwork saved when the owner cancelled the follow-up
-
-- Added original GTA diagnostic ASI source under gta/: a dormant F6/F7 test-actor probe, raw native health/death observation, HUD, local log, Script Hook V dynamic ABI wrapper, portable checks and CMake/Mingw build configuration. Read gta/README.md.
-- Native unit checks passed. Windows x64 ASI cross-compilation passed. A generated import library now declares the ScriptHookV.dll dependency through its game-version export, alongside KERNEL32 and Universal CRT imports. All eight dynamic entry points match the inspected official runtime export table. No in-game loader test yet. No plugin installed or executed in GTA; no game launched and no Elden Ring assets imported.
-- Official SDK/runtime downloads were inspected in ignored scratch only; archive redistribution is prohibited, so they are not published. Native hashes/signatures and runtime exports were used as API interoperability references. GTA5.exe version 1.0.3889.0 matches the runtime's advertised supported Legacy build.
-- Homebrew mingw-w64 14.0.0_3 installed (compiler reports GCC 16.2.0); dependency isl upgraded by Homebrew. No tap trust settings changed.
-- Steam downloads were left running. Latest content log showed Elden Ring downloading at about 986 Mbps, despite the on-disk manifest's stale zero-byte progress. Never treat that manifest counter alone as a stuck download.
-
-## Midir coordination
-
-- On 2026-10-01 Hari explicitly authorized this session to own the main GTA V × Elden Ring game. He subsequently confirmed Midir owns Dark Souls × MW2. A correction was delivered to the dot thread; the earlier candidate Elden Ring/MW2 Zombies assignment is superseded.
-- Sent the updated scope, candidate side-demo brief, repository/branch pointer, and strict checkout/bottle/download/process ownership boundaries using send_message_to_thread to the dot conversation 01a0f57b-1eee-7674-9735-1ab9034fe0f7 on host durable. The API confirmed delivery; do not claim acceptance or a running side build until observed.
-- That dot previously spawned Review game combines project (01a0f57f-2350-7535-a601-3d6186da00c2), which had read an older mac-prototype snapshot. The new brief corrects its outdated target and setup status.
-- We did not create an additional fork/session. Recommend separate repositories for different game hosts, or isolated worktrees/branches when sharing code. Do not mix active game/mod profiles.
-
-## Previous Terminal goal and owner decisions
-
-- Public open source project with a ten-minute Terminal crossover demo for a video.
-- Mac is the first build target. The owner authorized autonomous implementation and will provide game data later.
-- Earlier implementation lacked retail data. The new owner report and current audit above supersede that setup status.
-- Terminal means the MW2 airport map.
-- Signature proposal: builder gun, skating, confirmed-trick charge, dragon killstreak, objective/extraction/restart loop.
-- Additional research: universal-modder, the Minecraft/Elden Ring clip, libsm64 and CrossOver. Preserve the Terminal objective while expanding through reusable adapters.
-
-## Repository and ownership
-
-- Public remote: https://github.com/oh-ashen-one/modern-warfare-2-ai
-- Earlier implementation branch: codex/mac-prototype, based on codex/terminal-foundation. Current branch is listed above.
-- The original foundation branch remains the default; no main/default-branch merge is authorized or performed.
-- No other session's game process, bottle or checkout was changed.
-
-## Completed and verified
-
-- Pinned mashup source imported into runtime/ with upstream LICENSE/NOTICE. See docs/UPSTREAM-IMPORT.md.
-- Rust 1.98.1 installed and pinned. Native arm64 optimized engine executable built successfully on the M3 Ultra Studio.
-- SwiftUI setup app, Rust setup CLI, safe process launch path, file validation and game-folder configuration implemented.
-- Minecraft automatic data downloads disabled in the Mac launcher. No commercial game data downloaded.
-- Mac board/rig preparation command added. The Skate conversion helper refuses missing data and existing output paths.
-- Independent mission/block rule crate implemented; eight meaningful tests pass. Strict Clippy and formatting pass for original Rust crates.
-- Native setup window inspected visually and through accessibility; refresh and folder-picker cancellation verified. Launch stays disabled with missing MW2 data.
-- Apple Silicon setup preview packaged with local ad-hoc signing and license notices for 499 Rust packages.
-- Local deliverable folder: ~/Applications/Modern-Warfare-2-AI-Preview/
-- Packaging is reproducible with scripts/build-mac.sh; use MW2AI_OUTPUT_DIR outside iCloud/Documents to avoid File Provider signing metadata.
-
-## Honest boundary
-
-- The mission/block rules are NOT yet wired into the runtime.
-- No Terminal rendering, shooting, bots, skating or full gameplay session has been tested because retail data is missing.
-- No Skyrim model/animation conversion or dragon encounter has been implemented.
-- No claim of 60 fps, full controller compatibility or finished ten-minute gameplay is made.
-- The delivered app is a setup preview plus compiled base runtime, not the finished game.
-
-## CrossOver and more-game research
-
-- CrossOver 26.2 is installed on the Studio.
-- The earlier missing-bottle finding is superseded: the Steam bottle now exists and Windows Steam is downloading games.
-- universal-modder's published worked bridge is Minecraft/GTA V on Windows. The linked Elden Ring clip is by a different creator; captions were unavailable, and only four frames were sampled.
-- Neither universal-modder nor libsm64 has been imported or installed. They are references in docs/MORE-GAMES.md.
-
-## Previous Terminal next steps (backlog)
-
-1. Provide owned MW2 (2009 PC) multiplayer data to the native setup app; verify the unchanged Terminal baseline first.
-2. Supply/convert Skate 3 data and verify real controls, animation, collision, death and restart.
-3. Connect the prepared mission/block rules to actual game events and collision/rendering; add the builder weapon.
-4. Supply Skyrim data, establish the conversion pipeline, and implement the bounded dragon strike.
-5. Complete the ten-minute mission and obtain owner gameplay feedback before calling it finished.
-6. For Windows-host experiments on the Mac, locate the actual CrossOver bottle storage and create a separate task-owned bottle before testing loader/depth/compositor compatibility.
-
-## Commands
-
-- cargo test --workspace --locked
-- cargo clippy --workspace --all-targets --locked -- -D warnings
-- cargo fmt --all --check
-- MW2AI_OUTPUT_DIR="$HOME/Applications/Modern-Warfare-2-AI-Preview" bash scripts/build-mac.sh
-- cargo run -p mw2ai-launcher -- doctor --json
-- cargo run -p mw2ai-launcher -- demo-check
-
-Read docs/BUILD-STATUS.md and docs/MAC-SETUP.md for exact limitations. Do not treat the scripted rule check as gameplay evidence.
-
-## Original preparation handoff (superseded by the current candidate above)
-
-- The preview is active. Next step is owner-only launch of GTA V Legacy through the existing CrossOver Steam path, finish the tutorial/free-roam save, and follow gta/OWNER-TEST.md.
-- All runtime and visual claims remain pending that owner test. If no header appears, inspect the loader chain. If models are unavailable, inspect the DLC mount and YTYP registration. If models appear but no damage/animations, use the local EldenLosSantos.log for focused fixes.
-- Do not run GTA, render previews or conduct agent playtests. No recurring continuation/reminder exists for this thread.
-
-## Original preparation verification (before the first owner spawn test)
-
-- Full dependency bootstrap succeeded. Its public runtime downloader was corrected to use the publishers' normal curl download route after urllib received HTTP 406; both downloaded archives matched their pinned SHA-256 values.
-- Complete build_owned_assets.py pipeline succeeded into a fresh asset output directory, without any game or render. Rebuilt DLC exactly matches the staged candidate SHA-256 48500df2c04e3e57103a086f4fd75dea54c238aaa743ec78beee80b9e0801018 (27,295,744 bytes).
-- Final rigged interchange files (four clips each) also pass the Khronos glTF validator with zero errors and zero warnings. Native resources preserve 96/138/53 bones, four clips each, and collision. See gta/VERIFICATION.json.
-- Source review: draft PR https://github.com/oh-ashen-one/modern-warfare-2-ai/pull/2, based on codex/gta-damage-probe. No merge performed. GitHub source checks passed for the preceding source checkpoint; final docs/download fix triggers the same checks.
-- Private named deliverables are under ~/Applications/EldenLosSantosPreview. SourceAssets contains the retained editable assets; the old ignored assets/private/eldenring path is maintained as a local symlink so saved Blender texture references remain valid. Older intermediate exports and duplicate verification outputs are disposable and being cleaned up, along with task-owned build/tool caches. Recreate tools with bootstrap_tools.py when development resumes.
-- Preview profile ACTIVE; original retail bytes and all six installed payload hashes verified. No game was launched. The remaining gate is Hari's own loading/visual/gameplay/performance check, starting with gta/OWNER-TEST.md.
+Historical per-candidate debugging notes and prior rollback hashes remain in Git history (previous full handoff at `bb643985f29c6172c51e3084b97f2fa37b4b4470`). This current handoff supersedes their stale launch/publication/install instructions.

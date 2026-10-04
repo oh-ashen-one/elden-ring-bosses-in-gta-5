@@ -102,5 +102,7 @@
   "movement": {
     "Malenia": "Native clip phase drives extracted horizontal root movement. Run playback speed matches configured pursuit speed. Locked attack heading; upright pose frame restored after vehicle impact recovery. Three asynchronous overlapping sphere probes precede each <=0.35 m step; pending/hit/stale/invalid results stop movement. No obstacle pathfinding.",
     "others": "Previous line-of-sight chase retained."
-  }
+  },
+  "installed_candidate": "20261004-malenia-root-motion",
+  "installed_source_code_commit": "b4ec51e94f11f07a4c18ffebdc45fd4724ec3494"
 }
