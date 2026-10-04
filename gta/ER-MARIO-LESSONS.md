@@ -1,6 +1,6 @@
 # ER Mario lessons applied to the GTA encounter
 
-Reviewed [deltarooo/er-mario at ff6b9b2](https://github.com/deltarooo/er-mario/tree/ff6b9b2d44c7bb211ef289ebc500c3fd354c9a65) on 2026-10-04. This is a reference review: no upstream code, model or ROM asset was copied. It does not establish compatibility between its Elden Ring hooks and GTA/CrossOver.
+Reviewed [deltarooo/er-mario 0.3.8 at 83d1397](https://github.com/deltarooo/er-mario/tree/83d1397b5377c88a0fcdb00717e84ce068798ceb) on 2026-10-04, following the earlier ff6b9b2 review. This is a reference review: no upstream code, model or ROM asset was copied. It does not establish compatibility between its Elden Ring hooks and GTA/CrossOver.
 
 | Reference lesson | Application here | Evidence boundary |
 | --- | --- | --- |
@@ -23,3 +23,6 @@ Reviewed [deltarooo/er-mario at ff6b9b2](https://github.com/deltarooo/er-mario/t
 The public repository contains original converters/runtime code and synthetic fixtures. Users generate the model, clips and motion header locally from their owned games. The generated header and a plugin compiled with it contain derived retail data and stay private.
 
 The 2026-10-04 work used bounded CPU-only data conversion, native resource read-back and single-job builds. No game or renderer was launched. Hari chose to keep launches on hold while the shared coordinator remains emergency-paused. Once runtime work resumes, this original thread must inspect the actual rendered fight, repair visible/contact failures, and only then request Hari's final subjective playtest.
+
+
+Owner testing subsequently exposed a Malenia streaming crash and failed crab visuals. See [the crash diagnosis and exact reuse map](CRASH-20261004.md). The next candidate changes only Malenia texture storage; existing engine hooks, rig/animation and combat are preserved to isolate the failure. Hari owns the playtest and requested no reopen.

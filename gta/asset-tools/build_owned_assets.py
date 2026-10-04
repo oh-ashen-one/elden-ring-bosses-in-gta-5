@@ -74,10 +74,14 @@ def main():
         template.rename(converted/(name+"_anims.blender-source.xml"))
         shutil.copy2(repaired,template)
     run(sys.executable,tools/"align_ground_contact.py","--converted",output/"gta-object-materials","--animations",output/"animation-repaired","--out",output/"gta-grounded")
+    # Keep the focused Malenia candidate within the reviewed streaming budget.
+    # This preserves resolution and rejects encodings that fail quality gates.
+    run(sys.executable,tools/"optimize_textures.py","--converted",output/"gta-grounded","--out",output/"gta-streaming","--codec","BC7")
     run(sys.executable,tools/"export_motion.py","--raw",output/"raw/c2120","--glb",output/"interchange/c2120.glb",
         "--model","ergt_malenia","--clips",*entries[0][2],"--weapon-mesh","#00#_Sword","--out",output/"motion/malenia.hpp")
     dotnet=cache/"dotnet/dotnet";bridge=repo/"build/cw-bridge/CodeWalkerBridge.dll"
-    run(sys.executable,tools/"build_dlc.py","--converted",output/"gta-grounded","--out",output/"dlc-build","--dotnet",dotnet,"--bridge",bridge)
+    run(sys.executable,tools/"build_dlc.py","--converted",output/"gta-streaming","--out",output/"dlc-build","--dotnet",dotnet,"--bridge",bridge)
+    run(sys.executable,tools/"rpf_audit.py",output/"dlc-build/dlc.rpf","--max-resource-mib","32","--out",output/"archive-audit.json")
     run(dotnet,bridge,"prepare-dlclist",args.gta_game.resolve(),output/"newmods/common/data/dlclist.xml")
     print("Private owned-asset DLC prepared. No game launched. Runtime verification is still required.")
 

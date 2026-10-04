@@ -125,10 +125,22 @@
     {
       "repository": "deltarooo/er-mario",
       "url": "https://github.com/deltarooo/er-mario",
-      "role": "native_character_transform_collision_and_host_combat_reference",
-      "revision": "ff6b9b2d44c7bb211ef289ebc500c3fd354c9a65",
+      "role": "native_transform_contact_and_host_damage_reference",
+      "revision": "83d1397b5377c88a0fcdb00717e84ce068798ceb",
       "imported": false,
-      "license_note": "Reference only; no code, models or ROM assets copied. Lessons documented in gta/ER-MARIO-LESSONS.md."
+      "license_note": "Reference-only review of engine_mario.rs and combat.rs. Pure methods adapted to GTA; ER/SM64 hooks not copied. See gta/CRASH-20261004.md.",
+      "previous_reviewed_revision": "ff6b9b2d44c7bb211ef289ebc500c3fd354c9a65",
+      "release_reviewed": "0.3.8"
+    },
+    {
+      "repository": "K0lb3/ispc_texcomp_py",
+      "url": "https://github.com/K0lb3/ispc_texcomp_py",
+      "role": "external_cpu_bc7_encoder",
+      "version": "1.0.1",
+      "root_license_reported_by_github": "MIT",
+      "imported": false,
+      "used_as_external_dependency": true,
+      "license_note": "Pinned PyPI dependency; package source/binary not vendored. Generated retail textures remain private."
     }
   ],
   "import": {

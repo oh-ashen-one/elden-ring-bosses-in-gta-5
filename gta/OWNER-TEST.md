@@ -1,8 +1,8 @@
 # Elden Los Santos — owner preview
 
-**2026-10-04 Malenia motion candidate.** Malenia now has five full-rate source clips, separate root movement, a real stagger reaction and a kneeling defeat animation. Her sword damage follows sampled blade geometry during the strike window. Movement probes check walls, vehicles and pedestrians before changing her position. These changes have passed offline checks; their appearance, actual contacts and performance in GTA remain unverified.
+**2026-10-04 Malenia streaming repair candidate.** The previous owner test crashed while loading Malenia’s model, before her animation/combat ran. This candidate changes only her embedded texture storage: same dimensions and material references, seven unused maps removed, generated maps encoded in high-quality BC7. The mesh, rig, animations, collision and gameplay plugin are preserved. It is ready for a controlled owner test, not a completed or visually accepted fight.
 
-**GTA stays closed for now, at Hari’s request.** The shared Studio renderer coordinator is emergency-paused. This thread will perform the technical rendered encounter checks after runtime work resumes; Hari’s final playtest comes afterward. No automatic game test is queued.
+**GTA remains closed at Hari’s request.** No automatic test or restart is queued. The confirmed old failure and exact limits are in `CRASH-20261004.md` in the public source.
 
 ## Start
 
@@ -23,15 +23,16 @@ Use the **top-row number keys 1–6**. No Fn key is needed. These keys are reser
 
 Use a clear outdoor area for the first test. These are animated creature objects with custom GTA-side combat; they are not a port of the Elden Ring executable or its complete AI.
 
-## Short first test
+## Malenia test — stop at the first failed gate
 
-1. Start with **Malenia** (the default selection), press **4** to pause combat and press **2 once** outdoors. If she fails to appear, stop here; don’t cycle through other creatures or repeatedly retry. The log now distinguishes model loading, animation loading and creation. A failed creature is locked for that session.
-2. Shoot it while combat is OFF. Confirm the health bar drops.
-3. Press **4** to resume aggression. Check that the creature faces you while pursuing, its feet/claws meet the ground, and damage coincides with the visible strike. Check attacks against you and nearby NPCs/drivers; movement and animation should both be visible. For Malenia, watch the committed sword swing: she should not spin to follow you halfway through it. Her generic explosion attack is disabled; Wolf and Crab retain their earlier blast behavior.
-4. Use the RPG, a moving-car impact, then helicopter weapons. A parked car touching the creature should not repeatedly drain its health. Check each damage channel separately.
-5. Defeat the creature, clear it with 3, then spawn another one.
+1. **Spawn and appearance:** load your existing Story Mode save in a clear outdoor area. Malenia is the default selection. Press **4 once** to pause aggression, then **2 once**. Wait up to five seconds. If “Failed zlib call,” a loading failure, or a crash returns, stop; do not cycle the roster or keep retrying. Send the exact message.
+2. **Close-up:** with aggression paused, inspect her face/helmet/hair, body proportions, sword and feet from the front and side. She should hold an animated idle, with no crumpled mesh or missing texture patches. If wrong, send one close-up screenshot and stop; logs cannot establish visual quality.
+3. **Sword encounter:** press **5**, shoot once or twice, then **4** to resume. Back away and sidestep a swing. Check foot/body movement and the lunge, committed facing, a connected hit when in reach, and a miss when you evade. Nearby NPCs may also attract her aggression. She currently has one source sword attack, not the full Elden Ring moveset.
+4. **Damage and stagger:** use several rifle rounds, one RPG, then a moving-car impact. HP should drop, a heavy hit should interrupt her with a visible reaction, and a parked car touching her should not drain HP. Source tests alone do not confirm these channels.
+5. **Defeat and reset:** finish her, observe the kneeling defeat and settled body, press **3**, then **2**. Repeat three times; HP and attack state should reset and no old bodies or damage should remain.
+6. **Helicopter:** press **6** and test Buzzard weapons. Report damage, stability and how the encounter looks from the air. Key3 keeps your helicopter; key6 preserves a usable one and can replace its destroyed wreck.
 
-A failure at an earlier step is useful feedback; you do not need to repeat the rest. If anything fails, send the visible error and `EldenLosSantos.log` from the active profile directory. No header usually means the ASI loader/plugin did not load; “Model unavailable” means the creature DLC was not registered.
+If the first gate fails, the later gates are not passed. If appearance fails, stop before a long combat session. The most useful report is the failed step plus a screenshot or exact error; this thread will read its own private logs. Wolf and Crab are not the acceptance target and their earlier visual failures are not claimed fixed.
 
 ## Locations on this Studio
 

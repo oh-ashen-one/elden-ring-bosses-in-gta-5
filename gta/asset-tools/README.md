@@ -130,3 +130,10 @@ The complete owned-assets orchestrator now generates that header. Pass its absol
 Malenia’s old death selection `a000_005000` is a turn, with a -90-degree reference-frame rotation and upright source poses. Inspected `a000_008030` recoils and recovers; `a000_010000` ends kneeling. Her run and attack contain metres of previously discarded root motion. These findings were checked against skinned source poses; actual GTA playback remains a separate required gate.
 
 `align_ground_contact.py` also gives Malenia a conservative one-metre-wide torso box. The old rest-pose bounds included the extended sword and were nearly four metres wide. Her attack sweep now samples the weapon separately. Body boxes and victim capsules remain GTA-side approximations, not imported original ER hitboxes or Havok physics.
+
+
+## Streaming failure follow-up
+
+The owner test failed with ERR_GEN_ZLIB_2 while Malenia's model streamed. [Diagnosis](../CRASH-20261004.md) records the evidence and uncertainties. `rpf_audit.py` independently validates nested RPF7 bounds, extended resource lengths, actual raw-DEFLATE termination and declared page-memory sizes. `--max-resource-mib 32` is a conservative preview review budget, not a universal engine limit.
+
+`optimize_textures.py` creates a new private input copy, prunes unreferenced Malenia textures and encodes generated RGBA maps as BC7 using pinned `ispc_texcomp==1.0.1`. Full dimensions/mips are retained; lossy error is measured. The gates reject normal-map p99 angular error above 3 degrees or alpha threshold-coverage change above 0.1 percent. The BC3 alternative failed on the actual body map and was not installed. No model, material binding, rig, clip, behavior or additional boss is changed by this operation. The full owned-assets recipe now applies this step to Malenia and audits the final archive. Runtime crash resolution and appearance still require the owner's test.

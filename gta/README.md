@@ -2,7 +2,7 @@
 
 Original GTA V Story Mode mod code and a local conversion pipeline for owned Elden Ring creatures. Current characters: **Malenia, Red Wolf of Radagon, Giant Crab**.
 
-**Status: an earlier build was owner-confirmed to show the three creatures and take bullet damage.** The 2026-10-04 candidate focuses on Malenia: full-rate source clips, separate root motion, collision probes, animated blade contact, proper stagger and kneeling defeat. Native-file and code checks pass; the current encounter has not been rendered or played. The owner has kept launches on hold. See [current coverage](encounter-coverage.json) and [owner guide](OWNER-TEST.md).
+**Status: owner testing of the motion candidate exposed a Malenia “Failed zlib call” during model streaming and poor crab visuals.** A smaller, source-resolution BC7 Malenia package is prepared as a focused repair candidate. Actual crash resolution and the complete boss fight are unverified. The game stays closed until the owner requests the next playtest. See [crash diagnosis](CRASH-20261004.md), [current coverage](encounter-coverage.json) and [precise test steps](OWNER-TEST.md).
 
 [ER Mario lessons and concrete application](ER-MARIO-LESSONS.md) records the reference review without claiming its engine hooks work in GTA.
 

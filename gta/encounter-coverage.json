@@ -1,6 +1,6 @@
 {
   "installed_baseline": "bb643985f29c6172c51e3084b97f2fa37b4b4470",
-  "scope": "2026-10-04 Malenia root-motion candidate; GTA launch held by owner; actual rendered encounter unverified",
+  "scope": "Malenia-only streaming repair; owner test required; game remains closed",
   "characters": [
     {
       "name": "Malenia",
@@ -104,5 +104,22 @@
     "others": "Previous line-of-sight chase retained."
   },
   "installed_candidate": "20261004-malenia-root-motion",
-  "installed_source_code_commit": "b4ec51e94f11f07a4c18ffebdc45fd4724ec3494"
+  "installed_source_code_commit": "b4ec51e94f11f07a4c18ffebdc45fd4724ec3494",
+  "last_owner_test": {
+    "candidate": "20261004-malenia-root-motion",
+    "malenia": "ERR_GEN_ZLIB_2 while streaming model, before animation/create/combat",
+    "crab": "spawned; native phase/coordinates advanced; owner saw poor visuals/glitching loop; failed visual acceptance",
+    "game_exited": true,
+    "automatic_relaunch": false
+  },
+  "streaming_repair": {
+    "candidate": "20261004-malenia-streaming-isolation",
+    "status": "prepared for reversible install and owner test; not a proven crash fix",
+    "only_changed_resource": "ergt_malenia.ydr texture storage",
+    "before_inflated_bytes": 77922304,
+    "after_inflated_bytes": 23396352,
+    "same_mesh_rig_clips_asi": true,
+    "bc7_lossy": true,
+    "resolution_preserved": true
+  }
 }
