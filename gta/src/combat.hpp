@@ -51,13 +51,14 @@ struct CreatureSpec {
     bool ranged_enabled = true;
     float body_radius=.5f,body_height=2.8f,vertical_reach=4.0f,weapon_radius=.12f;
     const char* visual_child=nullptr;
+    float minimum_attack_distance=0;
 };
 
 // Hit timers now follow inspected source attack-motion landmarks. Contact
 // timing, clip roles and GTA playback still require owner gameplay review.
 inline constexpr std::array<CreatureSpec, 4> creatures{{
     {"Malenia", "ergt_malenia", "ergt_malenia_anims", "a000_000020", "a000_002100", "a000_003000", "a000_010000",
-     3600, 3.2f, 6.0f, 28, 1150, 1500, 2734, -0.005f,180.0f,"a000_008030",1334,false},
+     3600, 3.2f, 6.0f, 28, 1150, 1500, 2734, -0.005f,180.0f,"a000_008030",1334,false,.5f,2.8f,4.0f,.12f,nullptr,4.8f},
     {"Starscourge Radahn", "ergt_radahn", "ergt_radahn_anims", "a000_000020", "a000_002100", "a000_003000", "a000_010000",
      6500,5.2f,9.0f,45,1833,2200,3934,-.04f,180.0f,"a000_008140",1234,false,2.5f,10.3f,12.0f,.45f},
     {"Fire Giant", "ergt_firegiant", "ergt_firegiant_anims", "a000_000020", "a000_002100", "a000_003000", "a000_010000",
@@ -93,6 +94,7 @@ struct Decision {
     bool ranged_strike = false;
     bool telegraph = false;
     Vec3 aim;
+    bool reposition=false;
 };
 
 class Combat {
@@ -115,7 +117,10 @@ public:
         if (!std::isfinite(value) || value <= 0 || state_ == CombatState::defeated) return;
         health_ = std::max(0.0f, health_ - value);
         if (health_ == 0) { state_ = CombatState::defeated; remaining_ms_ = 0; }
-        else if (value >= 250) { state_ = CombatState::staggered; remaining_ms_ = spec_->stagger_ms; ++reaction_generation_; }
+        else if (value >= 250 && stagger_resist_ms_==0) {
+            state_ = CombatState::staggered; remaining_ms_ = spec_->stagger_ms;
+            stagger_resist_ms_=spec_->stagger_ms+1500; ++reaction_generation_;
+        }
     }
 
     Decision tick(int elapsed_ms, const Observation& observation) {
@@ -123,6 +128,7 @@ public:
         if (state_ == CombatState::defeated) return out;
         const int dt = std::clamp(elapsed_ms, 0, 250);
         if (dt == 0) return out;
+        stagger_resist_ms_=std::max(0,stagger_resist_ms_-dt);
         if (remaining_ms_ > 0) remaining_ms_ = std::max(0, remaining_ms_ - dt);
         // Physical hit reactions continue even with aggression paused or no
         // target. Pausing cancels attacks, not the source stagger animation.
@@ -131,7 +137,7 @@ public:
             state_=CombatState::idle;
         }
         if (!observation.target_alive || !observation.combat_enabled || !finite_vec(observation.actor) || !finite_vec(observation.target)) {
-            state_ = CombatState::idle; remaining_ms_ = 0; return out;
+            state_ = CombatState::idle; remaining_ms_ = 0; repositioning_=false; return out;
         }
         if (state_ == CombatState::ranged_windup) {
             out.aim = locked_target_; out.telegraph = remaining_ms_ > 0;
@@ -160,6 +166,17 @@ public:
         }
         const float distance = horizontal_distance(observation.actor, observation.target);
         if (!observation.line_of_sight || distance > 200.0f) { state_ = CombatState::idle; return out; }
+        // Source lunges need space. At hugging distance, turn and use the
+        // original run clip to make room, then recommit at full attack range.
+        // Hysteresis avoids alternating forward/backward every frame.
+        if(spec_->minimum_attack_distance>0 && distance<spec_->minimum_attack_distance)repositioning_=true;
+        if(repositioning_ && distance>=spec_->melee_range)repositioning_=false;
+        if(repositioning_) {
+            state_=CombatState::chasing;out.reposition=true;
+            const float step=std::min(spec_->speed*dt/1000.f,spec_->melee_range-distance+.1f);
+            out.movement=distance>.01f?Vec3{(observation.actor.x-observation.target.x)/distance*step,(observation.actor.y-observation.target.y)/distance*step,0}:Vec3{step,0,0};
+            return out;
+        }
         if (spec_->ranged_enabled && (observation.airborne_target || std::abs(observation.actor.z - observation.target.z) > 6.0f || distance > 28.0f)) {
             locked_target_ = observation.target;
             state_ = CombatState::ranged_windup; remaining_ms_ = 1500;
@@ -184,5 +201,7 @@ private:
     int remaining_ms_ = 0;
     Vec3 locked_target_{};
     unsigned reaction_generation_ = 0;
+    int stagger_resist_ms_=0;
+    bool repositioning_=false;
 };
 } // namespace ergt

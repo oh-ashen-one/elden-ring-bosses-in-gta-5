@@ -45,7 +45,7 @@ struct Actor {
     float playback_rate = 1, blade_phase = -1;
     bool melee_clip = false, cleanup_requested = false, cleanup_failed = false;
     unsigned played_reaction = 0;
-    bool pose_transition_required = false;
+    bool pose_transition_required = false, repositioning=false;
     bool corpse_settled = false;
     float committed_heading = 0;
     ergt::Vec3 blade_origin{}, queued_movement{}, sweep_from{}, sweep_to{};
@@ -62,7 +62,7 @@ struct Actor {
 std::array<Actor, 1> actors;
 std::array<int, 512> nearby_peds{};
 int nearby_ped_count = 0;
-struct VehicleSample { int entity=0; float speed=0, prior_speed=0; };
+struct VehicleSample { int entity=0; float speed=0, prior_speed=0; std::uint32_t last_contact=0; int contact_actor=0; };
 std::array<VehicleSample, 128> nearby_vehicles{};
 int nearby_vehicle_count = 0;
 std::uint32_t last_pool_scan = 0;
@@ -86,9 +86,9 @@ void scan_world(int player, std::uint32_t now) {
         if(ergt::horizontal_distance({centre.x,centre.y,centre.z},{v.x,v.y,v.z})>100) continue;
         float speed=hook.invoke<float>(0xD5037BA82E12416FULL,e);
         if(!std::isfinite(speed)) continue;
-        float previous=speed;
-        for(int j=0;j<old_count;j++) if(old[j].entity==e) {previous=old[j].speed;break;}
-        nearby_vehicles[nearby_vehicle_count++]={e,speed,previous};
+        float previous=speed;std::uint32_t contact=0;int contact_actor=0;
+        for(int j=0;j<old_count;j++) if(old[j].entity==e) {previous=old[j].speed;contact=old[j].last_contact;contact_actor=old[j].contact_actor;break;}
+        nearby_vehicles[nearby_vehicle_count++]={e,speed,previous,contact,contact_actor};
     }
 }
 std::array<bool, ergt::creatures.size()> failed_creatures{};
@@ -578,9 +578,14 @@ void observe_damage(Actor& actor,int player,std::uint32_t now) {
     if(vehicle && now-actor.last_impact>=650) {
         float impact=0;
         for(int i=0;i<nearby_vehicle_count;i++) {
-            const auto& v=nearby_vehicles[i];
-            if(exists(v.entity) && hook.invoke<int>(0xC86D67D52A707CF8ULL,actor.entity,v.entity,true))
-                impact=std::max(impact,ergt::impact_damage(std::max(v.speed,v.prior_speed)));
+            auto& v=nearby_vehicles[i];
+            if(exists(v.entity) && hook.invoke<int>(0xC86D67D52A707CF8ULL,actor.entity,v.entity,true)) {
+                // Vehicle weapons also set the vehicle-damage flag. Only a
+                // physical contact with this actor may use speed-based damage.
+                if(hook.invoke<int>(0x17FFC1B2BA35A494ULL,actor.entity,v.entity)){v.last_contact=now;v.contact_actor=actor.entity;}
+                if(v.contact_actor==actor.entity && v.last_contact && now-v.last_contact<=300)
+                    impact=std::max(impact,ergt::impact_damage(std::max(v.speed,v.prior_speed)));
+            }
         }
         if(impact>0) { loss=std::max(loss,impact);actor.last_impact=now;record("vehicle_impact",actor.entity,impact); }
         else if(!weapon) loss=0; // A stationary/unattributed vehicle contact is not an impact.
@@ -800,6 +805,10 @@ void update_actor(Actor& actor,int player,int,std::uint32_t now,int dt) {
     const bool impact_recovery=now-actor.last_impact<700;
     auto decision=actor.combat.tick(dt,{position,target,alive,sight,fighting,airborne});
     const auto state=actor.combat.state();
+    if(state==ergt::CombatState::chasing && actor.repositioning!=decision.reposition){
+        actor.repositioning=decision.reposition;actor.pose_transition_required=true;
+        record(decision.reposition?"spacing_retreat_started":"spacing_retreat_finished",actor.entity);
+    }
     if(state!=actor.previous_state || actor.pose_transition_required || (state==ergt::CombatState::staggered && actor.played_reaction!=actor.combat.reaction_generation())) {
         actor.pose_transition_required=false;
         actor.played_reaction=actor.combat.reaction_generation();
@@ -840,7 +849,7 @@ void update_actor(Actor& actor,int player,int,std::uint32_t now,int dt) {
         }
     }
     if(fighting && (state==ergt::CombatState::chasing || state==ergt::CombatState::idle) && alive && !impact_recovery) {
-        const float heading=ergt::heading_to_target(position,target,actor.spec->model_heading_offset);
+        const float heading=ergt::heading_to_target(position,target,actor.spec->model_heading_offset+(decision.reposition?180.f:0.f));
         hook.invoke(0x8E2530AA8ADA980EULL,actor.entity,heading);
         actor.motion_heading=heading;
     }

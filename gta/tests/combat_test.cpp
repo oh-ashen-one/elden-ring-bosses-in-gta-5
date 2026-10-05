@@ -50,7 +50,7 @@ int main() {
     boss.damage(10000);boss.cancel_attack();
     require(boss.state()==CombatState::defeated,"target selection cannot revive a defeated creature");
     for(const auto& spec:creatures) {
-        Combat timing(&spec);Observation close{{0,0,0},{1,0,0},true,true,true,false};
+        Combat timing(&spec);Observation close{{0,0,0},{spec.melee_range,0,0},true,true,true,false};
         timing.tick(1,close);int elapsed=0;bool struck=false;
         while(elapsed<spec.attack_clip_ms-10) {
             auto d=timing.tick(10,close);elapsed+=10;struck|=d.melee_strike;
@@ -74,7 +74,7 @@ int main() {
     for(int encounter=0;encounter<50;encounter++) {
         const auto& spec=creatures[encounter%creatures.size()];boss.reset(&spec);
         require(boss.health()==spec.maximum_health && boss.state()==CombatState::idle,"respawn starts with fresh health and no queued attack");
-        o={{0,0,0},{1,0,0},true,true,true,false};boss.tick(1,o);
+        o={{0,0,0},{spec.melee_range,0,0},true,true,true,false};boss.tick(1,o);
         bool hit=false;int elapsed=0;
         while(!hit && elapsed<5000) {hit=boss.tick(10,o).melee_strike;elapsed+=10;}
         require(hit && elapsed>=spec.windup_ms && elapsed<spec.windup_ms+10,"hit occurs at configured motion landmark");
@@ -83,5 +83,13 @@ int main() {
     boss.reset(&creatures[0]);o={{0,0,0},{1,0,0},true,true,true,false};boss.tick(16,o);
     o.target.x=std::numeric_limits<float>::quiet_NaN();auto invalid=boss.tick(250,o);
     require(!invalid.melee_strike && !invalid.ranged_strike && finite_vec(invalid.movement),"invalid target transform cannot create damage or NaN movement");
+    boss.reset(&creatures[0]);o={{0,0,0},{1,0,0},true,true,true,false};
+    auto space=boss.tick(100,o);require(space.reposition && space.movement.x<0,"Hugging target must create space using real movement");
+    o.target.x=5.2f;require(boss.tick(100,o).reposition,"Retreat must retain hysteresis until attack range");
+    o.target.x=6.f;require(!boss.tick(100,o).reposition && boss.state()==CombatState::melee_windup,"Retreat must recommit the source attack at range");
+    boss.reset(&creatures[2]);boss.damage(300);auto reaction=boss.reaction_generation();
+    boss.damage(300);require(boss.reaction_generation()==reaction,"Repeated explosives must not restart stagger every shot");
+    for(int i=0;i<40;i++)boss.tick(250,o);
+    boss.damage(300);require(boss.reaction_generation()>reaction,"Stagger resistance must expire");
     std::cout << "Combat scenarios passed; no GTA runtime executed\n";
 }

@@ -15,7 +15,7 @@ prefix = r'''
 #include <tuple>
 #include <type_traits>
 #include "combat.hpp"
-struct Frame { int hp=10000; bool weapon=false,vehicle=false; int attacker=0; float weapon_damage=32; } frame;
+struct Frame { int hp=10000; bool weapon=false,vehicle=false; int attacker=0; float weapon_damage=32; bool touching=true; } frame;
 struct FakeHook {
  template<class R=void,class...Args> R invoke(std::uint64_t hash,Args... args) {
   if constexpr (std::is_void_v<R>) { return; }
@@ -24,6 +24,7 @@ struct FakeHook {
    if(hash==0xEEF059FAD016D209ULL) result=frame.hp;
    else if(hash==0x131D401334815E94ULL) result=frame.weapon;
    else if(hash==0xDFD5033FDBA0A9C8ULL) result=frame.vehicle;
+   else if(hash==0x17FFC1B2BA35A494ULL) result=frame.touching;
    else if(hash==0xC86D67D52A707CF8ULL) {
     if constexpr(sizeof...(Args)>1) {
      if constexpr(std::is_arithmetic_v<std::tuple_element_t<1,decltype(tuple)>>)
@@ -39,7 +40,7 @@ struct Actor {
  std::uint32_t last_attacked=0,last_impact=0,last_fallback=0,last_log=0;
  float damage_since_log=0;
 };
-struct VehicleSample { int entity=100; float speed=0,prior_speed=0; };
+struct VehicleSample { int entity=100; float speed=0,prior_speed=0; std::uint32_t last_contact=0; int contact_actor=0; };
 VehicleSample nearby_vehicles[1]; int nearby_vehicle_count=1;
 bool exists(int entity) { return entity!=0; }
 void record(const char*,int=0,float=0) {}
@@ -62,6 +63,10 @@ int main() {
  expect(stopped_after_hit.combat.health(),2640,"Recent pre-impact speed was discarded");
  Actor mixed; nearby_vehicles[0]={100,0,0}; frame={9968,true,true,1,32}; observe_damage(mixed,1,1000);
  expect(mixed.combat.health(),3568,"Parked-contact filter swallowed a simultaneous bullet");
+ Actor remote_gun; nearby_vehicles[0]={100,35,35}; frame={9970,true,true,100,30,false}; observe_damage(remote_gun,1,3000);
+ expect(remote_gun.combat.health(),3570,"Distant helicopter gunfire fabricated physical impact damage");
+ Actor remote_rocket; frame={8800,true,true,100,1200,false}; observe_damage(remote_rocket,1,4000);
+ expect(remote_rocket.combat.health(),2400,"Vehicle impact filter swallowed a real helicopter rocket");
  Actor explosive; frame={8800,true,false,1,1200}; observe_damage(explosive,1,1000);
  expect(explosive.combat.health(),2400,"Native explosive damage was lost");
  Actor fallback; frame={10000,true,false,1,32}; observe_damage(fallback,1,1000);

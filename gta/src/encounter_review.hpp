@@ -104,7 +104,7 @@ void tick_encounter_review(int player,std::uint32_t now) {
         if(!actor_ok||static_cast<std::int32_t>(qa.load_until-now)<=0){review_delete_vehicle(player);record("review_vehicle_load_failed");}
         else if(hook.invoke<int>(0x98A4EB5D89A0C952ULL,qa.vehicle_model)) {
             const auto b=coords(actor.entity);const bool heli=qa.vehicle_kind==3;
-            const float distance=heli?std::max(50.f,actor.spec->body_radius*6.f):qa.vehicle_kind==2?2.7f+actor.spec->body_radius:25.f+actor.spec->body_radius;
+            const float distance=heli?std::max(50.f,actor.spec->body_radius*6.f):qa.vehicle_kind==2?2.2f+actor.spec->body_radius:25.f+actor.spec->body_radius;
             const auto p=ergt::add(b,{distance,0,heli?actor.spec->body_height*.55f:0.f});float ground=0;
             if(!hook.invoke<int>(0xC906A7DAB05C8D2BULL,p.x,p.y,p.z+100.f,&ground,false,false))return;
             qa.vehicle=hook.invoke<int>(0xAF35D0D2583051B0ULL,qa.vehicle_model,p.x,p.y,heli?p.z:ground+1.f,90.f,false,true,false);qa.load_until=0;
@@ -116,6 +116,8 @@ void tick_encounter_review(int player,std::uint32_t now) {
                     hook.invoke(0xF75B0D629E1C063DULL,player,qa.vehicle,-1);
                     hook.invoke(0x1C99BB7B6E96D16FULL,qa.vehicle,0.f,0.f,0.f);
                 } else {
+                    // Keep the test driver out of the vehicle's impact lane.
+                    hook.invoke(0x239A3351AC1DA385ULL,player,b.x+35.f,b.y+8.f,b.z+1.f,false,false,true);
                     hook.invoke<int>(0x49733E92263139D1ULL,qa.vehicle,5.f);
                     hook.invoke(0xE4E2FD323574965CULL,qa.vehicle,qa.vehicle_kind==2);
                     if(qa.vehicle_kind==1)hook.invoke(0xAB54A438726D25D5ULL,qa.vehicle,20.f);

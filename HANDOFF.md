@@ -4,6 +4,12 @@ Updated 2026-10-05. **Owner authorized this thread to finish the remaining mater
 
 ## Current continuation
 
+- First live continuation run: real Sultan collision caused362.28+36.76 damage and source stagger; native on-foot carbine reducedHP; RPG led to real defeat and settled source kneeling pose (close screenshot). Malenia also struck the PLAYER at source phase0.42427, reducingHP150→123.
+- Real Buzzard gun and rocket selection accepted; mounted weapons damaged the60m giant while player occupied/flew the helicopter. Found remote weapon hits also set GTA's vehicle-damage flag, falsely activating impact recovery. Source now requires current/recent physical contact for speed damage.
+- Found close-hugging range exploited the single lunge. Malenia now turns and uses the existing source run to create space before recommitting; no custom animation. Added1.5s stagger resistance after the source reaction to avoid indefinite RPG restart lock. These refinements await the second live run.
+- Parked test was not touching, so not passed; setup narrowed and moves player away from car lane. Source regression21 suites pass. Measured game frame times during first run: Malenia mean32.614ms/p9537.249ms; giant+Buzzard mean37.178ms/p9546.195ms at1920×1080. No60fps claim.
+- Current installed `20261005-completion` (fbee474), DLC1cc5c51ba436f5c4455f43430102bd818551a4ee4d1bd7da5b3f2219ee9d598b. New runtime-only refinement pending install. Evidence `Evidence/20261005-completion/run1.log` and named captures. Our own `completion-reservation-20261005.json` PAUSED remains across this authorized restart, no foreign work touched.
+
 - Source candidate adds original per-material alpha thresholds and mip coverage preservation. The first package correctly rejected a split-child sampler name mismatch; `gta-cutout-thresholds-v2` uses the shared parent names. Actual appearance is still unverified.
 - Local fixed review commands stage a temporary airfield check, real Sultan/Buzzard vehicles and their native weapons, on-foot fire, and30-second engine frame-time samples. They expire and restore the player's original location/heading/wanted state. They never edit boss HP to manufacture a pass; technical setup is distinct from a manual playthrough.
 - Twenty-one source suites passed, and current Windows ASI compiled. Shared brain freshness verified, no competing renderer/hold observed, original desktop notification processes predate the owner's already-confirmed clear desktop; CrossOver UI is responsive. No game launched yet this continuation.
