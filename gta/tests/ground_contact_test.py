@@ -32,10 +32,15 @@ class GroundContact(unittest.TestCase):
  def test_body_width_does_not_change_render_geometry_or_contact_height(self):
   root=self.fixture();m.adjust(root,-.1);m.body_box(root)
   self.assertEqual(root.find('BoundingBoxMin').get('x'),'-2')
-  for item in [root.find('Bounds'),root.find('Bounds/Children/Item')]:
-   self.assertEqual(float(item.find('BoxMin').get('x')),-.5)
-   self.assertEqual(float(item.find('BoxMax').get('y')),.5)
-   self.assertEqual(float(item.find('BoxMin').get('z')),-.1)
+  parent=root.find('Bounds');child=root.find('Bounds/Children/Item')
+  transform=list(map(float,child.findtext('CompositeTransform').split()))
+  self.assertEqual(float(parent.find('BoxMin').get('z')),-.1)
+  for i,axis in enumerate('xyz'):
+   lo=float(child.find('BoxMin').get(axis));hi=float(child.find('BoxMax').get(axis))
+   self.assertAlmostEqual(lo,-hi)
+   self.assertAlmostEqual(lo+transform[12+i],float(parent.find('BoxMin').get(axis)))
+   self.assertAlmostEqual(hi+transform[12+i],float(parent.find('BoxMax').get(axis)))
+  self.assertGreater(float(child.find('BoxMax').get('z'))+transform[14],2.5)
  def test_unknown_shape_transform_and_invalid_floor_rejected(self):
   r=self.fixture();r.find('Bounds/Children/Item').set('type','Capsule')
   with self.assertRaises(ValueError):m.adjust(r,0)

@@ -23,6 +23,14 @@ SIZES = {'Position': 3, 'BlendWeights': 4, 'BlendIndices': 4, 'Normal': 3,
 
 def read_image(path):
     data = bytearray(path.read_bytes())
+    if data[84:88]!=b'DX10' and len(data)>=128 and struct.unpack_from('<I',data,88)[0]==32:
+        masks=struct.unpack_from('<4I',data,92)
+        if masks in ((255,65280,16711680,4278190080),(16711680,65280,255,4278190080)):
+            height,width=struct.unpack_from('<II',data,12)
+            pitch=struct.unpack_from('<I',data,20)[0] if struct.unpack_from('<I',data,8)[0]&8 else width*4
+            if pitch<width*4 or len(data)<128+pitch*height:raise ValueError('Truncated uncompressed texture')
+            pixels=np.frombuffer(data,dtype=np.uint8,offset=128,count=pitch*height).reshape(height,pitch)[:,:width*4].reshape(height,width,4)
+            return pixels.copy() if masks[0]==255 else pixels[:,:,[2,1,0,3]].copy()
     if data[84:88] == b'DX10':
         fmt = struct.unpack_from('<I', data, 128)[0]
         if fmt in (72, 75, 78): struct.pack_into('<I', data, 128, fmt-1)

@@ -2,6 +2,13 @@
 
 Updated 2026-10-05. **Complete-model/material candidate installed; guarded GTA technical render review in progress.**
 
+## Current encounter check: giant upper-body collision under repair
+
+- `20261005-encounter-review` (ASI froma4f3207, BGRA DLC) ran technical native carbine/RPG probes. At Fire Giant's47.84m target height the calls were recorded but no damage was observed. Do not claim helicopter/elevated hits passed.
+- Malenia's native RPG probe DID produce real damage/fire. `malenia-combat-live.png` shows the original running pose with depleted HP; logs show source run playback/world displacement, accepted kneeling defeat, `corpse_settled`, then cleanup. No melee-contact/full encounter/subjective pass claimed.
+- Corrected primitive collision representation is prepared: symmetric child box, translated to its intended model-space centre; parent centres/radius agree. All intended world AABB limits and render geometry preserved. Source regression checks transformed child bounds, not just min/max. New private `gta-collision-origin`; use `dlc-collision-origin-v2/dlc.rpf` SHA256 `11bd019517f539962524f6843713bc6c76af33ada63aaf5301b540aa4d377822`. The earlier unsuffixed package is partial and MUST NOT be installed (first repair hit a width guard before Fire Giant; corrected v2 checks allfive archetypes).
+- GTA CLOSED normally for asset patch; eight owned runs, zero crashes. Reopen under our existing reservation after install, repeat elevated native hits, then inspect melee/motion/reset. Keep scope/lane and proprietary-data boundaries unchanged.
+
 ## Latest current rendering result
 
 - `20261005-cache-cutout` actual GTA frame `cache-firegiant-front.png` confirms the distinct skeleton cache IDs resolve the split rig's gross deformation.60m Fire Giant is coherent, with face/arms/torso/shield aligned. This is actual runtime evidence; full moving/combat/reset acceptance remains pending.

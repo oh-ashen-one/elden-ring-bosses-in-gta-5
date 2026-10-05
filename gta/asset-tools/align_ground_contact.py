@@ -27,16 +27,25 @@ def body_box(root,half_width=0.5):
     """
     bound=root.find('Bounds');children=bound.findall('Children/Item')
     if bound.get('type')!='Composite' or len(children)!=1 or children[0].get('type')!='Box':raise ValueError('Unsupported body collider')
-    if not 0.1<=half_width<=10:raise ValueError('Invalid body width')
-    for item in [bound,children[0]]:
-        lo=item.find('BoxMin');hi=item.find('BoxMax')
-        for axis in 'xy':lo.set(axis,str(-half_width));hi.set(axis,str(half_width))
-        lower=[float(lo.get(k)) for k in 'xyz'];upper=[float(hi.get(k)) for k in 'xyz'];size=[b-a for a,b in zip(lower,upper)]
-        item.find('Volume').set('value',format(math.prod(size),'.9g'))
-        for i,axis in enumerate('xyz'):item.find('Inertia').set(axis,format(sum(size[j]**2 for j in range(3) if j!=i)/12,'.9g'))
-        centre=[float(item.find('SphereCenter').get(k)) for k in 'xyz']
-        radius=math.sqrt(sum(max(abs(a-c),abs(b-c))**2 for a,b,c in zip(lower,upper,centre)))
-        item.find('SphereRadius').set('value',format(radius,'.9g'))
+    if not 0.1<=half_width<=20:raise ValueError('Invalid body width')
+    lower=[float(bound.find('BoxMin').get(k)) for k in 'xyz'];upper=[float(bound.find('BoxMax').get(k)) for k in 'xyz']
+    lower[:2]=[-half_width,-half_width];upper[:2]=[half_width,half_width]
+    centre=[(a+b)/2 for a,b in zip(lower,upper)];half=[(b-a)/2 for a,b in zip(lower,upper)];size=[2*x for x in half]
+    radius=math.sqrt(sum(x*x for x in half))
+    # Canonical primitive: symmetric local extents translated to the desired
+    # model-space centre. Native GTA boxes must not depend on asymmetric local
+    # bounds with a zero centroid (which missed elevated projectile rays).
+    for index,item in enumerate([bound,children[0]]):
+        lo=lower if index==0 else [-v for v in half];hi=upper if index==0 else half
+        for tag,values in [('BoxMin',lo),('BoxMax',hi),('BoxCenter',centre if index==0 else [0,0,0]),('SphereCenter',centre if index==0 else [0,0,0])]:
+            node=item.find(tag)
+            if node is None:node=ET.SubElement(item,tag)
+            for axis,value in zip('xyz',values):node.set(axis,format(value,'.12g'))
+        item.find('Volume').set('value',format(math.prod(size),'.12g'))
+        for i,axis in enumerate('xyz'):item.find('Inertia').set(axis,format(sum(size[j]**2 for j in range(3) if j!=i)/12,'.12g'))
+        item.find('SphereRadius').set('value',format(radius,'.12g'))
+    transform=[1,0,0,0,0,1,0,0,0,0,1,0,*centre,1]
+    children[0].find('CompositeTransform').text=' '.join(format(v,'.12g') for v in transform)
 
 
 def adjust(root, floor, allow_lower=False):
