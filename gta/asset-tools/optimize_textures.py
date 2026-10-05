@@ -19,10 +19,10 @@ from upgrade_visuals import read_image,normal_pixels
 
 def encode(pixels,normal=False,codec='BC3'):
     image=Image.fromarray(pixels);chunks=[];levels=0
-    if codec not in ('BC3','BC7'):raise ValueError('Unsupported texture codec')
-    if codec=='BC7':
+    if codec not in ('BC3','BC5','BC7'):raise ValueError('Unsupported texture codec')
+    if codec in ('BC5','BC7'):
         import ispc_texcomp as itc
-        settings=itc.BC7EncSettings.from_profile('alpha_slow')
+        if codec=='BC7':settings=itc.BC7EncSettings.from_profile('alpha_slow')
     while True:
         if normal:image=Image.fromarray(normal_pixels(np.asarray(image)))
         expected=((image.width+3)//4)*((image.height+3)//4)*16
@@ -35,10 +35,13 @@ def encode(pixels,normal=False,codec='BC3'):
             # The SIMD encoder expects complete 4x4 blocks, including tiny mips.
             array=np.asarray(image);pw=(image.width+3)//4*4;ph=(image.height+3)//4*4
             array=np.pad(array,((0,ph-image.height),(0,pw-image.width),(0,0)),mode='edge')
-            chunk=itc.compress_blocks_bc7(itc.RGBASurface(array.tobytes(),pw,ph,pw*4),settings)
+            # ISPC's BC5 kernel reads packed RG pairs, despite the binding's
+            # generic RGBASurface name. RGBA would interleave BA as fake pixels.
+            surface=itc.RGBASurface(array.tobytes(),pw,ph,pw*4) if codec=='BC7' else itc.RGBASurface(array[:,:,:2].copy().tobytes(),pw,ph,pw*2)
+            chunk=itc.compress_blocks_bc7(surface,settings) if codec=='BC7' else itc.compress_blocks_bc5(surface)
             if levels==0:
                 words=[124,0xA1007,image.height,image.width,expected,0,0,*([0]*11),32,4,int.from_bytes(b'DX10','little'),0,0,0,0,0,0x401008,0,0,0,0]
-                header=bytearray(b'DDS '+struct.pack('<31I',*words)+struct.pack('<5I',98,3,0,1,0))
+                header=bytearray(b'DDS '+struct.pack('<31I',*words)+struct.pack('<5I',98 if codec=='BC7' else 83,3,0,1,0))
         if len(chunk)!=expected:raise ValueError('Unexpected block payload size')
         chunks.append(chunk);levels+=1
         if image.size==(1,1):break
@@ -53,7 +56,12 @@ def quality(original,encoded,normal):
     report={'dimensions_preserved':list(decoded.shape)==list(original.shape),'channel_rmse':np.sqrt(np.mean((a-b)**2,axis=(0,1))).tolist(),
             'alpha_128_coverage_change':float(np.mean((a[:,:,3]>=128)!=(b[:,:,3]>=128)))}
     if normal:
-        x=a[:,:,:3]/127.5-1;y=b[:,:,:3]/127.5-1
+        # normal_spec reconstructs Z from sampled RG. Compare what that
+        # shader actually consumes; blue is not a normal component in GTA.
+        def decoded_rg(pixels):
+            xy=pixels[:,:,:2]/127.5-1
+            return np.dstack([xy,np.sqrt(np.maximum(0,1-np.sum(xy*xy,axis=2)))])
+        x=decoded_rg(a);y=decoded_rg(b)
         x/=np.maximum(np.linalg.norm(x,axis=2)[:,:,None],1e-8);y/=np.maximum(np.linalg.norm(y,axis=2)[:,:,None],1e-8)
         angles=np.rad2deg(np.arccos(np.clip(np.sum(x*y,axis=2),-1,1)))
         report['normal_angle_mean_degrees']=float(angles.mean());report['normal_angle_p99_degrees']=float(np.percentile(angles,99))

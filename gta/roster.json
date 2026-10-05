@@ -1,6 +1,7 @@
 {
-  "candidate": "20261005-complete-boss-materials",
-  "scope": "Source assets preserved; GTA-side combat; live review pending",
+  "schema": 1,
+  "source": "Owned regulation.bin NpcParam modelDispMask fields; read with er_npc_masks.c",
+  "runtime_verified": false,
   "bosses": [
     {
       "character": "c2120",
@@ -91,17 +92,5 @@
         "a000_010000"
       ]
     }
-  ],
-  "active_actor_limit": 1,
-  "source_attack_events": "Original owned TAE AttackBehavior intervals; native phase contact sampling",
-  "source_clips_per_boss": 5,
-  "ranged_attacks": false,
-  "technical_runtime_verified": false,
-  "subjective_acceptance": false,
-  "known_limits": [
-    "Different renderer/material model; no claim of identical lighting",
-    "No original AI, cloth physics, sounds, VFX or full movesets",
-    "Coarse body collision; no pathfinding",
-    "Native damage/death/reset require current-candidate review"
   ]
 }

@@ -54,8 +54,12 @@ struct Actor {
     std::uint32_t sweep_started = 0, sweep_animation = 0;
     std::array<int,513> blade_victims{};
     int blade_victim_count = 0;
+    int blade_window = -1;
+    float motion_heading = 0;
 };
-std::array<Actor, 3> actors;
+// Initial owner validation uses one large boss at a time. The selector offers
+// four choices; concurrent giant encounters need measured streaming/perf work.
+std::array<Actor, 1> actors;
 std::array<int, 512> nearby_peds{};
 int nearby_ped_count = 0;
 struct VehicleSample { int entity=0; float speed=0, prior_speed=0; };
@@ -101,7 +105,7 @@ bool reference_probe_used = false;
 bool reference_probe_active = false;
 std::uint32_t reference_probe_hash = 0;
 std::uint32_t reference_probe_started = 0;
-constexpr std::array<const char*,4> diagnostic_models={"prop_box_wood01a","ergt_malenia","ergt_redwolf","ergt_crab"};
+constexpr std::array<const char*,5> diagnostic_models={"prop_box_wood01a","ergt_malenia","ergt_radahn","ergt_firegiant","ergt_godfrey"};
 int diagnostic_index=-1;
 int diagnostic_failures=0;
 std::uint32_t diagnostic_hash=0,diagnostic_started=0;
@@ -132,7 +136,7 @@ void initialize_log() {
     log_file=_wfopen(path,L"a");
     std::wcscpy(slash+1,L"EldenLosSantos.import-check.request");
     std::wcscpy(diagnostic_request_path,path);
-    record("loaded_root_motion_20261004_runtime_verification_pending");
+    record("loaded_complete_boss_roster_20261005_owner_verification_pending");
 }
 void text(float x,float y,const char* line,float scale=0.32f) {
     hook.invoke(0x66E0276CC5F6B9DAULL,0);
@@ -157,6 +161,7 @@ void animate(Actor& actor,const char* clip,bool loop) {
     actor.active_clip=clip;actor.clip_loop=loop;
     actor.motion=ergt::find_motion(actor.spec->model,clip);actor.motion_cursor={};
     actor.blade_phase=-1;actor.blade_victim_count=0;actor.queued_movement={};
+    actor.blade_window=-1;actor.motion_heading=hook.invoke<float>(0xE83D4F9BA2A38914ULL,actor.entity);
     actor.playback_rate=1;
     if(actor.motion && std::strcmp(clip,actor.spec->move_clip)==0) {
         const float speed=ergt::length(ergt::subtract(actor.motion->samples[actor.motion->count-1].root,actor.motion->samples[0].root))/actor.motion->duration;
@@ -252,8 +257,8 @@ bool prepare_helicopter_spawn() {
 
 void begin_spawn(bool vehicle,std::uint32_t now) {
     if (pending.active || diagnostic_index>=0) return;
-    if(!vehicle && selected==0 && !ergt::find_motion(ergt::creatures[0].model,ergt::creatures[0].attack_clip)) {
-        std::snprintf(notice,sizeof(notice),"Malenia requires the locally generated motion build. See the setup guide.");
+    if(!vehicle && !ergt::find_motion(ergt::creatures[selected].model,ergt::creatures[selected].attack_clip)) {
+        std::snprintf(notice,sizeof(notice),"This boss requires the locally generated motion build. See the setup guide.");
         record("owned_motion_missing");return;
     }
     if (!vehicle && failed_creatures[selected]) {
@@ -262,7 +267,7 @@ void begin_spawn(bool vehicle,std::uint32_t now) {
     }
     if (vehicle && !prepare_helicopter_spawn()) return;
     if (!vehicle && std::all_of(actors.begin(),actors.end(),[](const Actor& a){return a.entity!=0;})) {
-        std::snprintf(notice,sizeof(notice),"Three creatures are active. 3 clears them."); return;
+        std::snprintf(notice,sizeof(notice),"One boss is active. Press 3 to clear it before spawning another."); return;
     }
     const auto& spec=ergt::creatures[selected];
     const auto model_hash=hash(vehicle?"buzzard":spec.model);
@@ -533,8 +538,10 @@ void move_with_collision(Actor& actor,ergt::Vec3 desired,std::uint32_t now,bool 
     // Three overlapping swept spheres cover Malenia's upright body. These are
     // GTA-side conservative movement probes, not imported Havok limb colliders.
     for(int i=0;i<3;i++){
-        const float z=0.55f+i*0.75f;
-        actor.sweep_handles[i]=hook.invoke<int>(0x28579D1B8F8AAC80ULL,from.x,from.y,from.z+z,to.x,to.y,to.z+z,0.5f,31,actor.entity,7);
+        const float radius=actor.spec->body_radius;
+        const float low=radius+.05f,high=std::max(low,actor.spec->body_height-radius);
+        const float z=low+(high-low)*i/2.0f;
+        actor.sweep_handles[i]=hook.invoke<int>(0x28579D1B8F8AAC80ULL,from.x,from.y,from.z+z,to.x,to.y,to.z+z,radius,31,actor.entity,7);
         if(!actor.sweep_handles[i])actor.sweep_blocked=true;
     }
     if(std::all_of(actor.sweep_handles.begin(),actor.sweep_handles.end(),[](int x){return x==0;}))actor.queued_movement={};
@@ -549,10 +556,14 @@ void blade_contacts(Actor& actor,int primary,std::uint32_t now,bool enabled) {
     if(!enabled || !actor.animation_accepted || !std::isfinite(phase) || previous<0 || phase<=previous || phase>1 ||
        (phase-previous)*actor.motion->duration>0.30f || length(subtract(origin,previous_origin))>1.0f ||
        !hook.invoke<int>(0x1F0B79228E461EC9ULL,actor.entity,actor.spec->dictionary,actor.active_clip,3))return;
-    // Provisional active window from inspected source blade poses, separate
-    // from anticipation/recovery. Needs actual GTA contact review.
-    const float first=std::max(previous,1.03f/actor.motion->duration),last=std::min(phase,1.36f/actor.motion->duration);
-    if(last<first)return;
+    // Original owned TAE AttackBehavior intervals, sampled against the actual
+    // native playback phase. Missing event data fails closed.
+    if(!actor.motion->contacts || actor.motion->contact_count<=0)return;
+    for(int window=0;window<actor.motion->contact_count;window++){
+    const auto contact=actor.motion->contacts[window];
+    const float first=std::max(previous,contact.start),last=std::min(phase,contact.end);
+    if(last<first)continue;
+    if(actor.blade_window!=window){actor.blade_window=window;actor.blade_victim_count=0;}
     const float heading=hook.invoke<float>(0xE83D4F9BA2A38914ULL,actor.entity);
     if(!std::isfinite(heading))return;
     std::array<int,513> victims{};int count=0;victims[count++]=primary;
@@ -561,7 +572,7 @@ void blade_contacts(Actor& actor,int primary,std::uint32_t now,bool enabled) {
         const int ped=victims[i];
         if(!exists(ped)||hook.invoke<int>(0x3317DEDB88C95038ULL,ped,true))continue;
         const auto victim=coords(ped);
-        if(!finite_vec(victim)||length(subtract(victim,origin))>8.0f)continue;
+        if(!finite_vec(victim)||length(subtract(victim,origin))>actor.spec->melee_range+actor.spec->body_height+4.0f)continue;
         const int car=hook.invoke<int>(0x9A9112A0FE9A4713ULL,ped,false);
         const int id=exists(car)?car:ped;
         if(std::find(actor.blade_victims.begin(),actor.blade_victims.begin()+actor.blade_victim_count,id)!=actor.blade_victims.begin()+actor.blade_victim_count)continue;
@@ -572,12 +583,17 @@ void blade_contacts(Actor& actor,int primary,std::uint32_t now,bool enabled) {
             const float t=first+(last-first)*sample/8;
             const auto pose=sample_motion(*actor.motion,t);
             const auto base=mix(previous_origin,origin,(t-previous)/(phase-previous));
-            const auto a=add(base,rotate_heading(pose.blade_base,heading)),b=add(base,rotate_heading(pose.blade_tip,heading));
+            for(int weapon=0;weapon<(actor.motion->dual_blade?2:1)&&!hit;weapon++){
+            const auto local_a=weapon?pose.second_base:pose.blade_base,local_b=weapon?pose.second_tip:pose.blade_tip;
+            const float sample_heading=actor.motion_heading+pose.yaw*57.2957795f;
+            const auto a=add(base,rotate_heading(local_a,sample_heading)),b=add(base,rotate_heading(local_b,sample_heading));
             if(id==car){
                 const auto x=hook.invoke<NativeVector>(0x2274BC1C4885E333ULL,car,a.x,a.y,a.z);
                 const auto y=hook.invoke<NativeVector>(0x2274BC1C4885E333ULL,car,b.x,b.y,b.z);
-                hit=segment_box({x.x,x.y,x.z},{y.x,y.y,y.z},{minimum.x-.1f,minimum.y-.1f,minimum.z-.1f},{maximum.x+.1f,maximum.y+.1f,maximum.z+.1f});
-            }else hit=segment_distance_squared(a,b,add(victim,{0,0,-0.65f}),add(victim,{0,0,0.65f}))<=0.35f*0.35f;
+                const float radius=actor.spec->weapon_radius;
+                hit=segment_box({x.x,x.y,x.z},{y.x,y.y,y.z},{minimum.x-radius,minimum.y-radius,minimum.z-radius},{maximum.x+radius,maximum.y+radius,maximum.z+radius});
+            }else {const float radius=.3f+actor.spec->weapon_radius;hit=segment_distance_squared(a,b,add(victim,{0,0,-0.65f}),add(victim,{0,0,0.65f}))<=radius*radius;}
+            }
         }
         if(!hit||!hook.invoke<int>(0xFCDFF7B72D23A1ACULL,actor.entity,ped,17))continue;
         if(actor.blade_victim_count>=static_cast<int>(actor.blade_victims.size()))return;
@@ -589,6 +605,7 @@ void blade_contacts(Actor& actor,int primary,std::uint32_t now,bool enabled) {
             hook.invoke(0x18FF00FC7EFF559EULL,car,1,push.x,push.y,push.z,false,false,true,false);
         }else hook.invoke(0x697157CED63F18D4ULL,ped,actor.spec->melee_damage,true,0,0u);
         if(log_file){std::fprintf(log_file,"event=blade_contact entity=%d victim=%d phase=%.5f tick=%u\n",actor.entity,id,phase,now);std::fflush(log_file);}
+    }
     }
 }
 
@@ -672,7 +689,10 @@ void update_actor(Actor& actor,int player,int,std::uint32_t now,int dt) {
         actor.previous_state=state;
     }
     observe_animation(actor,now);
-    if(state==ergt::CombatState::defeated && !actor.corpse_settled){
+    const bool death_finished=!actor.animation_accepted || !actor.motion ||
+        hook.invoke<float>(0x346D81500D088F42ULL,actor.entity,actor.spec->dictionary,actor.active_clip)>=.98f ||
+        now-actor.animation_started>static_cast<unsigned>(actor.motion->duration*1000)+1500;
+    if(state==ergt::CombatState::defeated && death_finished && !actor.corpse_settled){
         // Let an airborne vehicle/explosion victim land before freezing the
         // final pose. Disabling collision in mid-air would remove ground contact.
         float ground=0;
@@ -690,9 +710,12 @@ void update_actor(Actor& actor,int player,int,std::uint32_t now,int dt) {
     if(fighting && (state==ergt::CombatState::chasing || state==ergt::CombatState::idle) && alive && !impact_recovery) {
         const float heading=ergt::heading_to_target(position,target,actor.spec->model_heading_offset);
         hook.invoke(0x8E2530AA8ADA980EULL,actor.entity,heading);
+        actor.motion_heading=heading;
     }
-    if(actor.motion && state!=ergt::CombatState::defeated && !impact_recovery){
-        const float heading=actor.melee_clip?actor.committed_heading:hook.invoke<float>(0xE83D4F9BA2A38914ULL,actor.entity);
+    if(actor.motion && !actor.corpse_settled && !impact_recovery){
+        const float native_phase=hook.invoke<float>(0x346D81500D088F42ULL,actor.entity,actor.spec->dictionary,actor.active_clip);
+        const float yaw=std::isfinite(native_phase)?ergt::sample_motion(*actor.motion,native_phase).yaw:0;
+        const float heading=actor.motion_heading+yaw*57.2957795f;
         // Pose/root/blade math assumes an upright model; restore that exact
         // frame after physical impact recovery, preserving committed facing.
         if(std::isfinite(heading))hook.invoke(0x8524A8B0171D5E07ULL,actor.entity,0.0f,0.0f,heading,2,true);
@@ -707,11 +730,11 @@ void update_actor(Actor& actor,int player,int,std::uint32_t now,int dt) {
         ergt::Vec3 root_delta{};
         const bool advancing=actor.motion_cursor.advance(*actor.motion,phase,actor.clip_loop,dt*0.001f*actor.playback_rate+0.08f,root_delta);
         const bool moving=state==ergt::CombatState::chasing || (actor.melee_clip && (state==ergt::CombatState::melee_windup || state==ergt::CombatState::recovering));
-        const bool enabled=moving && fighting && alive && !impact_recovery && actor.animation_accepted;
+        const bool reacting=state==ergt::CombatState::staggered || state==ergt::CombatState::defeated;
+        const bool enabled=(reacting || (moving && fighting && alive)) && !impact_recovery && !actor.corpse_settled && actor.animation_accepted;
         if(!advancing || !hook.invoke<int>(0x1F0B79228E461EC9ULL,actor.entity,actor.spec->dictionary,actor.active_clip,3))root_delta={};
-        const float heading=hook.invoke<float>(0xE83D4F9BA2A38914ULL,actor.entity);
-        move_with_collision(actor,ergt::rotate_heading(root_delta,heading),now,enabled);
-        blade_contacts(actor,target_entity,now,enabled && sight);
+        move_with_collision(actor,ergt::rotate_heading(root_delta,actor.motion_heading),now,enabled);
+        blade_contacts(actor,target_entity,now,enabled && !reacting && sight);
     } else if(!impact_recovery && (decision.movement.x!=0 || decision.movement.y!=0)) {
         const float x=position.x+decision.movement.x,y=position.y+decision.movement.y;
         float ground=0;

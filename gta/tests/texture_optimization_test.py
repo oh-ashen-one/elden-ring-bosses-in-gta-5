@@ -36,5 +36,11 @@ class TextureEncoding(unittest.TestCase):
             self.assertEqual(data[84:88],b'DX10');self.assertEqual(struct.unpack_from('<I',data,128)[0],98)
             self.assertEqual(Image.open(io.BytesIO(data)).size,(width,height))
             self.assertEqual(struct.unpack_from('<I',data,28)[0],levels)
+    @unittest.skipUnless(importlib.util.find_spec('ispc_texcomp'),'Pinned encoder required')
+    def test_bc5_uses_rg_pairs_not_rgba_interleaving(self):
+        pixels=np.full((8,8,4),[50,180,128,255],dtype=np.uint8)
+        data,_=encode(pixels,codec='BC5');decoded=np.asarray(Image.open(io.BytesIO(data)))
+        self.assertTrue(np.all(decoded[:,:,0]==50));self.assertTrue(np.all(decoded[:,:,1]==180))
+        self.assertEqual(struct.unpack_from('<I',data,128)[0],83)
 
 if __name__=='__main__':unittest.main()

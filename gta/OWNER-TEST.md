@@ -1,8 +1,8 @@
 # Elden Los Santos — owner preview
 
-**2026-10-04 Malenia streaming repair candidate.** The previous owner test crashed while loading Malenia’s model, before her animation/combat ran. This candidate changes only her embedded texture storage: same dimensions and material references, seven unused maps removed, generated maps encoded in high-quality BC7. The mesh, rig, animations, collision and gameplay plugin are preserved. It is ready for a controlled owner test, not a completed or visually accepted fight.
+**2026-10-05 complete-model/material candidate.** Malenia’s helmet/additional armor restored from the original NPC display masks. Original color/normal texture pixels and source clips are preserved; GTA shader adaptations remain approximations. New selection: Malenia, Starscourge Radahn, Fire Giant and Godfrey. Crab/Wolf removed from the menu.
 
-**GTA remains closed at Hari’s request.** No automatic test or restart is queued. The confirmed old failure and exact limits are in `CRASH-20261004.md` in the public source.
+Hari authorized autonomous technical Story Mode/spawn/screenshots for this candidate. Installation and actual rendered results are recorded in HANDOFF.md; this guide alone does not establish a pass.
 
 ## Start
 
@@ -14,8 +14,8 @@ Use the **top-row number keys 1–6**. No Fn key is needed. These keys are reser
 
 | Key | Action |
 | --- | --- |
-| 1 | Select Malenia, Red Wolf of Radagon, or Giant Crab. |
-| 2 | Spawn the selected creature ahead of you. Maximum three at once. |
+| 1 | Select Malenia, Starscourge Radahn, Fire Giant, or Godfrey. |
+| 2 | Spawn the selected creature ahead of you. One active boss at a time while the new heavy roster is validated. |
 | 3 | Remove this mod's creatures. Keeps your helicopter. |
 | 4 | Pause/resume creature aggression. Starts ON. |
 | 5 | Receive a carbine and RPG with ammunition. |
@@ -32,7 +32,7 @@ Use a clear outdoor area for the first test. These are animated creature objects
 5. **Defeat and reset:** finish her, observe the kneeling defeat and settled body, press **3**, then **2**. Repeat three times; HP and attack state should reset and no old bodies or damage should remain.
 6. **Helicopter:** press **6** and test Buzzard weapons. Report damage, stability and how the encounter looks from the air. Key3 keeps your helicopter; key6 preserves a usable one and can replace its destroyed wreck.
 
-If the first gate fails, the later gates are not passed. If appearance fails, stop before a long combat session. The most useful report is the failed step plus a screenshot or exact error; this thread will read its own private logs. Wolf and Crab are not the acceptance target and their earlier visual failures are not claimed fixed.
+If the first gate fails, the later gates are not passed. If appearance fails, stop before a long combat session. The most useful report is the failed step plus a screenshot or exact error; this thread will read its own private logs. After Malenia, repeat the appearance/animation gate for Radahn, Fire Giant and Godfrey, clearing between selections. Use a large open area for the giants.
 
 ## Locations on this Studio
 
@@ -55,13 +55,12 @@ The command restores the exact original directory to Steam's path and restores t
 
 ## Known limits
 
-- Script Hook V, the ASI loader and this script ran under CrossOver on GTA 1.0.3889.0. The v2 package failed creature creation and later crashed after a crab request. The v3 texture repair still failed object creation. v4 proved stock-object creation works, while the custom model still failed. v5 registration alone still failed. Runtime isolation then identified the Dynamic archetype flag; v7 applied it and the owner confirmed all three visible imports. The current candidate’s appearance, animation and aggressive combat are still unverified.
-- Malenia uses selected phase-one meshes. Her GTA-side behavior includes chase, a committed sword swing, stagger and faster pursuit below half health. The five selected clips were inspected offline; original ER AI, the full moveset and second phase are not ported.
-- Wolf/Crab ranged effects and damage use GTA explosions; original Elden Ring VFX, spell systems, AI, sounds and cloth simulation are not ported.
-- Malenia uses a conservative torso box for GTA bullets/physics and a separate sampled sword sweep for attacks. Her movement probes stop at obstacles; they do not plan a route around buildings. Wolf and Crab retain coarse whole-body boxes. Real contact timing needs the guarded technical run.
-- Native health loss is preferred for incoming damage. Hit flags provide a logged fallback where drawable objects do not reduce native health. Weapon/explosion/vehicle balance still needs calibration.
-- Materials preserve source image dimensions and use GTA's skinned-object normal/specular shader. Hair opacity comes from the HairLong material's actual normal atlas. Specular response, layered shading and shell fur remain approximations; this is not yet Elden Ring visual parity. Optional meshes may need visibility tuning.
-- No FPS, controller compatibility or completed ten-minute gameplay claim is made.
-- Story Mode only. The plugin guards network sessions; Script Hook V itself does not support GTA Online.
+- Imported Elden Ring geometry, rigs and original clips with GTA-side combat. This is not a port of Elden Ring AI or its complete boss movesets.
+- Five full-rate clips per boss: idle, run, one attack, stagger and defeat. Contact windows come from original TAE AttackBehavior events; geometry sweeps use the native playback phase. Radahn uses both hand-held swords. Godfrey has two source attack contact windows.
+- No original spell/VFX, voice or cloth simulation. No travelling projectile is implemented. Source hair/fur materials require GTA alpha/shader adaptation, which must be judged in real rendered frames.
+- Conservative body boxes receive native bullets/physics; sampled weapon sweeps handle outgoing contact. Movement stops at obstacles but does not route around buildings. Giants may be constrained in city streets.
+- Original source diffuse/normal DDS mip bytes are preserved, with header-only sRGB normalization. Derived gloss/metal/opacity maps are source-resolution lossless RGBA. GTA lighting will differ from Elden Ring; do not claim one-to-one renderer parity.
+- Native gun, explosion, vehicle and helicopter damage, stagger, death and repeated reset need candidate-specific gameplay checks. No FPS or complete encounter acceptance is implied by export/tests.
+- Story Mode only. Network-session guard remains active. Keep the private rollback until owner acceptance.
 
 **Do not upload or share the private package or its motion-enabled ASI:** it contains assets extracted from your games and separately obtained runtime files. The public repository distributes original source and conversion/setup instructions, not those files.

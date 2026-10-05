@@ -1,6 +1,20 @@
 # GTA V × Elden Ring handoff
 
-Updated 2026-10-04 after the owner-reported streaming crash. **Focused Malenia texture repair installed; GTA CLOSED; owner test pending.**
+Updated 2026-10-05. **Complete-model/material candidate prepared; installation and technical render review in progress.**
+
+## October 5 current work — supersedes all older launch/roster/status instructions below
+
+- Hari's actual screenshots confirm the October 4 candidate loaded and its run/attack/reaction/health mechanics improved. Its visuals failed: missing Malenia helmet/armor, excessive chrome and opaque fur fins.
+- Hari explicitly requested Malenia plus Starscourge Radahn, Fire Giant and another famous boss (Godfrey chosen), replacing Crab/Wolf. He then explicitly authorized this original thread to launch GTA on the M3 Ultra, enter Story Mode, spawn, screenshot and inspect the result. The earlier no-launch and no-expansion instructions are superseded.
+- Read `gta/VISUAL-REPAIR-20261005.md` for concrete causes/corrections and limits. Source meshes, texture payloads and animation clips are imported; no custom animation is being authored. Fighting decisions/damage are GTA-side behavior.
+- Branch remains `codex/boss-motion-polish`. Source work belongs here; no changes to other game/benchmark lanes. Public files contain original tool/runtime code and selection metadata only.
+- Private inputs: `~/Applications/EldenLosSantosPreview/SourceAssets/roster-20261005`, `interchange-final`, `gta-fidelity-source`, `gta-ready`, `motion/bosses.hpp`, `dlc-source-fidelity-v3`. These are source assets, not disposable caches.
+- Native DLC SHA256 `ee9e58127787cc8cc09dc5e38f728d0af8c1095c5d10f2ece6dd66470a26c3fb`: 39 resources independently inflate; original texture payloads round-trip exactly. Full-resolution lossless derived maps cause some 32/64 MiB pages; this is a concrete streaming/performance risk, not a proven crash fix or visual pass.
+- Twenty offline test suites passed. Four models and twenty source clips package successfully. GTA render/gameplay review of THIS candidate is still pending.
+- Current control plan: 1 select, 2 spawn, 3 clear, 4 aggression, 5 weapons, 6 Buzzard. One active boss while large-roster validation is pending. No original ER AI/cloth/VFX/full movesets claimed.
+- Current Studio: hostname `Mac`, Mac15,14, Apple M3 Ultra, console `midir`. Shared brain 3be383eed864 refreshed from GitHub. Actual GPU root `/Users/midir/sm2-n1/_scratch/gpu`; exclusive GTA launcher and all safety thresholds retained. Our completed earlier GTA owner-play pause was released only after confirming GTA exited and holding the same perf lock. Always recheck live before launching.
+- Installed package at this pre-install point remains the October 4 streaming candidate below. Preserve its complete backup during upgrade; do not overwrite this status with a completion claim until verified.
+
 
 ## Latest owner test and focused repair — supersedes the older snapshot below
 

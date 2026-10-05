@@ -13,7 +13,8 @@ int main() {
     bool hit = false;
     for (int i=0;i<90;i++) hit |= boss.tick(16,o).melee_strike;
     require(!hit, "moving out of range must dodge the committed strike");
-    boss.reset(&creatures[1]); o.target={0,0,30}; o.airborne_target=true;
+    auto ranged_spec=creatures[1];ranged_spec.ranged_enabled=true;
+    boss.reset(&ranged_spec); o.target={0,0,30}; o.airborne_target=true;
     require(boss.tick(16,o).telegraph, "airborne target receives a telegraph");
     o.target={25,0,30};
     bool blast=false;
@@ -68,7 +69,7 @@ int main() {
         require((forward.x*target.x+forward.y*target.y)/10>0.999f,"imported model must face toward its target");
     }
     for(int encounter=0;encounter<50;encounter++) {
-        const auto& spec=creatures[encounter%3];boss.reset(&spec);
+        const auto& spec=creatures[encounter%creatures.size()];boss.reset(&spec);
         require(boss.health()==spec.maximum_health && boss.state()==CombatState::idle,"respawn starts with fresh health and no queued attack");
         o={{0,0,0},{1,0,0},true,true,true,false};boss.tick(1,o);
         bool hit=false;int elapsed=0;

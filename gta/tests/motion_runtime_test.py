@@ -9,7 +9,7 @@ import subprocess
 import tempfile
 root=Path(__file__).parents[1]
 source=(root/'src/encounter_plugin.cpp').read_text()
-actor=source[source.index('struct Actor {'):source.index('std::array<Actor, 3> actors;')]
+actor=source[source.index('struct Actor {'):source.index('std::array<Actor, 1> actors;')]
 helpers=source[source.index('void move_with_collision('):source.index('bool attack_playback_ready(')]
 prefix=r'''
 #include <map>
@@ -71,7 +71,8 @@ int main(){
  a=fresh();move_with_collision(a,{.1f,0,0},100,true);cast_status=2;
  move_with_collision(a,{},120,false);check(moves==0,"pause moved actor");
  const ergt::MotionSample samples[]={{{},0,{-2,2,1},{2,2,1}},{{},0,{-2,2,1},{2,2,1}}};
- const ergt::MotionTrack track{"fixture","attack",2.733333f,samples,2,true};
+ const ergt::ContactWindow windows[]={{.38f,.5f}};
+ const ergt::MotionTrack track{"fixture","attack",2.733333f,samples,2,true,false,windows,1};
  a=fresh();a.motion=&track;a.melee_clip=true;a.active_clip="attack";a.animation_accepted=true;
  positions[100]={0,2,1};positions[101]={0,-2,1};nearby_peds[0]=101;nearby_ped_count=1;
  phase=.35f;blade_contacts(a,100,100,true);phase=.42f;blade_contacts(a,100,120,true);
@@ -84,6 +85,19 @@ int main(){
  a.blade_phase=.35f;phase=.42f;positions[102]={0,2,1};positions[200]={0,2,1};cars[100]=cars[102]=200;
  nearby_peds[0]=102;blade_contacts(a,100,220,true);
  check(engine_hits[200]==1,"passengers duplicated vehicle damage");
+ // Two genuine source windows must permit a second hit, but neither window
+ // may damage twice. The second weapon must also have a real contact sweep.
+ cars.clear();hits.clear();nearby_ped_count=0;
+ const ergt::MotionSample dual[]={{{},0,{-2,8,1},{2,8,1},{-2,2,1},{2,2,1}},{{},0,{-2,8,1},{2,8,1},{-2,2,1},{2,2,1}}};
+ const ergt::ContactWindow combo_windows[]={{.2f,.3f},{.6f,.7f}};
+ const ergt::MotionTrack combo{"fixture","combo",1.f,dual,2,true,true,combo_windows,2};
+ a=fresh();a.motion=&combo;a.melee_clip=true;a.active_clip="combo";a.animation_accepted=true;
+ phase=.15f;blade_contacts(a,100,300,true);phase=.25f;blade_contacts(a,100,320,true);
+ check(hits[100]==1,"secondary sword missed");
+ phase=.29f;blade_contacts(a,100,340,true);check(hits[100]==1,"first combo window duplicated damage");
+ phase=.45f;blade_contacts(a,100,360,true);phase=.65f;blade_contacts(a,100,380,true);
+ check(hits[100]==2,"second source combo window suppressed");
+ phase=.69f;blade_contacts(a,100,400,true);check(hits[100]==2,"second combo window duplicated damage");
  puts("Actual runtime helpers: async/stale/blocked movement and native-phase blade damage passed");
 }
 '''

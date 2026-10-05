@@ -7,6 +7,7 @@ Creates a local editable .blend plus CodeWalker XML drawable/animation assets.
 from pathlib import Path
 import argparse
 import json
+import struct
 import sys
 
 parser = argparse.ArgumentParser()
@@ -15,6 +16,7 @@ parser.add_argument("--input", type=Path, required=True)
 parser.add_argument("--textures", type=Path, required=True)
 parser.add_argument("--out", type=Path, required=True)
 parser.add_argument("--name", required=True)
+parser.add_argument("--geometry-only",action="store_true",help="Use direct corrected glTF-to-YCD conversion after this data-only geometry export")
 args = parser.parse_args(sys.argv[sys.argv.index("--") + 1:])
 repo = args.repo.resolve()
 sys.path.insert(0, str(repo / ".cache/gta-tools/blender-python"))
@@ -28,11 +30,14 @@ from Sollumz.sollumz_properties import SollumType, LODLevel
 from Sollumz.ydr.properties import BoneProperties
 from Sollumz.ydr.shader_materials import create_shader
 from Sollumz.ydr.ydrexport import export_ydr
+import Sollumz.ydr.ydrexport as drawable_export
+import Sollumz.ydr.vertex_buffer_builder as vertex_export
 from Sollumz.iecontext import ExportContext, ExportSettings, export_context_scope
 from Sollumz.tools.meshhelper import get_color_attr_name, get_uv_map_name
 from Sollumz.ycd.ycdimport import create_clip_dictionary_template, create_anim_obj
 from Sollumz.ycd.ycdexport import export_ycd
 from Sollumz.tools.animationhelper import get_action_duration_secs, get_action_duration_frames
+from Sollumz.sollumz_helper import get_sollumz_materials
 from Sollumz.ybn.collision_materials import collisionmats, create_collision_material_from_index
 from szio.gta5 import AssetTarget, AssetFormat, AssetVersion
 
@@ -47,6 +52,17 @@ bpy.ops.import_scene.gltf(filepath=str(args.input.resolve()))
 source_rig = next(obj for obj in bpy.data.objects if obj.type == "ARMATURE")
 source_actions = list(bpy.data.actions)
 report = json.loads(args.input.with_suffix(".json").read_text())
+raw_glb=args.input.read_bytes();json_length=struct.unpack_from('<I',raw_glb,12)[0]
+gltf=json.loads(raw_glb[20:20+json_length])
+source_by_path={}
+for mat in gltf['materials']:
+    source_path=mat.get('extras',{}).get('source_material')
+    resolved={}
+    for role,texture in [('base',mat.get('pbrMetallicRoughness',{}).get('baseColorTexture')),('normal',mat.get('normalTexture'))]:
+        if texture is not None:
+            name=gltf['images'][gltf['textures'][texture['index']]['source']]['name']
+            resolved[role]=name.removesuffix('_gl_normal')+'.dds'
+    source_by_path[source_path]={'resolved':resolved}
 
 # One explicit root with tag 0; FLVER rigs can contain several root bones.
 # Retain all source rest matrices, names and action channels below that root.
@@ -98,16 +114,26 @@ for obj in mesh_objects:
     obj.sz_lods.active_lod_level = LODLevel.HIGH
     obj.sz_lods.high.mesh = source_mesh
     obj.data = source_mesh
-    if obj.data.uv_layers: obj.data.uv_layers[0].name = get_uv_map_name(0)
+    for i,uv in enumerate(obj.data.uv_layers):uv.name=get_uv_map_name(i)
+    imported_colour=next(iter(obj.data.color_attributes),None)
+    source_alpha=None
+    if imported_colour:
+        # ER colour RGB commonly encodes blend masks, not GTA baked lighting.
+        source_alpha=[imported_colour.data[loop.vertex_index if imported_colour.domain=='POINT' else i].color[3]
+                      for i,loop in enumerate(obj.data.loops)]
     for index in (0, 1):
         name = get_color_attr_name(index)
         color = obj.data.color_attributes.get(name) or obj.data.color_attributes.new(name=name, type="BYTE_COLOR", domain="CORNER")
-        color.data.foreach_set("color", [1.0] * (len(color.data) * 4))
-    source = source_materials.get(original.name, source_materials.get(original.name.rsplit(".", 1)[0], {}))
+        values=[v for i in range(len(color.data)) for v in (1.0,1.0,1.0,source_alpha[i] if source_alpha else 1.0)]
+        color.data.foreach_set("color",values)
+    source_path=original.get('source_material')
+    source = source_by_path.get(source_path,source_materials.get(original.name, source_materials.get(original.name.rsplit(".", 1)[0], {})))
     material_kind = (original.name + " " + (source.get("source_shader") or "")).lower()
     cutout = any(word in material_kind for word in ("hair", "fur", "butterfly"))
     material = create_shader("ped_default_cutout.sps" if cutout else "ped_default.sps")
     material.name = original.name + "_gta"
+    material["ergt_source_material"] = original.name
+    material["ergt_source_material_path"] = source_path or ''
     resolved = source.get("resolved", {})
     for role, sampler in (("base", "DiffuseSampler"), ("normal", "BumpSampler")):
         texture_name = resolved.get(role)
@@ -148,14 +174,22 @@ for flag in ("map_weapon", "map_dynamic", "map_vehicle", "vehicle_not_bvh", "veh
 bpy.context.view_layer.update()
 
 target = AssetTarget(AssetFormat.CWXML, AssetVersion.GEN8)
+# Retain source UV sets in the PRIVATE intermediate for material baking. The
+# final material adapter removes unused channels before native GTA packing.
+saved_remove_uvs=drawable_export.remove_unused_uvs
+saved_used_uvs=vertex_export.get_mesh_used_texcoords_indices
+drawable_export.remove_unused_uvs=lambda vertices,used:vertices
+vertex_export.get_mesh_used_texcoords_indices=lambda mesh:list(range(len(mesh.uv_layers)))
 with export_context_scope(ExportContext(args.name, ExportSettings((target,)))):
     bundle = export_ydr(rig)
     if not bundle: raise RuntimeError("Drawable conversion failed")
     bundle.save(out, (target,))
+drawable_export.remove_unused_uvs=saved_remove_uvs
+vertex_export.get_mesh_used_texcoords_indices=saved_used_uvs
 
 clip_dictionary, clips, animations = create_clip_dictionary_template(args.name + "_anims")
 clip_names = []
-for action in source_actions:
+for action in ([] if args.geometry_only else source_actions):
     animation = create_anim_obj(SollumType.ANIMATION)
     animation.name = args.name + "_" + action.name
     animation.parent = animations
@@ -174,13 +208,16 @@ for action in source_actions:
     link.end_frame = get_action_duration_frames(action)
     clip_names.append(action.name)
 bpy.context.view_layer.update()
-if not export_ycd(clip_dictionary, str(out / f"{args.name}_anims.ycd.xml")):
+if not args.geometry_only and not export_ycd(clip_dictionary, str(out / f"{args.name}_anims.ycd.xml")):
     raise RuntimeError("Animation conversion failed")
+if args.geometry_only:clip_names=[a['name'] for a in report['animations']]
 armature.pose_position = "POSE"
 bpy.ops.wm.save_as_mainfile(filepath=str(out / f"{args.name}.blend"))
 (out / f"{args.name}.conversion.json").write_text(json.dumps({
     "model": args.name, "source": report["character"], "bones": tags,
     "clips": clip_names, "missing_base_materials": missing_base,
+    "shader_sources": [m.get("ergt_source_material",m.name) for m in get_sollumz_materials(rig)],
+    "shader_source_paths": [m.get("ergt_source_material_path",'') for m in get_sollumz_materials(rig)],
     "gta_runtime_verified": False, "kind": "animated_drawable",
     "collision": {"type": "whole_body_box", "min": list(low), "max": list(high)},
     "limitations": ["Whole-body box collision; not per-limb hitboxes", "Layered ER materials approximated", "Animation roles unverified"],

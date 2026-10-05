@@ -49,17 +49,20 @@ struct CreatureSpec {
     const char* stagger_clip = nullptr;
     int stagger_ms = 500;
     bool ranged_enabled = true;
+    float body_radius=.5f,body_height=2.8f,vertical_reach=4.0f,weapon_radius=.12f;
 };
 
 // Hit timers now follow inspected source attack-motion landmarks. Contact
 // timing, clip roles and GTA playback still require owner gameplay review.
-inline constexpr std::array<CreatureSpec, 3> creatures{{
+inline constexpr std::array<CreatureSpec, 4> creatures{{
     {"Malenia", "ergt_malenia", "ergt_malenia_anims", "a000_000020", "a000_002100", "a000_003000", "a000_010000",
      3600, 3.2f, 3.5f, 28, 1150, 1500, 2734, -0.005f,180.0f,"a000_008030",1334,false},
-    {"Red Wolf of Radagon", "ergt_redwolf", "ergt_redwolf_anims", "a000_000000", "a000_001020", "a000_003000", "a000_005000",
-     2800, 5.0f, 4.5f, 32, 1350, 1300, 3934, -0.075f},
-    {"Giant Crab", "ergt_crab", "ergt_crab_anims", "a000_000000", "a000_001020", "a000_003000", "a000_005000",
-     4500, 2.0f, 5.2f, 40, 900, 1900, 2567, -0.355f},
+    {"Starscourge Radahn", "ergt_radahn", "ergt_radahn_anims", "a000_000020", "a000_002100", "a000_003000", "a000_010000",
+     6500,5.2f,9.0f,45,1833,2200,3934,-.04f,180.0f,"a000_008140",1234,false,2.5f,10.3f,12.0f,.45f},
+    {"Fire Giant", "ergt_firegiant", "ergt_firegiant_anims", "a000_000020", "a000_002100", "a000_003000", "a000_010000",
+     14000,4.0f,18.0f,65,2833,3700,6667,-.23f,180.0f,"a000_008700",7000,false,4.0f,23.0f,26.0f,2.2f},
+    {"Godfrey, First Elden Lord", "ergt_godfrey", "ergt_godfrey_anims", "a000_000020", "a000_002100", "a000_003000", "a000_010000",
+     5000,3.8f,5.5f,38,1100,1600,3834,-.04f,180.0f,"a000_008700",5334,false,.9f,6.5f,8.0f,.55f},
 }};
 
 enum class CombatState { idle, chasing, melee_windup, ranged_windup, recovering, staggered, defeated };
@@ -136,7 +139,7 @@ public:
             if (remaining_ms_ == 0) {
                 out.melee_strike = observation.line_of_sight &&
                     horizontal_distance(observation.actor, observation.target) <= spec_->melee_range + 0.5f &&
-                    std::abs(observation.actor.z - observation.target.z) < 4.0f;
+                    std::abs(observation.actor.z - observation.target.z) < spec_->vertical_reach;
                 state_ = CombatState::recovering;
                 // Let the native one-shot reach its end before another attack
                 // replaces it. Windup marks the hit, not the clip's endpoint.
@@ -155,7 +158,7 @@ public:
             locked_target_ = observation.target;
             state_ = CombatState::ranged_windup; remaining_ms_ = 1500;
             out.telegraph = true; out.aim = locked_target_;
-        } else if (distance <= spec_->melee_range && std::abs(observation.actor.z-observation.target.z)<4.0f) {
+        } else if (distance <= spec_->melee_range && std::abs(observation.actor.z-observation.target.z)<spec_->vertical_reach) {
             state_ = CombatState::melee_windup; remaining_ms_ = spec_->windup_ms;
         } else {
             state_ = CombatState::chasing;

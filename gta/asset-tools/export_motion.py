@@ -18,7 +18,7 @@ from soulstruct.havok.fromsoft.eldenring import AnimationHKX
 from rebuild_animation import SourceGLB, Y_UP_TO_Z_UP
 
 
-def root_samples(container, count):
+def root_samples(container, count, allow_turns=False):
     motion=container.hkx_animation.extractedMotion
     if motion is None:return np.zeros((count,4))
     if not np.allclose(list(motion.up),[0,1,0,0]) or not np.allclose(list(motion.forward),[0,0,1,0]):
@@ -29,9 +29,9 @@ def root_samples(container, count):
     # Source -> reflected glTF -> Z-up GTA: (x,y,z) -> (x,z,y).
     # Reflection changes the sign of axial yaw. These selected clips have no
     # turning root; reject turning/jumping moves until their runtime is added.
-    result=values[:,[0,2,1,3]].copy();result[:,3]*=-1
+    result=values[:,[0,2,1,3]].copy();result[:,3]=np.unwrap(-result[:,3])
     result-=result[0]
-    if np.max(np.abs(result[:,2:]))>0.01:raise ValueError('Turning/jumping root motion is not supported by this grounded encounter')
+    if np.max(np.abs(result[:,2]))>0.01 or (not allow_turns and np.max(np.abs(result[:,3]))>0.01):raise ValueError('Unsupported root motion for this grounded encounter')
     return np.column_stack([np.interp(np.linspace(0,1,count),np.linspace(0,1,len(result)),c) for c in result.T])
 
 

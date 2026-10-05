@@ -1,8 +1,8 @@
 # Elden Los Santos
 
-Original GTA V Story Mode mod code and a local conversion pipeline for owned Elden Ring creatures. Current characters: **Malenia, Red Wolf of Radagon, Giant Crab**.
+Original GTA V Story Mode mod code and a local conversion pipeline for owned Elden Ring creatures. Current characters: **Malenia, Starscourge Radahn, Fire Giant, Godfrey**.
 
-**Status: owner testing of the motion candidate exposed a Malenia “Failed zlib call” during model streaming and poor crab visuals.** A smaller, source-resolution BC7 Malenia package is prepared as a focused repair candidate. Actual crash resolution and the complete boss fight are unverified. The game stays closed until the owner requests the next playtest. See [crash diagnosis](CRASH-20261004.md), [current coverage](encounter-coverage.json) and [precise test steps](OWNER-TEST.md).
+**Status: complete-model/material repair candidate, technical runtime review pending.** The owner’s October 5 run confirmed improved animation, attacks, reactions and health loss, while the supplied screenshots failed visual quality. This update restores missing Malenia parts, preserves source color/normal pixels, adapts original material masks and adds the requested boss roster. See [visual diagnosis](VISUAL-REPAIR-20261005.md), [coverage](encounter-coverage.json) and [test steps](OWNER-TEST.md). Source/native conversion checks are not a gameplay pass.
 
 [ER Mario lessons and concrete application](ER-MARIO-LESSONS.md) records the reference review without claiming its engine hooks work in GTA.
 
@@ -10,9 +10,9 @@ Existing profiles can be updated with `tools/upgrade_profile.py --candidate /pat
 
 ## What is implemented
 
-- Original Windows x64 ASI: creature selection/spawning, up to three active creatures, health bars, native health-loss/hit-flag damage intake, custom melee/ranged/chase/stagger/enrage behavior, source-animation playback, reset, optional weapons and an armed helicopter.
+- Original Windows x64 ASI: creature selection/spawning, one active boss at a time during new-roster validation, health bars, native health-loss/hit-flag damage intake, custom chase/melee/stagger/enrage behavior, source-animation playback, reset, optional weapons and an armed helicopter.
 - Offline asset extraction from owned Elden Ring archives, rigged interchange exports, textures/material adaptation, background data-only Blender/Sollumz conversion, native GTA resource conversion and DLC packaging.
-- Thirteen selected animation clips, coarse body collision, and a three-archetype local DLC. Assets, textures and game-derived metadata are private, not Git contents.
+- Twenty selected original animation clips, coarse body collision, and a four-archetype local DLC. Assets, textures and game-derived metadata are private, not Git contents.
 - A reversible APFS profile manager that keeps original retail bytes intact and scopes the Wine DLL override to GTA5.exe.
 - Independent rule/ABI tests plus fixture tests for clone isolation and profile restoration. These checks do not prove game behavior.
 
@@ -26,14 +26,14 @@ cmake --build build/gta-native
 ctest --test-dir build/gta-native --output-on-failure
 
 cmake -S gta -B build/gta-win64 -DCMAKE_TOOLCHAIN_FILE=tools/mingw.cmake -DCMAKE_BUILD_TYPE=Release \
-  -DERGT_MOTION_HEADER=/path/to/private/ergt-assets/motion/malenia.hpp
+  -DERGT_MOTION_HEADER=/path/to/private/ergt-assets/motion/bosses.hpp
 cmake --build build/gta-win64
 
 # macOS/APFS synthetic fixture checks; does not touch real games or registry
 python3 gta/tests/profile_test.py
 ```
 
-Run the owned-assets conversion below first to create the private motion header. Without it the source-only plugin refuses Malenia spawning instead of substituting fake movement. The header contains derived animation/weapon samples and stays private.
+Run the owned-assets conversion below first to create the private motion header. Without it the source-only plugin refuses boss spawning instead of substituting fake movement. The header contains derived animation/weapon samples and stays private.
 
 Main output: `build/gta-win64/EldenLosSantos.asi`. **A motion-enabled ASI contains owned-game motion data; keep it private alongside the DLC.** The separate `EldenLosSantosProbe.asi` is a diagnostic using a GTA test actor; do not install both together because their hotkeys overlap.
 

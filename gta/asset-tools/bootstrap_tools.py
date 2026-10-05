@@ -51,7 +51,7 @@ def main():
     run("cmake","--build",build,"-j","4")
     output=root/"build/asset-tools";output.mkdir(parents=True,exist_ok=True)
     libraries=[build/"libsouls_formats.a",build/"_deps/zlib-ng-build/libz.a",build/"_deps/zstd-build/lib/libzstd.a",build/"libmxml4.a"]
-    for src,name in [("er_extract.c","er-extract.exe"),("er_unpack.c","er-unpack.exe")]:
+    for src,name in [("er_extract.c","er-extract.exe"),("er_unpack.c","er-unpack.exe"),("er_npc_masks.c","er-npc-masks.exe"),("er_tae_events.c","er-tae-events.exe")]:
         run("x86_64-w64-mingw32-gcc","-std=c11","-O2","-Wall","-Wextra","-Werror","-municode","-static",
             "-I",source/"include",root/"gta/asset-tools"/src,*libraries,"-lbcrypt","-lcrypt32","-o",output/name)
     env=dict(os.environ,DOTNET_CLI_TELEMETRY_OPTOUT="1",DOTNET_NOLOGO="1")

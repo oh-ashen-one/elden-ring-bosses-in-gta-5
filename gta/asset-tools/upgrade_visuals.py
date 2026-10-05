@@ -18,7 +18,7 @@ from PIL import Image
 
 CHARACTERS = [('c2120', 'ergt_malenia'), ('c3181', 'ergt_redwolf'), ('c2270', 'ergt_crab')]
 SIZES = {'Position': 3, 'BlendWeights': 4, 'BlendIndices': 4, 'Normal': 3,
-         'Colour0': 4, 'Colour1': 4, 'TexCoord0': 2, 'Tangent': 4}
+         'Colour0': 4, 'Colour1': 4, 'TexCoord0': 2, 'TexCoord1': 2, 'TexCoord2': 2, 'Tangent': 4}
 
 
 def read_image(path):

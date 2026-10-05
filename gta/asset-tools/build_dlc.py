@@ -9,11 +9,13 @@ import hashlib
 import json
 import math
 import shutil
+import copy
 import subprocess
 from pathlib import Path
 from xml.etree import ElementTree as ET
 from normalize_dds import normalize_dds
 from dlc_manifest import validate_registration
+from texture_dictionaries import partition, parenting, normalize_names
 
 CHARACTERS = [("c2120", "ergt_malenia"), ("c3181", "ergt_redwolf"), ("c2270", "ergt_crab")]
 
@@ -34,6 +36,8 @@ def main():
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--dotnet", type=Path, required=True)
     parser.add_argument("--bridge", type=Path, required=True)
+    parser.add_argument("--roster",type=Path)
+    parser.add_argument("--external-textures",action="store_true",help="Use standard separate YTD resources to avoid bloating skinned drawables")
     args = parser.parse_args()
     output = args.out.resolve()
     if output.exists(): raise ValueError("Use a new packaging directory; existing outputs are preserved")
@@ -48,8 +52,9 @@ def main():
     map_types = ET.Element("CMapTypes")
     ET.SubElement(map_types, "extensions")
     archetypes = ET.SubElement(map_types, "archetypes")
-    manifest_models = []
-    for character, name in CHARACTERS:
+    manifest_models = [];texture_chains=[]
+    characters=[(b['character'],b['model']) for b in json.loads(args.roster.read_text())['bosses']] if args.roster else CHARACTERS
+    for character, name in characters:
         folder = args.converted / character
         receipt = json.loads((folder / f"{name}.conversion.json").read_text())
         if receipt["missing_base_materials"]: raise ValueError(f"{name}: unresolved base materials")
@@ -59,6 +64,8 @@ def main():
         conversion.mkdir(parents=True)
         drawable_xml = folder / f"{name}.ydr.xml"
         shutil.copy2(drawable_xml, conversion / drawable_xml.name)
+        normalized_document=ET.parse(conversion/drawable_xml.name);normalize_names(normalized_document)
+        normalized_document.write(conversion/drawable_xml.name,encoding='utf-8',xml_declaration=True)
         texture_folder = conversion / name; texture_folder.mkdir()
         normalized_count = 0
         for texture in ET.parse(drawable_xml).findall("ShaderGroup/TextureDictionary/Item"):
@@ -70,6 +77,20 @@ def main():
             data, changed = normalize_dds((folder / name / filename).read_bytes())
             with destination.open("xb") as stream: stream.write(data)
             normalized_count += int(changed)
+        if args.external_textures:
+            document=ET.parse(conversion/drawable_xml.name);dictionary=document.find('ShaderGroup/TextureDictionary')
+            if dictionary is None:raise ValueError('Expected embedded texture inputs before separation')
+            groups,sizes=partition(dictionary,texture_folder)
+            chain=[name if i==0 else name+'_t'+str(i).zfill(2) for i in range(len(groups))]
+            texture_chains.append(chain)
+            for txd,group in zip(chain,groups):
+                if txd!=name:(conversion/txd).symlink_to(texture_folder.name,target_is_directory=True)
+                write_xml(group,conversion/(txd+'.ytd.xml'))
+                invoke('convert',conversion/(txd+'.ytd.xml'),models/(txd+'.ytd'))
+                (models/(txd+'.ytd.json')).rename(output/(txd+'.ytd.verification.json'))
+            (conversion/(name+'.textures.json')).write_text(json.dumps([txd+'.ytd.xml' for txd in chain]))
+            document.find('ShaderGroup').remove(dictionary);ET.indent(document)
+            document.write(conversion/drawable_xml.name,encoding='utf-8',xml_declaration=True)
         for extension, stem in [("ydr", name), ("ycd", name + "_anims")]:
             source = conversion if extension == "ydr" else folder
             invoke("convert", source / f"{stem}.{extension}.xml", models / f"{stem}.{extension}")
@@ -117,6 +138,10 @@ def main():
     files=ET.SubElement(content,"dataFiles")
     archive_path="dlc_ergt:/%PLATFORM%/models/cdimages/ergt_assets.rpf"
     entries=[(archive_path,"RPF_FILE"),(archive_path+"/ergt.ytyp","DLC_ITYP_REQUEST")]
+    if texture_chains:
+        meta=stage/'common/data/gtxd.meta';meta.parent.mkdir(parents=True)
+        write_xml(parenting(texture_chains),meta)
+        entries.append(('dlc_ergt:/common/data/gtxd.meta','GTXD_PARENTING_DATA'))
     for filename,kind in entries:
         item=ET.SubElement(files,"Item");ET.SubElement(item,"filename").text=filename;ET.SubElement(item,"fileType").text=kind
         value(item,"overlay",False);value(item,"disabled",True);value(item,"persistent",True)

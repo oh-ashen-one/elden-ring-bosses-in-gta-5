@@ -14,16 +14,20 @@ inline Vec3 rotate_heading(Vec3 p,float degrees){
     const float a=degrees*0.01745329252f,c=std::cos(a),s=std::sin(a);
     return {c*p.x-s*p.y,s*p.x+c*p.y,p.z};
 }
-struct MotionSample { Vec3 root; float yaw; Vec3 blade_base,blade_tip; };
+struct MotionSample { Vec3 root; float yaw; Vec3 blade_base,blade_tip; Vec3 second_base{},second_tip{}; };
+struct ContactWindow { float start,end; };
 struct MotionTrack {
     const char* model; const char* clip; float duration; const MotionSample* samples; int count;
     bool has_blade;
+    bool dual_blade=false;
+    const ContactWindow* contacts=nullptr;
+    int contact_count=0;
 };
 inline MotionSample sample_motion(const MotionTrack& track,float phase){
     const float index=std::clamp(phase,0.0f,1.0f)*(track.count-1);
     const int i=std::min(static_cast<int>(index),track.count-2);const float a=index-i;
     const auto& x=track.samples[i];const auto& y=track.samples[i+1];
-    return {mix(x.root,y.root,a),x.yaw+(y.yaw-x.yaw)*a,mix(x.blade_base,y.blade_base,a),mix(x.blade_tip,y.blade_tip,a)};
+    return {mix(x.root,y.root,a),x.yaw+(y.yaw-x.yaw)*a,mix(x.blade_base,y.blade_base,a),mix(x.blade_tip,y.blade_tip,a),mix(x.second_base,y.second_base,a),mix(x.second_tip,y.second_tip,a)};
 }
 struct MotionCursor {
     float phase=0; bool initialized=false;

@@ -22,6 +22,8 @@ from soulstruct.flver import FLVER
 from soulstruct.flver.bone_tools import BoneTree
 from soulstruct.havok import HKX
 from soulstruct.havok.fromsoft.eldenring import SkeletonHKX, AnimationHKX
+from havok_compat import install as install_havok_compat
+install_havok_compat()
 
 
 class GLB:
@@ -163,7 +165,7 @@ def combined_vertices(mesh):
     return result
 
 
-def export(root, char, destination, masks, max_animations, clip_names=None):
+def export(root, char, destination, masks, max_animations, clip_names=None, include_unmasked=False):
     raw = root / "raw" / char
     flver = load_flver(raw / f"{char}.chrbnd")
     original_rest = rest_matrices(flver)
@@ -178,7 +180,7 @@ def export(root, char, destination, masks, max_animations, clip_names=None):
     used = set()
     for mesh in flver.meshes:
         mask = re.match(r"#(\d+)#", mesh.material.name)
-        if masks is not None and (mask is None or int(mask[1]) not in masks): continue
+        if masks is not None and ((mask is None and not include_unmasked) or (mask is not None and int(mask[1]) not in masks)): continue
         vertices = combined_vertices(mesh)
         if not len(vertices): continue
         joints, weights = mesh_skin(mesh, vertices)
@@ -240,6 +242,13 @@ def export(root, char, destination, masks, max_animations, clip_names=None):
                       "WEIGHTS_0": glb.array(weights, "VEC4", target=34962)}
         if "uv_0" in vertices.dtype.names:
             attributes["TEXCOORD_0"] = glb.array(vertices["uv_0"], "VEC2", target=34962)
+        # Preserve alternate source UVs/vertex masks for material-specific
+        # reconstruction. They are data, not assumed GTA lighting colours.
+        for uv_index in (1,2):
+            if f"uv_{uv_index}" in vertices.dtype.names:
+                attributes[f"TEXCOORD_{uv_index}"]=glb.array(vertices[f"uv_{uv_index}"],"VEC2",target=34962)
+        if 'color_0' in vertices.dtype.names:
+            attributes['COLOR_0']=glb.array(np.clip(vertices['color_0'],0,1),'VEC4',target=34962)
         if "tangent_0" in vertices.dtype.names:
             tangent = vertices["tangent_0"].astype(float).copy()
             tangent[:, 2] *= -1
@@ -362,7 +371,7 @@ def export(root, char, destination, masks, max_animations, clip_names=None):
               "source_bones": len(flver.bones), "exported_bones": len(bone_ids),
               "meshes": len(selected), "vertices": len(position), "triangles": triangles_total,
               "bounds_min": position.min(axis=0).tolist(), "bounds_max": position.max(axis=0).tolist(),
-              "display_masks": sorted(masks) if masks is not None else "all",
+              "display_masks": sorted(masks) if masks is not None else "all", "include_unmasked": include_unmasked,
               "animations": animations, "materials": exported_materials,
               "limitations": ["Intermediate glTF only", "Layered materials approximated by available base/normal textures",
                               "Source root-motion track not reapplied separately", "Cloth, particles and runtime behavior absent",
@@ -382,8 +391,9 @@ if __name__ == "__main__":
     parser.add_argument("--masks", nargs="*", type=int)
     parser.add_argument("--animations", type=int, default=3)
     parser.add_argument("--clip-names", nargs="*")
+    parser.add_argument("--include-unmasked",action="store_true",help="Keep unmasked base meshes alongside the NPC display-mask selection")
     args = parser.parse_args()
     if not re.fullmatch(r"c[0-9]{4}", args.character): parser.error("Invalid character ID")
     if not 0 <= args.animations <= 20: parser.error("Choose 0-20 clips per bounded export")
     export(args.root.resolve(), args.character, args.out.resolve(),
-           set(args.masks) if args.masks is not None else None, args.animations, args.clip_names)
+           set(args.masks) if args.masks is not None else None, args.animations, args.clip_names,args.include_unmasked)

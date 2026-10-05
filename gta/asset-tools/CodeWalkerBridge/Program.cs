@@ -121,17 +121,67 @@ try
     {
         string textures = source[..^".ydr.xml".Length];
         var original = XmlYdr.GetYdr(xml, textures);
-        ValidateTextures(original);
+        bool external = (original.Drawable?.ShaderGroup?.TextureDictionary?.Textures?.data_items?.Length ?? 0)==0;
+        if (external)
+        {
+            string listPath=source[..^".ydr.xml".Length]+".textures.json";
+            string[] dictionaries=File.Exists(listPath) ? JsonSerializer.Deserialize<string[]>(File.ReadAllText(listPath))! : [Path.GetFileName(source[..^".ydr.xml".Length]+".ytd.xml")];
+            var names=new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach(string relative in dictionaries)
+            {
+                if(Path.GetFileName(relative)!=relative || !relative.EndsWith(".ytd.xml"))throw new InvalidDataException("Unsafe texture manifest path");
+                string txdPath=Path.Combine(Path.GetDirectoryName(source)!,relative);
+                var txdXml=new XmlDocument { XmlResolver=null };txdXml.Load(txdPath);
+                var txd=XmlYtd.GetYtd(txdXml,txdPath[..^".ytd.xml".Length]);
+                ValidateTextureArray(txd.TextureDict?.Textures?.data_items ?? []);
+                foreach(var t in txd.TextureDict!.Textures.data_items)
+                    if(!names.Add(t.Name))throw new InvalidDataException("Duplicate parent texture: "+t.Name);
+            }
+            foreach(XmlNode sampler in xml.SelectNodes("/Drawable/ShaderGroup/Shaders/Item/Parameters/Item[@type='Texture']/Name")!)
+                if(!names.Contains(sampler.InnerText))throw new InvalidDataException("External sampler missing: "+sampler.InnerText);
+        }
+        else ValidateTextures(original);
         data = original.Save();
         var loaded = new YdrFile();
         loaded.Load(data);
         if (loaded.Drawable?.Skeleton?.BonesCount != original.Drawable?.Skeleton?.BonesCount)
             throw new InvalidDataException("Skeleton count changed during binary round-trip");
-        ValidateTextures(loaded);
+        if(!external)ValidateTextures(loaded);
         details = new { bones = loaded.Drawable?.Skeleton?.BonesCount, drawable_present = loaded.Drawable != null,
                         collision_present = loaded.Drawable?.Bound != null,
                         textures = loaded.Drawable?.ShaderGroup?.TextureDictionary?.Textures?.data_items?.Length ?? 0,
-                        texture_formats_verified = true };
+                        texture_formats_verified = true, external_texture_dictionary = external };
+    }
+    else if (source.EndsWith(".ytd.xml", StringComparison.OrdinalIgnoreCase))
+    {
+        var original = XmlYtd.GetYtd(xml,source[..^".ytd.xml".Length]);
+        ValidateTextureArray(original.TextureDict?.Textures?.data_items ?? []);
+        data = original.Save();
+        var loaded = new YtdFile();RpfFile.LoadResourceFile(loaded,data,13);
+        ValidateTextureArray(loaded.TextureDict?.Textures?.data_items ?? []);
+        if (loaded.TextureDict?.Textures?.data_items?.Length != original.TextureDict?.Textures?.data_items?.Length)
+            throw new InvalidDataException("Texture dictionary changed during round-trip");
+        // Pinned CodeWalker's Legacy reader divides mip byte counts by four,
+        // truncating block-compressed 2x2/1x1 tails and rectangular mip chains.
+        // Verify the full payload at its decoded native pointer instead.
+        int systemBytes=RpfResourceFileEntry.GetSizeFromFlags(BitConverter.ToUInt32(data,8));
+        int graphicsBytes=RpfResourceFileEntry.GetSizeFromFlags(BitConverter.ToUInt32(data,12));
+        using var compressed=new MemoryStream(data,16,data.Length-16);
+        using var inflater=new System.IO.Compression.DeflateStream(compressed,System.IO.Compression.CompressionMode.Decompress);
+        using var expanded=new MemoryStream();inflater.CopyTo(expanded);
+        if(expanded.Length!=systemBytes+graphicsBytes)throw new InvalidDataException("Resource page sizes disagree");
+        var rawReader=new ResourceDataReader(systemBytes,graphicsBytes,expanded.ToArray());
+        foreach(var before in original.TextureDict!.Textures.data_items)
+        {
+            var matches=loaded.TextureDict!.Textures.data_items.Where(t=>t.Name==before.Name).ToArray();
+            if(matches.Length!=1)throw new InvalidDataException("Texture name roundtrip: "+before.Name+" available "+string.Join(",",loaded.TextureDict.Textures.data_items.Select(t=>t.Name)));
+            var after=matches[0];
+            rawReader.Position=(long)after.DataPointer;
+            var recovered=rawReader.ReadBytes(before.Data.FullData.Length);
+            if(before.Format!=after.Format || before.Width!=after.Width || before.Height!=after.Height || before.Levels!=after.Levels || !before.Data.FullData.SequenceEqual(recovered))
+                throw new InvalidDataException("Texture pixels/mips changed in native round-trip: "+before.Name+" bytes "+before.Data.FullData.Length+"->"+after.Data.FullData.Length+" format "+before.Format+"->"+after.Format+" dimensions "+before.Width+"x"+before.Height+"->"+after.Width+"x"+after.Height+" levels "+before.Levels+"->"+after.Levels);
+        }
+        details = new { textures = loaded.TextureDict?.Textures?.data_items?.Length, external_texture_dictionary = true, pixel_payloads_verified = true };
     }
     else if (source.EndsWith(".ycd.xml", StringComparison.OrdinalIgnoreCase))
     {
@@ -214,6 +264,11 @@ catch (Exception error)
 static void ValidateTextures(YdrFile file)
 {
     var textures = file.Drawable?.ShaderGroup?.TextureDictionary?.Textures?.data_items ?? [];
+    ValidateTextureArray(textures);
+}
+
+static void ValidateTextureArray(Texture[] textures)
+{
     if (textures.Length == 0) throw new InvalidDataException("Creature drawable has no embedded textures");
     foreach (var texture in textures)
     {
@@ -234,7 +289,7 @@ static int ValidateResourceEntries(RpfFile archive)
     {
         int expected = Path.GetExtension(entry.Name).ToLowerInvariant() switch
         {
-            ".ydr" => 165, ".ycd" => 46, ".ytyp" => 2, _ => 0
+            ".ydr" => 165, ".ycd" => 46, ".ytyp" => 2, ".ytd" => 13, _ => 0
         };
         if (expected == 0) continue;
         if (entry is not RpfResourceFileEntry resource || resource.Version != expected)
