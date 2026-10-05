@@ -2,7 +2,7 @@
 
 Original GTA V Story Mode mod code and a local conversion pipeline for owned Elden Ring creatures. Current characters: **Malenia, Starscourge Radahn, Fire Giant, Godfrey**.
 
-**Status: complete-model/material repair candidate, technical runtime review pending.** The owner’s October 5 run confirmed improved animation, attacks, reactions and health loss, while the supplied screenshots failed visual quality. This update restores missing Malenia parts, preserves source color/normal pixels, adapts original material masks and adds the requested boss roster. See [visual diagnosis](VISUAL-REPAIR-20261005.md), [coverage](encounter-coverage.json) and [test steps](OWNER-TEST.md). Source/native conversion checks are not a gameplay pass.
+**Status: technically tested owner preview, not final gameplay acceptance.** Actual M3 GTA frames confirm all four bosses render after correcting missing parts, inward faces and skin/skeleton handling. Fire Giant is approximately60m tall. Native elevated projectile damage, Malenia source-phase sword contact/stagger and repeated create/clear cycles were observed. Hair/ghost shaders are approximations; complete vehicle/helicopter encounters, defeat/reset and final visual quality still need owner review. See [visual diagnosis](VISUAL-REPAIR-20261005.md), [coverage](encounter-coverage.json) and [test steps](OWNER-TEST.md).
 
 [ER Mario lessons and concrete application](ER-MARIO-LESSONS.md) records the reference review without claiming its engine hooks work in GTA.
 
@@ -12,7 +12,7 @@ Existing profiles can be updated with `tools/upgrade_profile.py --candidate /pat
 
 - Original Windows x64 ASI: creature selection/spawning, one active boss at a time during new-roster validation, health bars, native health-loss/hit-flag damage intake, custom chase/melee/stagger/enrage behavior, source-animation playback, reset, optional weapons and an armed helicopter.
 - Offline asset extraction from owned Elden Ring archives, rigged interchange exports, textures/material adaptation, background data-only Blender/Sollumz conversion, native GTA resource conversion and DLC packaging.
-- Twenty selected original animation clips, coarse body collision, and a four-archetype local DLC. Assets, textures and game-derived metadata are private, not Git contents.
+- Twenty selected original animation clips, coarse body collision, and a five-render-archetype local DLC (four bosses; Fire Giant has two synchronized pieces). Assets, textures and game-derived metadata are private, not Git contents.
 - A reversible APFS profile manager that keeps original retail bytes intact and scopes the Wine DLL override to GTA5.exe.
 - Independent rule/ABI tests plus fixture tests for clone isolation and profile restoration. These checks do not prove game behavior.
 
@@ -67,7 +67,7 @@ Create a separate accountless **ERGTA-Tools** Windows 10 64-bit CrossOver bottle
   --out '/path/to/private/ergt-assets'
 ```
 
-This reconstructs local artifacts and does not launch either game. The dependency bootstrap and complete conversion orchestration were exercised on the Studio with a fresh asset output directory. The earlier rebuilt DLC matched its installed candidate byte-for-byte. The revised Malenia pipeline has been rebuilt from preserved private inputs without running Blender again. A separate-machine rebuild and actual GTA playtest remain unverified. Dependency revisions and downloaded runtime hashes are recorded in [dependencies.json](dependencies.json).
+This reconstructs local artifacts and does not launch either game. The dependency bootstrap and complete conversion orchestration were exercised on the Studio with a fresh asset output directory. The earlier rebuilt DLC matched its installed candidate byte-for-byte. The current roster was rebuilt from owned source data and preserved private inputs, including geometry-only Blender conversion, then inspected in actual GTA. A clean second-machine reconstruction and complete owner playtest remain unverified. Dependency revisions and downloaded runtime hashes are recorded in [dependencies.json](dependencies.json).
 
 ## Scope and publication
 

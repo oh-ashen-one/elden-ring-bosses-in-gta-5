@@ -6,7 +6,7 @@ Owner decision: 2026-10-01. GTA V × Elden Ring is the active first demo. Earlie
 
 Target: an open-ended GTA V Story Mode crossover sandbox with Elden Ring bosses in Los Santos. The first verification milestone is a roughly ten-minute repeatable boss encounter, not a timer limiting the game. Native GTA firearms, vehicle impacts and helicopter weapons must damage the boss. Give the boss attacks that can threaten the player on foot and in the helicopter, a visible health bar, defeat state, and restart/cleanup.
 
-Proposed first boss: Malenia, subject to owner preference and a successful model/rig conversion test. A humanoid first boss reduces initial skeleton complexity; her complete Elden Ring behavior does not transfer automatically. Flight must remain an actual combat phase, with telegraphed ranged attacks and balanced damage.
+First encounter focus: Malenia. Owner-requested roster now also includes Starscourge Radahn, Godfrey and an approximately60m Fire Giant. A humanoid first boss reduces initial skeleton complexity; her complete Elden Ring behavior does not transfer automatically. Flight must remain an actual combat phase, with telegraphed ranged attacks and balanced damage.
 
 ### Build order
 
@@ -16,7 +16,7 @@ Proposed first boss: Malenia, subject to owner preference and a successful model
 4. Implement boss decisions, attacks, health/stagger, ranged threat, death and reset in the GTA host. Tune separate weapon damage channels so helicopter explosives neither fail to register nor erase the encounter immediately.
 5. Build the ten-minute encounter: short briefing and ground fight, helicopter access and aerial phase, finish/reward, clean restart. Measure performance on the Studio and obtain owner gameplay feedback.
 
-The Mac route is Windows GTA V through CrossOver. The mod loader and script execution are verified on this machine. All three creatures now spawn visibly and the owner confirmed bullet damage. The current patch targets material/deformation quality, animation, NPC aggression and vehicle impacts; gameplay review is pending. universal-modder is a workflow reference; its published Minecraft/GTA bridge does not supply an Elden Ring boss implementation. We do not need to run both retail games simultaneously for a converted boss plus GTA-hosted behavior.
+The Mac route is Windows GTA V through CrossOver. The native mod loader and four imported bosses were technically tested on the M3. Corrected geometry/rigs now render, Malenia records animation-phase sword contacts, and native projectiles damage Fire Giant at47.84m above his base. These observations do not establish a complete manual car/helicopter encounter, balanced aerial phase or final video-quality acceptance. universal-modder remains a workflow reference; no need to run both retail games simultaneously for converted assets with GTA-hosted behavior.
 
 Publish original mod code, build/setup instructions and eligible tooling as open source. Players provide their own game content; this is not a standalone redistribution of GTA V or Elden Ring.
 

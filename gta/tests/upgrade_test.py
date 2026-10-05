@@ -83,4 +83,18 @@ class UpgradeTests(unittest.TestCase):
                 fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
                 with self.assertRaises(BlockingIOError):u.upgrade(c,b,r)
 
+    def test_shortcut_remains_executable_and_repairs_mode_only_drift(self):
+        with tempfile.TemporaryDirectory() as t,patch.object(u,'ensure_game_stopped'):
+            c,b,r,_=self.fixture(Path(t));name='Play Elden Los Santos.command'
+            shortcut=c/name;shortcut.write_text('#!/bin/sh\nexit 0\n');shortcut.chmod(0o755)
+            manifest=json.loads((c/'manifest.json').read_text())
+            manifest['shortcut_files']={name:u.digest(shortcut)}
+            (c/'manifest.json').write_text(json.dumps(manifest))
+            self.assertEqual(u.upgrade(c,b,r)['status'],'installed')
+            self.assertEqual((b/name).stat().st_mode&0o777,0o755)
+            (b/name).chmod(0o644)
+            self.assertEqual(u.upgrade(c,b,r)['status'],'installed')
+            self.assertEqual((b/name).stat().st_mode&0o777,0o755)
+            self.assertEqual(u.upgrade(c,b,r)['status'],'already_installed')
+
 if __name__=='__main__':unittest.main()

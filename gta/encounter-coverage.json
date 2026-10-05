@@ -1,6 +1,6 @@
 {
-  "candidate": "20261005-complete-boss-materials",
-  "scope": "Source assets preserved; GTA-side combat; live review pending",
+  "candidate": "20261005-lunge-spacing",
+  "scope": "Source assets with GTA-side behavior; bounded actual runtime checks; owner acceptance pending",
   "bosses": [
     {
       "character": "c2120",
@@ -67,7 +67,9 @@
         "a000_003000",
         "a000_008700",
         "a000_010000"
-      ]
+      ],
+      "model_scale": 2.6,
+      "approximate_height_m": 60
     },
     {
       "character": "c4720",
@@ -99,9 +101,23 @@
   "technical_runtime_verified": false,
   "subjective_acceptance": false,
   "known_limits": [
-    "Different renderer/material model; no claim of identical lighting",
+    "Different renderer/material model; hair/ghost/snow shader quality requires owner judgment",
     "No original AI, cloth physics, sounds, VFX or full movesets",
-    "Coarse body collision; no pathfinding",
-    "Native damage/death/reset require current-candidate review"
-  ]
+    "Coarse body collision; no pathfinding; large open area required for giant",
+    "Manual vehicle/Buzzard, complete kill-reset cycles, balance and FPS remain unverified"
+  ],
+  "technical_runtime_checks": {
+    "four_bosses_rendered": true,
+    "malenia_phase_driven_npc_blade_contacts": 4,
+    "malenia_stagger_playback": true,
+    "three_malenia_create_clear_cycles": true,
+    "giant_child_create_clear": true,
+    "giant_elevated_native_projectile_target_height_m": 47.84,
+    "giant_native_rifle_damage": 24,
+    "giant_native_rpg_applied_damage": 1600,
+    "complete_fight": false,
+    "manual_vehicle_helicopter_combat": false,
+    "death": "Earlier runtime log shows defeat and settle; no decisive death image",
+    "performance_benchmark": false
+  }
 }

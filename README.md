@@ -8,7 +8,7 @@ An open source experiment in combining **MW2, Minecraft, Skate 3 and Skyrim** th
 
 ## GTA V × Elden Ring owner preview
 
-Original source and setup tools are now under [gta/](gta/README.md). A private local preview contains converted Elden Ring boss assets, custom GTA-side combat, and a reversible profile. **The owner confirmed imports, improved source animation, attacks, reactions and health loss, but rejected their visual quality. The October 5 candidate restores missing model parts, repairs materials and replaces Wolf/Crab with Radahn, Fire Giant and Godfrey alongside Malenia. Current-candidate rendered and encounter acceptance remains pending.** Read the [owner guide](gta/OWNER-TEST.md) for controls and known limits. Retail-derived assets and third-party runtime files are not distributed in this repository.
+Original source and setup tools are now under [gta/](gta/README.md). A private local preview contains converted Elden Ring boss assets, custom GTA-side combat, and a reversible profile. **October 5 technical review: all four requested bosses rendered in GTA, with restored Malenia parts, corrected face winding/rigs, and an approximately 60m Fire Giant. Actual native damage, Malenia animation-phase sword contacts, stagger and repeated clear/spawn were observed. Manual vehicle/helicopter encounters and final visual/gameplay acceptance remain pending.** Read the [owner guide](gta/OWNER-TEST.md) for controls and known limits. Retail-derived assets and third-party runtime files are not distributed in this repository.
 
 ## Mac setup preview
 

@@ -12,6 +12,7 @@ import fcntl
 import json
 import os
 import shutil
+import stat
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
@@ -45,7 +46,8 @@ def upgrade(candidate, bundle, root):
         if set(new_manifest['files'])!=REQUIRED or set(old_manifest['files'])!=REQUIRED:
             raise ValueError('Upgrade supports the exact six-file encounter payload only')
         sidecars=[*(Path('Tools')/name for name in TOOLS),Path('START-HERE.md'),Path('VERIFICATION.json'),*(Path(name) for name in shortcuts)]
-        sidecars_match=all((candidate/p).is_file() and (bundle/p).is_file() and digest(candidate/p)==digest(bundle/p) for p in sidecars)
+        sidecars_match=all((candidate/p).is_file() and (bundle/p).is_file() and digest(candidate/p)==digest(bundle/p)
+                           and stat.S_IMODE((candidate/p).stat().st_mode)==stat.S_IMODE((bundle/p).stat().st_mode) for p in sidecars)
         if old_state.get('candidate')==new_manifest.get('candidate') and old_state['files']==new_manifest['files'] and digest(bundle/'manifest.json')==digest(candidate/'manifest.json') and sidecars_match and old_state.get('source_commit')==new_manifest.get('source_commit'):
             return {'status':'already_installed','candidate':new_manifest.get('candidate'),'game_launched':False}
         token=uuid.uuid4().hex
@@ -61,7 +63,8 @@ def upgrade(candidate, bundle, root):
             if destination.is_symlink() or not destination.resolve().is_relative_to(profile if destination.is_relative_to(profile) else bundle):
                 raise ValueError('Unsafe destination: '+str(destination))
             sha=digest(source)
-            if destination.exists() and digest(destination)==sha:return
+            mode=stat.S_IMODE(source.stat().st_mode)&0o777
+            if destination.exists() and digest(destination)==sha and stat.S_IMODE(destination.stat().st_mode)==mode:return
             destination.parent.mkdir(parents=True,exist_ok=True)
             entry={'destination':str(destination),'sha256':sha,'existed':destination.exists()}
             if entry['existed']:
@@ -71,6 +74,9 @@ def upgrade(candidate, bundle, root):
             try:
                 with source.open('rb') as inp,temporary.open('xb') as out:
                     shutil.copyfileobj(inp,out);out.flush();os.fsync(out.fileno())
+                # Finder needs executable .command shortcuts after replacement.
+                # Preserve ordinary permissions, never set-id/sticky bits.
+                temporary.chmod(mode)
                 if digest(temporary)!=sha:raise IOError('Staging checksum mismatch')
             except BaseException:
                 temporary.unlink(missing_ok=True)

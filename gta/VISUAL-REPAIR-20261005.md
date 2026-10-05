@@ -4,7 +4,7 @@
 
 The owner’s actual GTA screenshots showed missing Malenia head/armor pieces, blue/chrome material patches and opaque fur fins. The owner confirmed improved original running/attack/hit animations and health reduction. Those observations supersede the older claim that the October 4 streaming candidate had never loaded.
 
-## Concrete corrections
+## Initial corrections (later live corrections below supersede the palette proposal)
 
 - Owned `regulation.bin` NPC display masks select Malenia groups 0, 10, **12, 13**, 21. The old manual selection omitted 12 (head metalwork, 4,558 vertices) and 13 (armor, 9,649 vertices). The selected model now has 48,764 source vertices and 61,914 triangles. No decimation was applied.
 - Removed the shared white specular texture and uniform high reflection response. Original normal RG supplies surface detail, normal B supplies gloss, and original metallic maps supply the adapted specular response. Hair/fur opacity uses the authored strand mask, secondary UVs and vertex layer alpha. These are explicit GTA shader adaptations, not an Elden Ring shader port.
@@ -84,3 +84,11 @@ Repeating the same elevated probe after canonicalizing the collider produced24 p
 Malenia visibly chased and played her original sword swing, but the first contact run repeatedly missed at point-blank distance. Her source lunge contributes about3.2m before the active window; the blade's centre crossing is another~2.5m ahead. Engagement now starts at6m rather than3.5m; the damage sweep/radius/window remain unchanged. Physical stagger now persists while aggression is paused or the target disappears. Per-window telemetry records actual actor/target positions for the next live check.
 
 The guarded owner shortcut can select an existing recognized GTA reservation or use the ordinary exclusive gate when no such reservation exists. It creates/clears no pause and still rejects emergency holds and competing renderers. This allows this task's own temporary pause to be released after testing without leaving the owner's shortcut unusable.
+
+## Final bounded runtime outcome
+
+With the6m engagement distance, the actual game recorded four Malenia blade contacts on NPC2818 at native phase~0.432–0.435 and then retargeted. Original run/attack animations advanced with world motion. Native RPG intake triggered source stagger a000_008030. Three fresh Malenia create/clear cycles reset native health to10000; the large Fire Giant primary/child also created and cleared. Logs and images remain private.
+
+The earlier native-damage run logged source defeat and corpse settling. A later intended death still captured the player at the hospital; it is NOT boss-death evidence. Full manual car/Buzzard fighting, complete kill/reset cycles, FPS, and final hair/fur/ghost/video-quality acceptance remain open. The canonical collider fixed elevated native rifle/RPG intake, but it is still coarse body collision. Giant city placement can intersect buildings; test the approximately60m model in an open area.
+
+Final native assets: DLC SHA25611bd019517f539962524f6843713bc6c76af33ada63aaf5301b540aa4d377822, ASI source f71043a. Updated shortcut installer also preserves executable permissions rather than replacing .command files with0644. Transactional mode-repair regression passes. Source/helpers/docs are published on the task branch; retail-derived assets and motion-bearing ASI stay private.

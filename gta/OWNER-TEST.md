@@ -1,12 +1,12 @@
 # Elden Los Santos — owner preview
 
-**2026-10-05 complete-model/material candidate.** Malenia’s helmet/additional armor restored from the original NPC display masks. Original color/normal texture pixels and source clips are preserved; GTA shader adaptations remain approximations. New selection: Malenia, Starscourge Radahn, Fire Giant and Godfrey. Crab/Wolf removed from the menu.
+**2026-10-05 tested technical preview.** Malenia, Starscourge Radahn, Fire Giant and Godfrey replace the old Crab/Wolf menu. Fire Giant is now approximately **60m tall**, intentionally enlarged2.6× for helicopter-scale encounters.
 
-Hari authorized autonomous technical Story Mode/spawn/screenshots for this candidate. Installation and actual rendered results are recorded in HANDOFF.md; this guide alone does not establish a pass.
+Actual M3 GTA checks covered rendered spawns, Malenia sword contact against NPCs, native rifle/RPG intake, stagger and three clear/spawn cycles. These are bounded mechanical checks; final appearance, full defeat/reset, driving and flying are still for your review. Hair/fur and GTA lighting remain approximations of the original renderer.
 
 ## Start
 
-1. When the GPU has been explicitly reserved for your GTA test, open **Check Elden Los Santos.command** in `~/Applications/EldenLosSantosPreview/`. If it passes, open **Play Elden Los Santos.command** in the same folder. Play repeats the checks and launches GTA V Legacy through CrossOver under the exclusive shared GPU lock. Keep using these guarded shortcuts for this mod preview.
+1. When other heavy GPU work is stopped or coordinated, open **Check Elden Los Santos.command** in `~/Applications/EldenLosSantosPreview/`. If it passes, open **Play Elden Los Santos.command** in the same folder. Play detects an existing owner reservation or uses the normal exclusive gate, refuses foreign/emergency holds, repeats the checks and launches GTA V Legacy through CrossOver under the exclusive shared GPU lock. Keep using these guarded shortcuts for this mod preview.
 2. Choose **Story Mode** and load your free-roam save. The owner has completed the tutorial.
 3. Look for **ELDEN LOS SANTOS** at the top left. Creatures now start **AGGRESSIVE**. Press **4** before spawning to inspect them with combat paused.
 
@@ -34,6 +34,14 @@ Use a clear outdoor area for the first test. These are animated creature objects
 
 If the first gate fails, the later gates are not passed. If appearance fails, stop before a long combat session. The most useful report is the failed step plus a screenshot or exact error; this thread will read its own private logs. After Malenia, repeat the appearance/animation gate for Radahn, Fire Giant and Godfrey, clearing between selections. Use a large open area for the giants.
 
+## Building-height Fire Giant / helicopter test
+
+1. Use a broad beach or airfield with open ground ahead. At this scale a city street can place his body through buildings.
+2. From a fresh launch: press **4** to pause aggression, **1 twice** to select Fire Giant, then **2**. Wait for the full two-part animated model.
+3. Press **6** for the armed Buzzard, enter it with normal GTA controls, and climb above nearby obstacles. Circle the giant's torso/head. His approximate height is60m and his body collision scales with him.
+4. Test helicopter guns/rockets, then **4** to enable his aggression. The earlier native projectile test hit47.84m up his body, but manual Buzzard combat/balance has not been passed.
+5. **3** clears the giant while preserving your helicopter. **2** starts a fresh boss.
+
 ## Locations on this Studio
 
 - Private package: `~/Applications/EldenLosSantosPreview/`
@@ -59,8 +67,8 @@ The command restores the exact original directory to Steam's path and restores t
 - Five full-rate clips per boss: idle, run, one attack, stagger and defeat. Contact windows come from original TAE AttackBehavior events; geometry sweeps use the native playback phase. Radahn uses both hand-held swords. Godfrey has two source attack contact windows.
 - No original spell/VFX, voice or cloth simulation. No travelling projectile is implemented. Source hair/fur materials require GTA alpha/shader adaptation, which must be judged in real rendered frames.
 - Conservative body boxes receive native bullets/physics; sampled weapon sweeps handle outgoing contact. Movement stops at obstacles but does not route around buildings. Giants may be constrained in city streets.
-- Original source diffuse/normal DDS mip bytes are preserved, with header-only sRGB normalization. Derived gloss/metal/opacity maps are source-resolution lossless RGBA. GTA lighting will differ from Elden Ring; do not claim one-to-one renderer parity.
-- Native gun, explosion, vehicle and helicopter damage, stagger, death and repeated reset need candidate-specific gameplay checks. No FPS or complete encounter acceptance is implied by export/tests.
+- Original source diffuse/normal DDS mip bytes are preserved, with header-only sRGB normalization. Derived gloss/metal/opacity maps are source-resolution lossless BGRA8. GTA lighting will differ from Elden Ring; do not claim one-to-one renderer parity.
+- Fixed native rifle/RPG damage, stagger and create/clear checks passed in this candidate. Manual cars/Buzzard, complete kills/resets and balance remain unverified. No FPS or complete encounter acceptance is implied.
 - Story Mode only. Network-session guard remains active. Keep the private rollback until owner acceptance.
 
 **Do not upload or share the private package or its motion-enabled ASI:** it contains assets extracted from your games and separately obtained runtime files. The public repository distributes original source and conversion/setup instructions, not those files.
