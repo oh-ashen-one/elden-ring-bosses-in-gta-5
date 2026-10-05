@@ -11,6 +11,7 @@ from geometry_fidelity import reject_inward
 from split_large_rig import partition as partition_rig
 from scale_roster import scale_drawable,scale_animation
 from fur_material import bake
+from cutout_fidelity import remap_alpha
 from material_fidelity import fields,sample
 from correct_bind_heads import correct,source_axes
 from rebuild_animation import TargetRig,matrix,world_matrices,Y_UP_TO_Z_UP
@@ -18,6 +19,14 @@ from texture_dictionaries import partition,parenting
 from animation_conversion_test import drawable
 
 class Fidelity(unittest.TestCase):
+    def test_cutout_mapping_preserves_every_source_accept_reject_decision_and_rgb(self):
+        p=np.zeros((1,256,4),np.uint8);p[0,:,3]=np.arange(256);p[:,:,:3]=[71,126,193]
+        for threshold in [45,70,85,128,140,200]:
+            out=remap_alpha(p,threshold)
+            np.testing.assert_array_equal(out[:,:,3]>=128,p[:,:,3]>=threshold)
+            np.testing.assert_array_equal(out[:,:,:3],p[:,:,:3])
+            self.assertEqual(out[0,0,3],0);self.assertEqual(out[0,-1,3],255)
+
     def test_large_rig_split_preserves_faces_and_named_weight_associations(self):
         root=E.Element('Drawable');bones=E.SubElement(E.SubElement(root,'Skeleton'),'Bones')
         for i in range(5):

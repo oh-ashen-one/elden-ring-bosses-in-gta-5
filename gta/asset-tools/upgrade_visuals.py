@@ -49,14 +49,26 @@ def normal_pixels(pixels):
     return out
 
 
-def write_dds(path, pixels, normal=False):
+def write_dds(path, pixels, normal=False, alpha_coverage=None):
     """BGRA8 with a complete mip chain. No lossy extra compression/upscaling."""
     height, width = pixels.shape[:2]
     levels = []
     image = Image.fromarray(pixels)
+    coverage=float((pixels[:,:,3]>=alpha_coverage).mean()) if alpha_coverage else None
     while True:
         level = np.array(image)
         if normal: level = normal_pixels(level)
+        if alpha_coverage and levels:
+            # Scaling only alpha preserves hair colour/normal detail. Quantized
+            # tiny mips cannot always represent the exact requested coverage.
+            a=level[:,:,3].astype(float);low,high=0.,16.;best=a;error=abs(float((a>=alpha_coverage).mean())-coverage)
+            for _ in range(18):
+                scale=(low+high)*.5;trial=np.rint(a*scale).clip(0,255)
+                actual=float((trial>=alpha_coverage).mean());delta=abs(actual-coverage)
+                if delta<error:best=trial;error=delta
+                if actual<coverage:low=scale
+                else:high=scale
+            level[:,:,3]=best.astype(np.uint8)
         levels.append(level[:,:,[2,1,0,3]].copy().tobytes())
         if image.size == (1, 1): break
         image = image.resize((max(1,image.width//2),max(1,image.height//2)),Image.Resampling.LANCZOS)

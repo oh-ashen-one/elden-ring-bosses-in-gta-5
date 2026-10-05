@@ -1,6 +1,13 @@
 # GTA V × Elden Ring handoff
 
-Updated 2026-10-05. Current private candidate **20261005-lunge-spacing** completed bounded technical GTA checks on the M3 Ultra. Ready for owner review; **not a complete/full-moveset or video-quality acceptance**.
+Updated 2026-10-05. **Owner authorized this thread to finish the remaining materials, actual vehicle/helicopter tests, balance and complete defeat/reset checks. Work in progress.** The previous `20261005-lunge-spacing` candidate remains the rollback baseline until the new receipt is installed.
+
+## Current continuation
+
+- Source candidate adds original per-material alpha thresholds and mip coverage preservation. The first package correctly rejected a split-child sampler name mismatch; `gta-cutout-thresholds-v2` uses the shared parent names. Actual appearance is still unverified.
+- Local fixed review commands stage a temporary airfield check, real Sultan/Buzzard vehicles and their native weapons, on-foot fire, and30-second engine frame-time samples. They expire and restore the player's original location/heading/wanted state. They never edit boss HP to manufacture a pass; technical setup is distinct from a manual playthrough.
+- Twenty-one source suites passed, and current Windows ASI compiled. Shared brain freshness verified, no competing renderer/hold observed, original desktop notification processes predate the owner's already-confirmed clear desktop; CrossOver UI is responsive. No game launched yet this continuation.
+- Commands documented in `encounter_review.hpp`; use `REVIEW_RETURN` to restore after a technical run. No listener or arbitrary scripts. Native contracts are pinned and checked. Final runtime outcomes follow after actual checks; earlier evidence below remains bounded historical evidence.
 
 ## Ownership and authority
 

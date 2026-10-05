@@ -405,6 +405,98 @@
     "0xAA08EF13F341C8FC": {
       "name": "REMOVE_WEAPON_ASSET",
       "arguments": 1
+    },
+    "0xA178472EBB8AE60D": {
+      "name": "SET_HELI_BLADES_FULL_SPEED",
+      "arguments": 1
+    },
+    "0x17FFC1B2BA35A494": {
+      "name": "IS_ENTITY_TOUCHING_ENTITY",
+      "arguments": 2
+    },
+    "0xAB54A438726D25D5": {
+      "name": "SET_VEHICLE_FORWARD_SPEED",
+      "arguments": 2
+    },
+    "0x49733E92263139D1": {
+      "name": "SET_VEHICLE_ON_GROUND_PROPERLY",
+      "arguments": 2
+    },
+    "0x1C99BB7B6E96D16F": {
+      "name": "SET_ENTITY_VELOCITY",
+      "arguments": 4
+    },
+    "0xF75B0D629E1C063D": {
+      "name": "SET_PED_INTO_VEHICLE",
+      "arguments": 3
+    },
+    "0x07503F7948F491A7": {
+      "name": "REQUEST_COLLISION_AT_COORD",
+      "arguments": 3
+    },
+    "0x75C55983C2C39DAA": {
+      "name": "SET_CURRENT_PED_VEHICLE_WEAPON",
+      "arguments": 2
+    },
+    "0xE4E2FD323574965C": {
+      "name": "SET_VEHICLE_BRAKE",
+      "arguments": 2
+    },
+    "0xE28E54788CE8F12D": {
+      "name": "GET_PLAYER_WANTED_LEVEL",
+      "arguments": 1
+    },
+    "0x74CD9A9327A282EA": {
+      "name": "SET_VEHICLE_SHOOT_AT_TARGET",
+      "arguments": 5
+    },
+    "0x15C40837039FFAF7": {
+      "name": "GET_FRAME_TIME",
+      "arguments": 0
+    },
+    "0xE0A7D1E497FFCD6F": {
+      "name": "SET_PLAYER_WANTED_LEVEL_NOW",
+      "arguments": 2
+    },
+    "0xBB40DD2270B65366": {
+      "name": "GET_PED_IN_VEHICLE_SEAT",
+      "arguments": 3
+    },
+    "0xB302540597885499": {
+      "name": "CLEAR_PLAYER_WANTED_LEVEL",
+      "arguments": 1
+    },
+    "0x2497C4717C8B881E": {
+      "name": "SET_VEHICLE_ENGINE_ON",
+      "arguments": 4
+    },
+    "0xE679E3E06E363892": {
+      "name": "NETWORK_OVERRIDE_CLOCK_TIME",
+      "arguments": 3
+    },
+    "0x39FF19C64EF7DA5B": {
+      "name": "SET_PLAYER_WANTED_LEVEL",
+      "arguments": 3
+    },
+    "0x4F8644AF03D0E0D6": {
+      "name": "PLAYER_ID",
+      "arguments": 0
+    },
+    "0xD972DF67326F966E": {
+      "name": "NETWORK_CLEAR_CLOCK_TIME_OVERRIDE",
+      "arguments": 0
+    },
+    "0xAAA34F8A7CB32098": {
+      "name": "CLEAR_PED_TASKS_IMMEDIATELY",
+      "arguments": 1
+    },
+    "0xADF692B254977C0C": {
+      "name": "SET_CURRENT_PED_WEAPON",
+      "arguments": 3
+    },
+    "0x96A05E4FB321B1BA": {
+      "name": "SET_PED_SHOOTS_AT_COORD",
+      "arguments": 5
     }
   }
 }

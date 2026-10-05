@@ -154,7 +154,7 @@ void initialize_log() {
     log_file=_wfopen(path,L"a");
     std::wcscpy(slash+1,L"EldenLosSantos.import-check.request");
     std::wcscpy(diagnostic_request_path,path);
-    record("loaded_complete_boss_roster_20261005_owner_verification_pending");
+    record("loaded_encounter_vehicle_review_20261005");
 }
 void text(float x,float y,const char* line,float scale=0.32f) {
     hook.invoke(0x66E0276CC5F6B9DAULL,0);
@@ -534,12 +534,16 @@ void tick_review(std::uint32_t now) {
     hook.invoke(0x4D41783FB745E42EULL,review_camera,camera.x,camera.y,camera.z);
     hook.invoke(0xF75497BB865F0803ULL,review_camera,target.x,target.y,target.z);
 }
+#include "encounter_review.hpp"
+
 void read_diagnostic_request(std::uint32_t now) {
     if (now-last_request_check<500 || !diagnostic_request_path[0]) return;
     last_request_check=now;
     FILE* request=_wfopen(diagnostic_request_path,L"rb");
     if (!request) return;
     char token[32]{};std::fgets(token,sizeof(token),request);std::fclose(request);
+    const std::array<const char*,11> encounter_tokens={"REVIEW_RETURN\n","REVIEW_AIRFIELD\n","REVIEW_METRICS\n","REVIEW_CAR\n","REVIEW_PARK\n","REVIEW_HELI\n","REVIEW_HELI_GUN\n","REVIEW_HELI_ROCKET\n","REVIEW_PLAYER_BACK\n","REVIEW_FOOT_GUN\n","REVIEW_FOOT_RPG\n"};
+    for(const char* allowed:encounter_tokens)if(std::strcmp(token,allowed)==0&&_wremove(diagnostic_request_path)==0){encounter_review_command(token,now);return;}
     // A file-only, fixed-command technical test; no listener or arbitrary code.
     if (std::strcmp(token,"CHECK_IMPORTS_ONCE\n")==0 && _wremove(diagnostic_request_path)==0)
         begin_diagnostics(now);
@@ -931,7 +935,7 @@ void run() {
         // The regular weapon wheel and controller bindings remain available.
         for (const int control:{157,158,160,164,165,159}) hook.invoke(0xFE99B66D079CF6BCULL,0,control,true);
         const unsigned command=commands.exchange(0);
-        if(command) {end_review();hud_until=now+6000;}
+        if(command) {qa.fire_until=0;end_review();hud_until=now+6000;}
         scan_world(player,now);
         if (command&select_next) selected=(selected+1)%static_cast<int>(ergt::creatures.size());
         read_diagnostic_request(now);
@@ -960,6 +964,7 @@ void run() {
             text(0.025f,0.08f,controls,0.25f);
         }
         for(auto& actor:actors)sync_visual_child(actor);
+        tick_encounter_review(player,now);
         tick_review_weapon(player,now);
         tick_review(now);
         boss_hud();
