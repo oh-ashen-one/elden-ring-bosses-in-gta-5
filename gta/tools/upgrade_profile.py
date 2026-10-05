@@ -40,9 +40,11 @@ def upgrade(candidate, bundle, root):
         if profile!=root/'Game' or retail!=root/'Retail':raise ValueError('Unexpected profile layout; preserving it')
         new_manifest=json.loads((candidate/'manifest.json').read_text())
         old_manifest=json.loads((bundle/'manifest.json').read_text())
+        shortcuts=list(new_manifest.get('shortcut_files',{}))
+        if any(p not in ('Check Elden Los Santos.command','Play Elden Los Santos.command') for p in shortcuts):raise ValueError('Unexpected shortcut update')
         if set(new_manifest['files'])!=REQUIRED or set(old_manifest['files'])!=REQUIRED:
             raise ValueError('Upgrade supports the exact six-file encounter payload only')
-        sidecars=[*(Path('Tools')/name for name in TOOLS),Path('START-HERE.md'),Path('VERIFICATION.json')]
+        sidecars=[*(Path('Tools')/name for name in TOOLS),Path('START-HERE.md'),Path('VERIFICATION.json'),*(Path(name) for name in shortcuts)]
         sidecars_match=all((candidate/p).is_file() and (bundle/p).is_file() and digest(candidate/p)==digest(bundle/p) for p in sidecars)
         if old_state.get('candidate')==new_manifest.get('candidate') and old_state['files']==new_manifest['files'] and digest(bundle/'manifest.json')==digest(candidate/'manifest.json') and sidecars_match and old_state.get('source_commit')==new_manifest.get('source_commit'):
             return {'status':'already_installed','candidate':new_manifest.get('candidate'),'game_launched':False}
@@ -81,6 +83,7 @@ def upgrade(candidate, bundle, root):
             for name in TOOLS:add(candidate/'Tools'/name,bundle/'Tools'/name)
             for name in ('START-HERE.md','VERIFICATION.json'):
                 add(candidate/name,bundle/name)
+            for name in shortcuts:add(candidate/name,bundle/name)
             # Package manifest commits after its files; profile phase remains
             # upgrading until both copies and helper metadata are consistent.
             add(candidate/'manifest.json',bundle/'manifest.json')

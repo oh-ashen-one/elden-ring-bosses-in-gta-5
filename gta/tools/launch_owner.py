@@ -102,8 +102,11 @@ def main():
     parser.add_argument('--expected-host', required=True)
     parser.add_argument('--check', action='store_true')
     parser.add_argument('--owner-reservation', action='store_true', help='Use only after the other session reserves the GPU explicitly for the owner GTA test')
+    parser.add_argument('--auto-owner-reservation', action='store_true', help='Use an existing recognized owner reservation, otherwise the ordinary exclusive gate; never creates or clears a pause')
     parser.add_argument('--inside-slot', action='store_true', help=argparse.SUPPRESS)
     args = parser.parse_args()
+    if args.auto_owner_reservation:
+        args.owner_reservation=owner_reservation(args.gpu_root.resolve())
     if subprocess.check_output(['hostname'], text=True).strip() != args.expected_host:
         raise RuntimeError('Host mismatch; game not launched')
     root = args.gpu_root.resolve(); wrapper = root / 'bin/gpu_slot.py'

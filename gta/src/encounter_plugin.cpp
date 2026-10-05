@@ -685,7 +685,13 @@ void blade_contacts(Actor& actor,int primary,std::uint32_t now,bool enabled) {
     const auto contact=actor.motion->contacts[window];
     const float first=std::max(previous,contact.start),last=std::min(phase,contact.end);
     if(last<first)continue;
-    if(actor.blade_window!=window){actor.blade_window=window;actor.blade_victim_count=0;}
+    if(actor.blade_window!=window){
+        actor.blade_window=window;actor.blade_victim_count=0;
+        if(log_file && exists(primary)){
+            const auto v=coords(primary);const auto pose=sample_motion(*actor.motion,first);
+            std::fprintf(log_file,"event=source_contact_window entity=%d phase=%.5f heading=%.3f origin=%.3f,%.3f,%.3f target=%.3f,%.3f,%.3f blade_model=%.3f,%.3f,%.3f:%.3f,%.3f,%.3f\n",actor.entity,phase,actor.motion_heading,origin.x,origin.y,origin.z,v.x,v.y,v.z,pose.blade_base.x,pose.blade_base.y,pose.blade_base.z,pose.blade_tip.x,pose.blade_tip.y,pose.blade_tip.z);std::fflush(log_file);
+        }
+    }
     const float heading=hook.invoke<float>(0xE83D4F9BA2A38914ULL,actor.entity);
     if(!std::isfinite(heading))return;
     std::array<int,513> victims{};int count=0;victims[count++]=primary;

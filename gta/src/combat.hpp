@@ -57,7 +57,7 @@ struct CreatureSpec {
 // timing, clip roles and GTA playback still require owner gameplay review.
 inline constexpr std::array<CreatureSpec, 4> creatures{{
     {"Malenia", "ergt_malenia", "ergt_malenia_anims", "a000_000020", "a000_002100", "a000_003000", "a000_010000",
-     3600, 3.2f, 3.5f, 28, 1150, 1500, 2734, -0.005f,180.0f,"a000_008030",1334,false},
+     3600, 3.2f, 6.0f, 28, 1150, 1500, 2734, -0.005f,180.0f,"a000_008030",1334,false},
     {"Starscourge Radahn", "ergt_radahn", "ergt_radahn_anims", "a000_000020", "a000_002100", "a000_003000", "a000_010000",
      6500,5.2f,9.0f,45,1833,2200,3934,-.04f,180.0f,"a000_008140",1234,false,2.5f,10.3f,12.0f,.45f},
     {"Fire Giant", "ergt_firegiant", "ergt_firegiant_anims", "a000_000020", "a000_002100", "a000_003000", "a000_010000",
@@ -121,13 +121,18 @@ public:
     Decision tick(int elapsed_ms, const Observation& observation) {
         Decision out{};
         if (state_ == CombatState::defeated) return out;
-        if (!observation.target_alive || !observation.combat_enabled || !finite_vec(observation.actor) || !finite_vec(observation.target)) {
-            // Turning combat off cancels queued attacks instead of banking a hit.
-            state_ = CombatState::idle; remaining_ms_ = 0; return out;
-        }
         const int dt = std::clamp(elapsed_ms, 0, 250);
         if (dt == 0) return out;
         if (remaining_ms_ > 0) remaining_ms_ = std::max(0, remaining_ms_ - dt);
+        // Physical hit reactions continue even with aggression paused or no
+        // target. Pausing cancels attacks, not the source stagger animation.
+        if(state_==CombatState::staggered){
+            if(remaining_ms_>0)return out;
+            state_=CombatState::idle;
+        }
+        if (!observation.target_alive || !observation.combat_enabled || !finite_vec(observation.actor) || !finite_vec(observation.target)) {
+            state_ = CombatState::idle; remaining_ms_ = 0; return out;
+        }
         if (state_ == CombatState::ranged_windup) {
             out.aim = locked_target_; out.telegraph = remaining_ms_ > 0;
             if (remaining_ms_ == 0) {

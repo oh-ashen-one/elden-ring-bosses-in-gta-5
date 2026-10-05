@@ -76,3 +76,11 @@ The bounded technical channel adds `REVIEW_FIGHT`, `REVIEW_HEADSHOT` and `REVIEW
 The fixed native RPG test caused actual damage/fire on Malenia; the rendered `malenia-combat-live.png` shows her moving with the imported run clip and reduced HP. Logs then recorded accepted source defeat playback and `corpse_settled`, followed by cleanup. No complete melee/vehicle/helicopter encounter pass is implied.
 
 The elevated Fire Giant carbine/RPG diagnostic recorded projectile calls but no damage intake. His box used asymmetric local extents from below the feet to65m with a zero local centre. The next asset candidate uses canonical symmetric primitive extents plus a translation to the intended model-space centre, with matching composite centres/radius. It preserves the intended world-space box and render geometry. This is intended to repair upper-body collision and still requires the repeated native test.
+
+## Confirmed upper-body damage and engagement-distance follow-up
+
+Repeating the same elevated probe after canonicalizing the collider produced24 points of native rifle damage and1600 points of applied RPG damage on Fire Giant, with the visible health bar falling (`full-height-native-hits.png`). The firing target was47.84m above his base. This confirms elevated native projectile collision/damage, not a piloted Buzzard fight or exact retail weapon balance.
+
+Malenia visibly chased and played her original sword swing, but the first contact run repeatedly missed at point-blank distance. Her source lunge contributes about3.2m before the active window; the blade's centre crossing is another~2.5m ahead. Engagement now starts at6m rather than3.5m; the damage sweep/radius/window remain unchanged. Physical stagger now persists while aggression is paused or the target disappears. Per-window telemetry records actual actor/target positions for the next live check.
+
+The guarded owner shortcut can select an existing recognized GTA reservation or use the ordinary exclusive gate when no such reservation exists. It creates/clears no pause and still rejects emergency holds and competing renderers. This allows this task's own temporary pause to be released after testing without leaving the owner's shortcut unusable.

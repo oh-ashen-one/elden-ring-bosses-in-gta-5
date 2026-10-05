@@ -29,6 +29,9 @@ int main() {
     boss.damage(std::numeric_limits<float>::quiet_NaN());
     require(boss.health()==creatures[2].maximum_health,"invalid damage cannot poison health");
     boss.damage(300); require(boss.state()==CombatState::staggered,"heavy impact staggers");
+    auto paused_reaction=o;paused_reaction.combat_enabled=false;paused_reaction.target_alive=false;
+    boss.tick(250,paused_reaction);
+    require(boss.state()==CombatState::staggered,"paused aggression or missing target must not erase a physical hit reaction");
     require(boss.tick(0,o).movement.x==0,"zero-time update cannot advance combat");
     boss.reset(&creatures[1]);o.target={20,0,0};
     auto step=boss.tick(10000,o);

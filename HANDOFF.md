@@ -2,6 +2,13 @@
 
 Updated 2026-10-05. **Complete-model/material candidate installed; guarded GTA technical render review in progress.**
 
+## Newest verification / final contact adjustment
+
+- `20261005-full-height-collision` ran on the M3 and PASSED the repeated elevated native projectile check: target47.84m above Fire Giant's base; rifle damage24, RPG applied damage1600, visible health reduction. Exact log/image `full-height-native-hits.*`. This is not manual helicopter flight or retail balance acceptance.
+- Malenia chased with coherent original run/sword animation. The initial melee review did not produce a contact at point-blank range; source attack has~3.2m lunge before its~2.5m forward blade crossing. Runtime engagement range now6m; actual blade sweep/window/radius unchanged. Added bounded per-window positions and preserved physical stagger during paused/no-target states. Next live test must establish sword contact; do not claim it passed yet.
+- Source launcher adds auto selection of an EXISTING owner reservation or ordinary exclusive gate, never creates/clears a pause. Upgrader handles the two allowlisted shortcuts transactionally. This supports releasing our own restart reservation when done.
+- GTA CLOSED normally for runtime patch; nine owned runs, zero crashes. Current installed asset package remains the proven canonical-collider DLC. Keep all retail/converted data private and preserve rollback. Pending final installed source/observations must be updated after the next controlled test.
+
 ## Current encounter check: giant upper-body collision under repair
 
 - `20261005-encounter-review` (ASI froma4f3207, BGRA DLC) ran technical native carbine/RPG probes. At Fire Giant's47.84m target height the calls were recorded but no damage was observed. Do not claim helicopter/elevated hits passed.
