@@ -111,6 +111,15 @@ int diagnostic_failures=0;
 std::uint32_t diagnostic_hash=0,diagnostic_started=0;
 wchar_t diagnostic_request_path[32768]{};
 std::uint32_t last_request_check=0;
+int review_camera=0,review_view=0;
+std::uint32_t review_until=0;
+void end_review() {
+    if(review_camera){
+        hook.invoke(0x07E5B515DB0636FCULL,false,false,0,true,false,0);
+        hook.invoke(0x865908C81A2C22E9ULL,review_camera,true);
+    }
+    review_camera=0;review_until=0;
+}
 
 bool exists(int entity) { return entity && hook.invoke<int>(0x7239B21A38F536BAULL, entity); }
 ergt::Vec3 coords(int entity) {
@@ -223,6 +232,7 @@ void remove_actor(Actor& actor) {
     actor=Actor{};
 }
 void clear() {
+    end_review();
     if (pending.active) { hook.invoke(0xE532F5D78798DAABULL,pending.hash); pending={}; }
     if (diagnostic_index>=0) {
         if (diagnostic_hash) hook.invoke(0xE532F5D78798DAABULL,diagnostic_hash);
@@ -429,6 +439,30 @@ void tick_diagnostics(int player,std::uint32_t now) {
     }
     diagnostic_next(now);
 }
+// Owner-authorized technical view only: local fixed commands, no listener,
+// no arbitrary scripts or persistent gameplay changes. Expires after 45s and
+// immediately yields back on normal mod controls/network/actor removal.
+void tick_review(std::uint32_t now) {
+    if(!review_until)return;
+    if(static_cast<std::int32_t>(review_until-now)<=0){end_review();return;}
+    auto& actor=actors[0];
+    if(!exists(actor.entity)||!actor.spec){if(!pending.active)end_review();return;}
+    if(hook.invoke<std::uint32_t>(0x9F47B058362C84B5ULL,actor.entity)!=hash(actor.spec->model)){end_review();return;}
+    const auto origin=coords(actor.entity);const float h=actor.spec->body_height;
+    const float heading=hook.invoke<float>(0xE83D4F9BA2A38914ULL,actor.entity);
+    const float distance=review_view==2?h*.7f:h*1.35f;
+    const auto offset=ergt::rotate_heading(review_view==1?ergt::Vec3{distance,0,h*.58f}:ergt::Vec3{0,-distance,h*(review_view==2?.82f:.58f)},heading);
+    const auto camera=ergt::add(origin,offset);const auto target=ergt::add(origin,{0,0,h*(review_view==2?.8f:.5f)});
+    if(!finite(camera)||!finite(target)){end_review();return;}
+    if(!review_camera){
+        review_camera=hook.invoke<int>(0xB51194800B257161ULL,"DEFAULT_SCRIPTED_CAMERA",camera.x,camera.y,camera.z,0.f,0.f,0.f,45.f,true,2);
+        if(!review_camera){end_review();return;}
+        hook.invoke(0x07E5B515DB0636FCULL,true,false,0,true,false,0);
+        record("technical_review_camera_started",actor.entity,static_cast<float>(review_view));
+    }
+    hook.invoke(0x4D41783FB745E42EULL,review_camera,camera.x,camera.y,camera.z);
+    hook.invoke(0xF75497BB865F0803ULL,review_camera,target.x,target.y,target.z);
+}
 void read_diagnostic_request(std::uint32_t now) {
     if (now-last_request_check<500 || !diagnostic_request_path[0]) return;
     last_request_check=now;
@@ -438,6 +472,14 @@ void read_diagnostic_request(std::uint32_t now) {
     // A file-only, fixed-command technical test; no listener or arbitrary code.
     if (std::strcmp(token,"CHECK_IMPORTS_ONCE\n")==0 && _wremove(diagnostic_request_path)==0)
         begin_diagnostics(now);
+    else if(std::strcmp(token,"REVIEW_STOP\n")==0 && _wremove(diagnostic_request_path)==0)end_review();
+    else if(std::strcmp(token,"REVIEW_CLEAR\n")==0 && _wremove(diagnostic_request_path)==0)clear();
+    else if((std::strcmp(token,"REVIEW_FRONT\n")==0 || std::strcmp(token,"REVIEW_SIDE\n")==0 || std::strcmp(token,"REVIEW_DETAIL\n")==0) && _wremove(diagnostic_request_path)==0){
+        end_review();fighting=false;review_view=token[7]=='S'?1:token[7]=='D'?2:0;review_until=now+45000;
+    }
+    else if(std::strncmp(token,"REVIEW_SPAWN_",13)==0 && token[13]>='0' && token[13]<'0'+static_cast<int>(ergt::creatures.size()) && token[14]=='\n' && token[15]==0 && _wremove(diagnostic_request_path)==0){
+        end_review();selected=token[13]-'0';fighting=false;begin_spawn(false,now);review_view=0;review_until=now+45000;
+    }
 }
 
 void observe_damage(Actor& actor,int player,std::uint32_t now) {
@@ -795,15 +837,15 @@ void run() {
         const int dt=static_cast<int>(std::min<std::uint32_t>(250,now-last)); last=now;
         if (hook.invoke<int>(0x9DE624D2FC4B603FULL) || hook.invoke<int>(0xB0034A223497FFCBULL) ||
             hook.invoke<int>(0x991251AFC3981F84ULL)) {
-            commands.store(0); hook.wait(0); continue;
+            end_review(); commands.store(0); hook.wait(0); continue;
         }
         const int player=hook.invoke<int>(0xD80958FC74E988A6ULL);
-        if (!exists(player)) { commands.store(0); hook.wait(0); continue; }
+        if (!exists(player)) { end_review(); commands.store(0); hook.wait(0); continue; }
         // Reserve top-row 1-6 for the mod without also selecting GTA weapons.
         // The regular weapon wheel and controller bindings remain available.
         for (const int control:{157,158,160,164,165,159}) hook.invoke(0xFE99B66D079CF6BCULL,0,control,true);
         const unsigned command=commands.exchange(0);
-        if(command) hud_until=now+6000;
+        if(command) {end_review();hud_until=now+6000;}
         scan_world(player,now);
         if (command&select_next) selected=(selected+1)%static_cast<int>(ergt::creatures.size());
         read_diagnostic_request(now);
@@ -831,6 +873,7 @@ void run() {
             text(0.025f,0.025f,title,0.32f);text(0.025f,0.055f,notice,0.28f);
             text(0.025f,0.08f,controls,0.25f);
         }
+        tick_review(now);
         boss_hud();
         hook.wait(0);
     }

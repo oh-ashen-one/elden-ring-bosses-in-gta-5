@@ -1,6 +1,13 @@
 # GTA V × Elden Ring handoff
 
-Updated 2026-10-05. **Complete-model/material candidate prepared; installation and technical render review in progress.**
+Updated 2026-10-05. **Complete-model/material candidate installed; guarded GTA technical render review in progress.**
+
+## Latest live test status
+
+- First new-candidate launch reached Story Mode, spawned/animated Malenia and was closed gracefully. Actual close-up `Evidence/20261005-complete-boss-materials/malenia-close-live.png` FAILS visual acceptance; owner said “looks messed up.” No crash. Do not call this repaired.
+- Local diagnostic candidate `20261005-malenia-palette-isolation` changed only Malenia's YDR bone palette to full/global identity indices. DLC `321bd01da4e8b5f789f8854f3e960f7d5ad706a18852d2faf686605e4b14bb3f`; every other native resource is byte-identical. It also reached Story Mode/spawn, no crash. Distant silhouette improved; close-up not yet decisive. It was closed gracefully for a bounded native review-camera addition.
+- Current own GPU pause says owner reopening GTA V for this authorized technical repair; exact text/ownership recorded in `~/Library/Application Support/EldenLosSantos/launch/visual-reservation-20261005.json`. Keep it across controlled restarts. Release only this own pause under the same perf lock when testing ends, after GTA exits. Foreign tasks untouched.
+- Camera controls now exist through the existing file-only request path. See the visual repair document. They use pinned native ABI facts, expire after45s and stop on mod inputs/network/actor removal. Camera-enabled ASI compiled; all20 offline suites passed. Next install/relaunch this camera build against the same isolated Malenia model and obtain decisive front/side close-ups.
 
 ## October 5 current work — supersedes all older launch/roster/status instructions below
 
@@ -13,7 +20,9 @@ Updated 2026-10-05. **Complete-model/material candidate prepared; installation a
 - Twenty offline test suites passed. Four models and twenty source clips package successfully. GTA render/gameplay review of THIS candidate is still pending.
 - Current control plan: 1 select, 2 spawn, 3 clear, 4 aggression, 5 weapons, 6 Buzzard. One active boss while large-roster validation is pending. No original ER AI/cloth/VFX/full movesets claimed.
 - Current Studio: hostname `Mac`, Mac15,14, Apple M3 Ultra, console `midir`. Shared brain 3be383eed864 refreshed from GitHub. Actual GPU root `/Users/midir/sm2-n1/_scratch/gpu`; exclusive GTA launcher and all safety thresholds retained. Our completed earlier GTA owner-play pause was released only after confirming GTA exited and holding the same perf lock. Always recheck live before launching.
-- Installed package at this pre-install point remains the October 4 streaming candidate below. Preserve its complete backup during upgrade; do not overwrite this status with a completion claim until verified.
+- Installed candidate `20261005-complete-boss-materials`, source/binary commit `bd4943871c59f5fd59564a6d6c56591a77a2bb80`, ASI SHA256 `ed9271704704055b0ebb9a2c85470804fee38e2bdb90ab9a30473755bf943ed0`. All six payloads match bundle/profile; original game bytes unchanged. Full old-candidate backup `~/Applications/EldenLosSantosPreview/Backups/upgrade-20261005T194303Z-c8c633d6`.
+- Hari checked and confirmed the desktop clear after an existing Apple notification process was observed. CUA cannot attach to CrossOver helper app windows (timeouts); Hari explicitly authorized AppleScript/macOS input automation and screenshot capture for THIS GTA test. Direct CGEvent postToPid with held key events works for the owned GTA process; quick AX clicks/keystrokes did not. Do not generalize this authorization to other apps/tasks.
+- Guarded normal-mode launch acquired the actual shared perf lock (GPU 12%, then 0%; no competing renderer). PID1295 GTA started, Story Mode entry visibly confirmed. No crash/relaunch occurred. Game captures and install/audit receipts stay private under `Evidence/20261005-complete-boss-materials`. This is not yet boss visual acceptance.
 
 
 ## Latest owner test and focused repair — supersedes the older snapshot below

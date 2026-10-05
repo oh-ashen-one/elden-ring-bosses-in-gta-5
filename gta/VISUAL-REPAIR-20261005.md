@@ -32,3 +32,11 @@ Twenty offline suites passed before packaging. Native round-trip checks compare 
 ## Acceptance boundary
 
 Installation receipts, guarded launch, screenshots and actual runtime outcomes belong in HANDOFF.md. A successful export, package audit, source test or spawn is not a completed boss fight. Different lighting, cloth simulation, complete movesets and original ER AI are not provided by copying source assets.
+
+## Actual runtime review and controlled follow-up
+
+The first guarded October 5 Story Mode run spawned Malenia but FAILED the close-up review: visibly distorted pieces and incomplete-looking shading. The owner also reported “looks messed up.” No crash occurred. The source/native checks above did not predict this rendering failure.
+
+A controlled local diagnostic restores only Malenia's full identity/global skin palette while preserving every other native resource. Its distant silhouette is more coherent, but a close-up is still required before attributing the failure to palette handling. Keep that diagnostic distinct from a confirmed fix.
+
+The existing file-only technical request channel now accepts `REVIEW_SPAWN_0` through `REVIEW_SPAWN_3` (one boss slot), `REVIEW_FRONT`, `REVIEW_SIDE`, `REVIEW_DETAIL`, `REVIEW_STOP` and `REVIEW_CLEAR`, each followed by a newline. File: `EldenLosSantos.import-check.request` beside the private ASI. Commands are single-use, Story Mode guarded and contain no arbitrary script/network listener. Inspection pauses aggression and uses a native GTA camera for at most 45 seconds. Ordinary mod keys immediately restore the gameplay camera. This supports actual rendered screenshots; it does not establish a visual pass by itself.
