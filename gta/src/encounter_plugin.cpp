@@ -22,7 +22,7 @@ constexpr char controls[] = "1 select | 2 spawn | 3 clear | 4 combat | 5 loadout
 char notice[192] = "Choose a creature with 1, then press 2 to spawn. Creatures spawn aggressive. 4 pauses combat.";
 
 struct Actor {
-    int entity = 0;
+    int entity = 0, visual_child = 0;
     const ergt::CreatureSpec* spec = nullptr;
     ergt::Combat combat;
     ergt::CombatState previous_state = ergt::CombatState::idle;
@@ -99,7 +99,13 @@ struct Pending {
     std::uint32_t hash = 0;
     std::uint32_t started = 0;
     bool model_ready = false;
+    std::uint32_t child_hash=0;
 } pending;
+void release_pending() {
+    if(pending.hash)hook.invoke(0xE532F5D78798DAABULL,pending.hash);
+    if(pending.child_hash)hook.invoke(0xE532F5D78798DAABULL,pending.child_hash);
+    pending={};
+}
 int owned_helicopter = 0;
 bool reference_probe_used = false;
 bool reference_probe_active = false;
@@ -181,8 +187,14 @@ void animate(Actor& actor,const char* clip,bool loop) {
     actor.playback_repaired=false;
     // Objects need their animated transform updated even when physics sleeps.
     hook.invoke(0xACAD101E1FB66689ULL,actor.entity,true);
-    const bool accepted=hook.invoke<int>(0x7FB218262B810701ULL,actor.entity,clip,actor.spec->dictionary,4.0f,loop,!loop,false,0.0f,0)!=0;
+    bool accepted=hook.invoke<int>(0x7FB218262B810701ULL,actor.entity,clip,actor.spec->dictionary,4.0f,loop,!loop,false,0.0f,0)!=0;
     hook.invoke(0x28D1A16553C51776ULL,actor.entity,actor.spec->dictionary,clip,actor.playback_rate);
+    if(actor.visual_child){
+        hook.invoke(0xACAD101E1FB66689ULL,actor.visual_child,true);
+        const bool child_ok=hook.invoke<int>(0x7FB218262B810701ULL,actor.visual_child,clip,actor.spec->dictionary,4.0f,loop,!loop,false,0.0f,0)!=0;
+        hook.invoke(0x28D1A16553C51776ULL,actor.visual_child,actor.spec->dictionary,clip,actor.playback_rate);
+        accepted=accepted&&child_ok;
+    }
     actor.animation_accepted=accepted;actor.animation_failed=!accepted;
     if (!accepted) record("animation_call_failed",actor.entity);
     if(log_file) {
@@ -222,6 +234,11 @@ void remove_actor(Actor& actor) {
         else handle=0;
     }
     if(pending_cast)return;
+    if(actor.visual_child && exists(actor.visual_child) && actor.spec && actor.spec->visual_child && hook.invoke<std::uint32_t>(0x9F47B058362C84B5ULL,actor.visual_child)==hash(actor.spec->visual_child)){
+        int child=actor.visual_child;hook.invoke(0x539E0AE3E6634B9FULL,&child);
+        if(exists(actor.visual_child)){actor.cleanup_failed=true;record("visual_child_cleanup_failed",actor.visual_child);return;}
+    }
+    actor.visual_child=0;
     if (exists(actor.entity) && actor.spec &&
         hook.invoke<std::uint32_t>(0x9F47B058362C84B5ULL,actor.entity)==hash(actor.spec->model)) {
         int entity=actor.entity;
@@ -233,7 +250,7 @@ void remove_actor(Actor& actor) {
 }
 void clear() {
     end_review();
-    if (pending.active) { hook.invoke(0xE532F5D78798DAABULL,pending.hash); pending={}; }
+    if (pending.active) { release_pending(); }
     if (diagnostic_index>=0) {
         if (diagnostic_hash) hook.invoke(0xE532F5D78798DAABULL,diagnostic_hash);
         diagnostic_hash=0;diagnostic_index=-1;record("import_diagnostics_cancelled");
@@ -285,7 +302,12 @@ void begin_spawn(bool vehicle,std::uint32_t now) {
         std::snprintf(notice,sizeof(notice),"Model %s unavailable. Check the ERGT DLC installation.",vehicle?"buzzard":spec.model);
         record("model_unavailable",0,static_cast<float>(selected)); return;
     }
-    pending={true,vehicle,selected,model_hash,now};
+    const auto child_hash=(!vehicle && spec.visual_child)?hash(spec.visual_child):0u;
+    if(child_hash && (!hook.invoke<int>(0xC0296A2EDF545E92ULL,child_hash)||!hook.invoke<int>(0x35B9E0803292B641ULL,child_hash))){
+        std::snprintf(notice,sizeof(notice),"Boss visual part is unavailable. Check the full DLC install.");record("visual_child_model_unavailable");return;
+    }
+    pending={true,vehicle,selected,model_hash,now};pending.child_hash=child_hash;
+    if(child_hash)hook.invoke(0x963D27A58DF860ACULL,child_hash);
     if (log_file) {
         std::fprintf(log_file,"event=spawn_requested model=%s hash=%08x preset=%d\n",vehicle?"buzzard":spec.model,model_hash,selected);
         std::fflush(log_file);
@@ -302,10 +324,10 @@ void finish_spawn(int player,std::uint32_t now) {
     if (now-pending.started>12000) {
         if (!pending.vehicle) failed_creatures[pending.preset]=true;
         record(pending.model_ready?"animation_streaming_timeout":"model_streaming_timeout",0,static_cast<float>(pending.preset));
-        hook.invoke(0xE532F5D78798DAABULL,pending.hash); pending={};
+        release_pending();
         std::snprintf(notice,sizeof(notice),"Asset streaming timed out. See EldenLosSantos.log."); record("streaming_timeout"); return;
     }
-    if (!hook.invoke<int>(0x98A4EB5D89A0C952ULL,pending.hash)) return;
+    if (!hook.invoke<int>(0x98A4EB5D89A0C952ULL,pending.hash) || (pending.child_hash && !hook.invoke<int>(0x98A4EB5D89A0C952ULL,pending.child_hash))) return;
     if (!pending.model_ready) {
         pending.model_ready=true;
         record("model_streaming_ready",0,static_cast<float>(pending.preset));
@@ -316,15 +338,15 @@ void finish_spawn(int player,std::uint32_t now) {
         }
     }
     if (!pending.vehicle && !hook.invoke<int>(0xD031A9162D01088CULL,spec.dictionary)) return;
-    auto p=hook.invoke<ergt::NativeVector>(0x1899F328B0E12848ULL,player,pending.vehicle?12.0f:0.0f,18.0f,0.0f);
+    auto p=hook.invoke<ergt::NativeVector>(0x1899F328B0E12848ULL,player,pending.vehicle?12.0f:0.0f,pending.vehicle?18.0f:std::max(18.0f,spec.body_radius*5.0f),0.0f);
     if (!finite({p.x,p.y,p.z})) {
         record("invalid_spawn_position");
-        hook.invoke(0xE532F5D78798DAABULL,pending.hash); pending={};
+        release_pending();
         std::snprintf(notice,sizeof(notice),"Invalid spawn position. Move outdoors and retry."); return;
     }
     float ground=0;
     if (!hook.invoke<int>(0xC906A7DAB05C8D2BULL,p.x,p.y,p.z+100.0f,&ground,false,false) || !std::isfinite(ground)) {
-        hook.invoke(0xE532F5D78798DAABULL,pending.hash); pending={};
+        release_pending();
         std::snprintf(notice,sizeof(notice),"No ground found. Move to a clear outdoor area."); return;
     }
     if (pending.vehicle) {
@@ -351,6 +373,19 @@ void finish_spawn(int player,std::uint32_t now) {
             if (exists(entity)) {
                 slot->entity=entity; slot->spec=&spec; slot->combat.reset(&spec);
                 slot->last_impact=now-1000;
+                if(pending.child_hash){
+                    slot->visual_child=hook.invoke<int>(0x9A294B2138ABB884ULL,pending.child_hash,p.x,p.y,z,false,true,false,0);
+                    if(!exists(slot->visual_child)){
+                        failed_creatures[pending.preset]=true;remove_actor(*slot);release_pending();record("visual_child_create_failed");
+                        std::snprintf(notice,sizeof(notice),"Boss visual part failed; incomplete spawn removed.");return;
+                    }
+                    const int child=slot->visual_child;
+                    hook.invoke(0xAD738C3085FE7E11ULL,child,true,true);hook.invoke(0x5927F96A78577363ULL,child,250);
+                    hook.invoke(0x1A9205C1B9EE827FULL,child,false,false);hook.invoke(0x1760FFA8AB074D66ULL,child,false);
+                    hook.invoke(0x1718DE8E3F2823CAULL,child,false);hook.invoke(0x406137F8EF90EAF5ULL,child,true);
+                    hook.invoke(0x6B9BBD38AB0796DFULL,child,entity,-1,0.f,0.f,0.f,0.f,0.f,0.f,false,false,false,false,2,true,0);
+                    record("visual_child_created",child);
+                }
                 hook.invoke(0x5927F96A78577363ULL,entity,250);
                 hook.invoke(0x406137F8EF90EAF5ULL,entity,true);
                 hook.invoke(0xAD738C3085FE7E11ULL,entity,true,true);
@@ -381,7 +416,7 @@ void finish_spawn(int player,std::uint32_t now) {
             }
         }
     }
-    hook.invoke(0xE532F5D78798DAABULL,pending.hash); pending={};
+    release_pending();
 }
 
 void tick_reference_probe(int player,std::uint32_t now) {
@@ -438,6 +473,17 @@ void tick_diagnostics(int player,std::uint32_t now) {
         if (valid) hook.invoke(0x539E0AE3E6634B9FULL,&entity);
     }
     diagnostic_next(now);
+}
+void sync_visual_child(Actor& actor) {
+    if(!actor.visual_child||!actor.spec||!actor.active_clip||actor.cleanup_requested)return;
+    if(!exists(actor.entity)||!exists(actor.visual_child)||hook.invoke<std::uint32_t>(0x9F47B058362C84B5ULL,actor.visual_child)!=hash(actor.spec->visual_child)){
+        actor.cleanup_requested=true;record("visual_child_lost",actor.entity);return;
+    }
+    const float phase=hook.invoke<float>(0x346D81500D088F42ULL,actor.entity,actor.spec->dictionary,actor.active_clip);
+    if(std::isfinite(phase)&&phase>=0&&phase<=1){
+        hook.invoke(0x4487C259F0F70977ULL,actor.visual_child,actor.spec->dictionary,actor.active_clip,phase);
+        hook.invoke(0x40FDEDB72F8293B2ULL,actor.visual_child);
+    }
 }
 // Owner-authorized technical view only: local fixed commands, no listener,
 // no arbitrary scripts or persistent gameplay changes. Expires after 45s and
@@ -873,6 +919,7 @@ void run() {
             text(0.025f,0.025f,title,0.32f);text(0.025f,0.055f,notice,0.28f);
             text(0.025f,0.08f,controls,0.25f);
         }
+        for(auto& actor:actors)sync_visual_child(actor);
         tick_review(now);
         boss_hud();
         hook.wait(0);

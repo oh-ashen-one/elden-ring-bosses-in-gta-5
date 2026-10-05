@@ -36,6 +36,7 @@ add_test(NAME melee_vehicle_deduplication COMMAND "${Python3_EXECUTABLE}" "${CMA
 add_test(NAME helicopter_reset_regressions COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/helicopter_test.py")
 add_test(NAME profile_upgrade_regressions COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/upgrade_test.py")
 add_test(NAME animation_pose_axes COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/animation_conversion_test.py")
+add_test(NAME visual_part_ownership COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/visual_parts_test.py")
 add_test(NAME source_asset_fidelity COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/asset_fidelity_test.py")
 
 if(WIN32)

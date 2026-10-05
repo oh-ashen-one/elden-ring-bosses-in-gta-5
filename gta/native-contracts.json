@@ -381,6 +381,14 @@
     "0x4D41783FB745E42E": {
       "name": "SET_CAM_COORD",
       "arguments": 4
+    },
+    "0x6B9BBD38AB0796DF": {
+      "name": "ATTACH_ENTITY_TO_ENTITY",
+      "arguments": 16
+    },
+    "0x4487C259F0F70977": {
+      "name": "SET_ENTITY_ANIM_CURRENT_TIME",
+      "arguments": 4
     }
   }
 }

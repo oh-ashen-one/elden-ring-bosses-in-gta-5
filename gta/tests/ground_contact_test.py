@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 import importlib.util
+import json
 import csv
 import math
 import re
@@ -25,7 +26,9 @@ class GroundContact(unittest.TestCase):
    block=source[source.index('"'+name+'"'):].split('}',1)[0]
    fields=next(csv.reader([block.replace('\n','')],skipinitialspace=True))
    runtime=float(fields[13].strip().removesuffix('f'))
-   self.assertEqual(runtime,floor)
+   roster=json.loads((Path(__file__).parents[1]/"roster.json").read_text())["bosses"]
+   scale=next(b.get("model_scale",1) for b in roster if b["model"]==name)
+   self.assertAlmostEqual(runtime,floor*scale)
  def test_body_width_does_not_change_render_geometry_or_contact_height(self):
   root=self.fixture();m.adjust(root,-.1);m.body_box(root)
   self.assertEqual(root.find('BoundingBoxMin').get('x'),'-2')

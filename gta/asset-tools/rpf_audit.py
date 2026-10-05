@@ -12,7 +12,8 @@ import struct
 import zlib
 from pathlib import Path
 
-MAX_BYTES=256*1024*1024
+MAX_BYTES=256*1024*1024  # maximum single inflated resource
+MAX_ARCHIVE_BYTES=1024*1024*1024  # multi-boss archives may contain many bounded resources
 
 def page_sizes(flags):
     base=512<<(flags&15)
@@ -28,7 +29,7 @@ def inflate(data,expected):
     return result
 
 def audit(data,label='dlc.rpf',depth=0):
-    if depth>4 or len(data)<16 or len(data)>MAX_BYTES:raise ValueError('Invalid archive size/depth')
+    if depth>4 or len(data)<16 or len(data)>MAX_ARCHIVE_BYTES:raise ValueError('Invalid archive size/depth')
     magic,count,names_size,encryption=struct.unpack_from('<4I',data)
     if magic!=0x52504637 or encryption not in (0,0x4e45504f):raise ValueError('Only unencrypted RPF7 is supported')
     end=16+count*16+names_size

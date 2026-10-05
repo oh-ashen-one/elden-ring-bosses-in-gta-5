@@ -68,7 +68,9 @@
         "a000_003000",
         "a000_008700",
         "a000_010000"
-      ]
+      ],
+      "model_scale": 2.6,
+      "scale_note": "Owner requested a building-height helicopter encounter; approximately 60m animated standing height."
     },
     {
       "character": "c4720",

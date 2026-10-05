@@ -8,12 +8,48 @@ import numpy as np
 sys.path.insert(0,str(Path(__file__).parents[1]/'asset-tools'))
 from compact_skin_palette import compact,identity
 from geometry_fidelity import reject_inward
+from split_large_rig import partition as partition_rig
+from scale_roster import scale_drawable,scale_animation
+from fur_material import bake
+from material_fidelity import fields,sample
 from correct_bind_heads import correct,source_axes
 from rebuild_animation import TargetRig,matrix,world_matrices,Y_UP_TO_Z_UP
 from texture_dictionaries import partition,parenting
 from animation_conversion_test import drawable
 
 class Fidelity(unittest.TestCase):
+    def test_large_rig_split_preserves_faces_and_named_weight_associations(self):
+        root=E.Element('Drawable');bones=E.SubElement(E.SubElement(root,'Skeleton'),'Bones')
+        for i in range(5):
+            b=E.SubElement(bones,'Item');E.SubElement(b,'Name').text='bone'+str(i)
+            for tag,v in [('Tag',100+i),('Index',i),('ParentIndex',-1 if i==0 else 0),('SiblingIndex',-1)]:E.SubElement(b,tag,value=str(v))
+        gs=E.SubElement(E.SubElement(E.SubElement(root,'DrawableModelsHigh'),'Item'),'Geometries')
+        for pair in [(1,2),(3,4)]:
+            g=E.SubElement(gs,'Item');E.SubElement(g,'BoneIDs').text=','.join(map(str,pair));vb=E.SubElement(g,'VertexBuffer');layout=E.SubElement(vb,'Layout')
+            for n in ['Position','BlendWeights','BlendIndices','Normal']:E.SubElement(layout,n)
+            E.SubElement(vb,'Data').text='0 0 0 255 0 0 0 0 0 0 0 0 0 1\n1 0 0 255 0 0 0 1 0 0 0 0 0 1\n0 1 0 255 0 0 0 0 0 0 0 0 0 1'
+            E.SubElement(E.SubElement(g,'IndexBuffer'),'Data').text='0 1 2'
+        parts=partition_rig(root,3);self.assertEqual(len(parts),2);self.assertEqual(sum(r['triangles'] for _,r in parts),2)
+        for (part,report),expected in zip(parts,[['bone1','bone2','bone1'],['bone3','bone4','bone3']]):
+            names=[b.findtext('Name') for b in part.findall('Skeleton/Bones/Item')];g=part.find('.//Geometries/Item');f=fields(g)
+            self.assertEqual([names[int(i)] for i in f['BlendIndices'][:,0]],expected)
+        with self.assertRaises(ValueError):partition_rig(root,2)
+
+    def test_building_scale_changes_positions_clips_and_collision_not_uv_or_rotation(self):
+        root=E.fromstring('<Drawable><BoundingSphereRadius value="3"/><Skeleton><Bones><Item><Translation x="1" y="2" z="3"/></Item></Bones></Skeleton><Geometries><Item><VertexBuffer><Layout><Position/><TexCoord0/></Layout><Data>1 2 3 .25 .75</Data></VertexBuffer></Item></Geometries><Bounds><BoxMin x="-1" y="-1" z="0"/><BoxMax x="1" y="1" z="23"/><Volume value="92"/><Inertia x="1" y="2" z="3"/></Bounds></Drawable>')
+        scale_drawable(root,2.6);data=np.fromstring(root.findtext('.//VertexBuffer/Data'),sep=' ')
+        np.testing.assert_allclose(data,[2.6,5.2,7.8,.25,.75]);self.assertAlmostEqual(float(root.find('Bounds/BoxMax').get('z')),59.8)
+        anim=E.fromstring('<ClipDictionary><Animations><Item><BoneIds><Item><Track value="0"/></Item><Item><Track value="1"/></Item></BoneIds><Sequences><Item><SequenceData><Item><Channels><Item><Type value="StaticVector3"/><Value x="1" y="2" z="3"/></Item></Channels></Item><Item><Channels><Item><Type value="StaticQuaternion"/><Value x="0" y="0" z="0" w="1"/></Item></Channels></Item></SequenceData></Item></Sequences></Item></Animations></ClipDictionary>')
+        rotation=E.tostring(anim.findall('.//SequenceData/Item')[1]);scale_animation(anim,2.6)
+        self.assertEqual(rotation,E.tostring(anim.findall('.//SequenceData/Item')[1]));self.assertAlmostEqual(float(anim.find('.//SequenceData/Item/Channels/Item/Value').get('y')),5.2)
+
+    def test_fur_uses_authored_uv2_transparency_without_changing_geometry(self):
+        g=E.fromstring('<Item><VertexBuffer><Layout><Position/><Normal/><TexCoord0/><TexCoord2/></Layout><Data>0 0 0 0 0 1 0 0 0 0\n1 0 0 0 0 1 1 0 1 0\n0 1 0 0 0 1 0 1 0 1</Data></VertexBuffer><IndexBuffer><Data>0 1 2</Data></IndexBuffer></Item>')
+        original=E.tostring(g);base=np.full((8,8,4),[180,40,20,255],np.uint8);strand=np.full((8,8,4),255,np.uint8);strand[:4,:,3]=0
+        normal=np.full((8,8,4),[128,128,128,255],np.uint8)
+        result,_,report=bake([g],base,strand,normal,fields,sample)
+        self.assertEqual(original,E.tostring(g));self.assertTrue(report['authored_uv2_strands']);self.assertGreater(result[:,:,3].max(),128);self.assertEqual(result[:,:,3].min(),0)
+        np.testing.assert_array_equal(result[6,0,:3],base[6,0,:3])
     def test_mirrored_flver_faces_must_not_be_reversed_twice(self):
         # Clockwise LH source triangle becomes outward RH simply by mirroring
         # Z. The old extra index swap made the visible outer face disappear.

@@ -53,9 +53,12 @@ def main():
     map_types = ET.Element("CMapTypes")
     ET.SubElement(map_types, "extensions")
     archetypes = ET.SubElement(map_types, "archetypes")
-    manifest_models = [];texture_chains=[]
-    characters=[(b['character'],b['model']) for b in json.loads(args.roster.read_text())['bosses']] if args.roster else CHARACTERS
+    manifest_models = [];texture_chains=[];chains_by_model={};conversions_by_model={}
+    bosses=json.loads(args.roster.read_text())['bosses'] if args.roster else [{'character':c,'model':n} for c,n in CHARACTERS]
+    characters=[(b['character'],b['model']) for b in bosses];parents={b['model']:b.get('visual_child_of') for b in bosses}
     for character, name in characters:
+        shared_parent=parents[name]
+        if shared_parent and (not args.external_textures or shared_parent not in conversions_by_model):raise ValueError('Visual child requires an already packaged external-texture parent')
         folder = args.converted / character
         receipt = json.loads((folder / f"{name}.conversion.json").read_text())
         if receipt["missing_base_materials"]: raise ValueError(f"{name}: unresolved base materials")
@@ -70,7 +73,7 @@ def main():
         normalized_document.write(conversion/drawable_xml.name,encoding='utf-8',xml_declaration=True)
         texture_folder = conversion / name; texture_folder.mkdir()
         normalized_count = 0
-        for texture in ET.parse(drawable_xml).findall("ShaderGroup/TextureDictionary/Item"):
+        for texture in ([] if shared_parent else ET.parse(drawable_xml).findall("ShaderGroup/TextureDictionary/Item")):
             filename = texture.findtext("FileName")
             if not filename or Path(filename).name != filename:
                 raise ValueError("Unsafe or missing embedded texture filename")
@@ -82,18 +85,26 @@ def main():
         if args.external_textures:
             document=ET.parse(conversion/drawable_xml.name);dictionary=document.find('ShaderGroup/TextureDictionary')
             if dictionary is None:raise ValueError('Expected embedded texture inputs before separation')
-            groups,sizes=partition(dictionary,texture_folder)
-            chain=[name if i==0 else name+'_t'+str(i).zfill(2) for i in range(len(groups))]
-            texture_chains.append(chain)
-            for txd,group in zip(chain,groups):
-                if txd!=name:(conversion/txd).symlink_to(texture_folder.name,target_is_directory=True)
-                write_xml(group,conversion/(txd+'.ytd.xml'))
-                invoke('convert',conversion/(txd+'.ytd.xml'),models/(txd+'.ytd'))
-                (models/(txd+'.ytd.json')).rename(output/(txd+'.ytd.verification.json'))
+            if shared_parent:
+                chain=chains_by_model[shared_parent];parent_conversion=conversions_by_model[shared_parent]
+                for txd in chain:
+                    shutil.copy2(parent_conversion/(txd+'.ytd.xml'),conversion/(txd+'.ytd.xml'))
+                    (conversion/txd).symlink_to((parent_conversion/txd).resolve(),target_is_directory=True)
+            else:
+                groups,sizes=partition(dictionary,texture_folder)
+                chain=[name if i==0 else name+'_t'+str(i).zfill(2) for i in range(len(groups))]
+                texture_chains.append(chain)
+                for txd,group in zip(chain,groups):
+                    if txd!=name:(conversion/txd).symlink_to(texture_folder.name,target_is_directory=True)
+                    write_xml(group,conversion/(txd+'.ytd.xml'))
+                    invoke('convert',conversion/(txd+'.ytd.xml'),models/(txd+'.ytd'))
+                    (models/(txd+'.ytd.json')).rename(output/(txd+'.ytd.verification.json'))
+                chains_by_model[name]=chain
             (conversion/(name+'.textures.json')).write_text(json.dumps([txd+'.ytd.xml' for txd in chain]))
             document.find('ShaderGroup').remove(dictionary);ET.indent(document)
             document.write(conversion/drawable_xml.name,encoding='utf-8',xml_declaration=True)
         for extension, stem in [("ydr", name), ("ycd", name + "_anims")]:
+            if shared_parent and extension=='ycd':continue
             source = conversion if extension == "ydr" else folder
             invoke("convert", source / f"{stem}.{extension}.xml", models / f"{stem}.{extension}")
             (models / f"{stem}.{extension}.json").rename(output / f"{stem}.{extension}.verification.json")
@@ -111,14 +122,15 @@ def main():
             ET.SubElement(item,tag,{axis:format(v,".9g") for axis,v in zip("xyz",vector)})
         value(item,"bsRadius",radius); value(item,"hdTextureDist",150)
         ET.SubElement(item,"name").text=name
-        ET.SubElement(item,"textureDictionary").text=name
-        ET.SubElement(item,"clipDictionary").text=name+"_anims"
+        ET.SubElement(item,"textureDictionary").text=shared_parent or name
+        ET.SubElement(item,"clipDictionary").text=(shared_parent or name)+"_anims"
         ET.SubElement(item,"drawableDictionary"); ET.SubElement(item,"physicsDictionary").text=name
         ET.SubElement(item,"assetType").text="ASSET_TYPE_DRAWABLE"
         ET.SubElement(item,"assetName").text=name
         ET.SubElement(item,"extensions")
         manifest_models.append({"source_character":character,"model":name,"clips":receipt["clips"],
                                 "collision":receipt["collision"],"normalized_srgb_textures":normalized_count,"gta_runtime_verified":False})
+        conversions_by_model[name]=conversion
     ET.SubElement(map_types,"name").text="ergt"
     ET.SubElement(map_types,"dependencies"); ET.SubElement(map_types,"compositeEntityTypes")
     ytyp_xml=output/"ergt.ytyp.xml"; write_xml(map_types,ytyp_xml)

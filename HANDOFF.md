@@ -2,6 +2,15 @@
 
 Updated 2026-10-05. **Complete-model/material candidate installed; guarded GTA technical render review in progress.**
 
+## Latest completed runtime evidence / building-height candidate
+
+- `20261005-outward-faces` was installed and tested in actual GTA on the M3. Source `b75b9e3`, camera ASI from `6bb9573`. All four bosses spawned; zero crashes across four owned runs, each closed normally.
+- Real screenshots in `Evidence/20261005-complete-boss-materials`: `outward-malenia-front.png` and `...-side.png` show the face-winding repair restores her outside dress/armor/helmet/sword and coherent pose. `outward-radahn-front.png` and `outward-godfrey-front.png` show correct primary geometry but opaque fur. `outward-firegiant-front.png` FAILS rig acceptance (304-bone palette deformation). No full fight/FPS/subjective acceptance claim.
+- User then asked for a building-height Fire Giant to fly a helicopter around. Chosen ~60m /2.6x source scale, including all rig/clip/root/weapon translations, bounds/collision/reach and clearance. This is explicit new scope, not a silent scale change.
+- New source: UV2 C[Fur] opacity/normal adaptation; two synchronized Fire Giant render pieces with255/147 bones preserving all403151 faces; ownership-safe child spawn/animation/phase/cleanup. Shared parent texture/clip dictionaries avoid duplicated runtime data. Current native source compiles;20 suites and separate owned-child cleanup fixture pass.
+- New private inputs: `gta-fur-final`, `gta-building-scale`, `gta-building-parts` (generated `render-roster.json`), `motion-building-scale/bosses.hpp`; native package `dlc-building-parts/dlc.rpf`, SHA256 `0130bc9bd32c75dd632cc93b82d794a45b7aa26caa19418bd07d1fa3606fe88c`.65 resources independently inflated, max64.0078MiB. `gta-win64` is now configured with the scaled private motion header.
+- GTA is CLOSED after the four-boss visual checks. Our own explicit GTA test PAUSED reservation remains across authorized restarts, exact ownership receipt in the launch directory. Next: commit/push current source, reversible install of the fur/split/60m candidate, then guarded actual rendered checks. Keep the October4 owner-working rollback.
+
 ## Face winding repair in progress — newest evidence
 
 - Fixed camera capture `native-malenia-front-immediate.png` shows the identity-palette pose is coherent, but rendered surfaces remain wrong. UV comparison confirms native coordinates match the original GLB within ~7.1e-8; do not randomly flip textures/UVs.

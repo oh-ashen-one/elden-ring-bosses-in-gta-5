@@ -72,9 +72,11 @@ def main():
         if not event_data.get('events'):raise ValueError('Original attack events absent')
     run(sys.executable,tools/'material_fidelity.py','--converted',output/'gta','--source-root',output,'--roster',roster_path,'--out',output/'gta-materials')
     run(sys.executable,tools/'finalize_roster.py','--materials',output/'gta-materials','--interchange',output/'interchange-final','--roster',roster_path,'--out',output/'gta-ready')
+    run(sys.executable,tools/'scale_roster.py','--converted',output/'gta-ready','--roster',roster_path,'--out',output/'gta-scaled')
+    run(sys.executable,tools/'split_large_rig.py','--converted',output/'gta-scaled','--roster',roster_path,'--out',output/'gta-parts')
     run(sys.executable,tools/'export_roster_motion.py','--root',output,'--roster',roster_path,'--out',output/'motion')
     dotnet=cache/'dotnet/dotnet';bridge=repo/'build/cw-bridge/CodeWalkerBridge.dll'
-    run(sys.executable,tools/'build_dlc.py','--converted',output/'gta-ready','--out',output/'dlc-build','--dotnet',dotnet,'--bridge',bridge,'--roster',roster_path,'--external-textures')
+    run(sys.executable,tools/'build_dlc.py','--converted',output/'gta-parts','--out',output/'dlc-build','--dotnet',dotnet,'--bridge',bridge,'--roster',output/'gta-parts/render-roster.json','--external-textures')
     run(sys.executable,tools/'rpf_audit.py',output/'dlc-build/dlc.rpf','--out',output/'archive-audit.json')
     run(dotnet,bridge,"prepare-dlclist",args.gta_game.resolve(),output/"newmods/common/data/dlclist.xml")
     print("Private owned-asset DLC prepared. No game launched. Runtime verification is still required.")

@@ -14,6 +14,7 @@ from PIL import Image
 from upgrade_visuals import SIZES,read_image,normal_pixels,convert_layout,write_dds
 from normalize_dds import normalize_dds
 from compact_skin_palette import compact,identity
+from fur_material import bake as bake_fur
 
 def key(path):return PureWindowsPath(path).stem.lower()
 def sample(image,uv):
@@ -34,6 +35,7 @@ def fur_opacity(geometries,mask,size,tile):
     Overlapping fin islands use maximum coverage. Source layer alpha provides
     a tip fade. This avoids rendering procedural shell fins as solid triangles.
     """
+    mask_float=mask.astype(np.float32)
     width,height=size;alpha=np.zeros((height,width),np.float32);covered=np.zeros((height,width),bool)
     for g in geometries:
         f=fields(g)
@@ -50,7 +52,7 @@ def fur_opacity(geometries,mask,size,tile):
             w1=((c[1]-a[1])*(xx-c[0])+(a[0]-c[0])*(yy-c[1]))/den;w2=1-w0-w1
             inside=(w0>=-.002)&(w1>=-.002)&(w2>=-.002)
             weights=np.stack([w0,w1,w2],axis=-1);secondary=weights@f['TexCoord1'][ids]
-            strands=sample(mask.astype(np.float32),secondary*np.asarray(tile))[:,:,3]/255
+            strands=sample(mask_float,secondary*np.asarray(tile))[:,:,3]/255
             layer=np.clip((weights@f['Colour0'][ids,3])/255,0,1)
             opacity=np.sqrt(np.clip(strands*(1-layer),0,1))
             target=alpha[lo[1]:hi[1]+1,lo[0]:hi[0]+1];target[inside]=np.maximum(target[inside],opacity[inside])
@@ -125,10 +127,11 @@ def adapt(converted,source_root,out,roster):
                 matches=[s for s in samplers if token in s['type'].lower() and s['path'] and key(s['path']) in texture_paths]
                 matches.sort(key=lambda s:0 if prefer and prefer in s['type'] else 1)
                 return texture_paths[key(matches[0]['path'])] if matches else None
-            original=key(source_path);stype=material['shader'].lower();hair='hair' in original or 'hair' in stype;fur='shell' in stype
+            original=key(source_path);stype=material['shader'].lower();fin_fur='c[fur]' in stype;hair='hair' in original or 'hair' in stype or fin_fur;fur='shell' in stype
             kind='fur' if fur else 'hair' if hair else 'skin' if 'sss' in stype or 'skin' in original else 'fabric' if any(x in original for x in ('fabric','fablic','frabic','mant','cloak','cloth','belt','rope')) else 'metal' if any(x in original for x in ('metal','armor','blade','axe','sword','weapon','hd_')) else 'body'
             diffuse_path=find('albedo','_7_AlbedoMap');normal_path=find('normal','_0_NormalMap');metal_path=find('metallic')
             if fur:normal_path=find('normal','_8_NormalMap')
+            if fin_fur:diffuse_path=find('albedo','_8_AlbedoMap');normal_path=find('normal','_6_NormalMap')
             normal=pixels(normal_path) if normal_path else np.full((4,4,4),[128,128,255,255],np.uint8)
             if hair and 'chrcustomize' in stype:
                 tint=np.asarray(params.get('P_ChrCustomize__Hair__snp_0_color_4',[.6,.4,.3])[:3])*np.asarray(params.get('g_DiffuseMapColor',[1,1,1])[:3])
@@ -145,10 +148,18 @@ def adapt(converted,source_root,out,roster):
                     geometry=[g for g in tree.findall('.//Geometries/Item') if int(g.find('ShaderIndex').get('value'))==index]
                     diffuse[:,:,3]=fur_opacity(geometry,pixels(strand),(diffuse.shape[1],diffuse.shape[0]),params.get('group_7_CommonUV-UVParam',[40,40]))
                     diffuse_name='ergt_'+character+'_fur_'+str(index)
+            adapted_normal=None;strand_report=None
+            if fin_fur:
+                strand_path=find('albedo','_1_AlbedoMap')
+                if not strand_path:raise ValueError('C[Fur] lacks authored strand opacity')
+                geometry=[g for g in tree.findall('.//Geometries/Item') if int(g.find('ShaderIndex').get('value'))==index]
+                diffuse,adapted_normal,strand_report=bake_fur(geometry,diffuse,pixels(strand_path),normal,fields,sample,params.get('group_1_CommonUV-UVParam',[1,1]))
+                diffuse_name='ergt_'+character+'_strands_'+str(index)
             normal_name='ergt_'+(normal_path.stem.lower() if normal_path else 'flat')+'_normal'
-            spec_name='ergt_'+hashlib.sha256((str(normal_path)+str(metal_path)+kind).encode()).hexdigest()[:16]+'_spec'
-            diffuse_name=add_texture(diffuse_name,diffuse,source=diffuse_path if not fur and not (hair and 'chrcustomize' in stype) else None)
-            normal_name=add_texture(normal_name,normal,'NORMAL',source=normal_path)
+            if adapted_normal is not None:normal_name='ergt_'+character+'_strands_'+str(index)+'_normal';normal=adapted_normal
+            spec_name='ergt_'+hashlib.sha256((normal_name+str(metal_path)+kind).encode()).hexdigest()[:16]+'_spec'
+            diffuse_name=add_texture(diffuse_name,diffuse,source=diffuse_path if not fur and not fin_fur and not (hair and 'chrcustomize' in stype) else None)
+            normal_name=add_texture(normal_name,normal,'NORMAL',source=normal_path if adapted_normal is None else None)
             spec_name=add_texture(spec_name,spec_pixels(normal,pixels(metal_path) if metal_path else None,kind),'SPECULAR')
             blend=hair or fur;shader.find('Name').text='normal_spec';shader.find('FileName').text='normal_spec_alpha.sps' if blend else 'normal_spec.sps';shader.find('RenderBucket').set('value','1' if blend else '0')
             old=shader.find('Parameters');shader.remove(old);p=E.SubElement(shader,'Parameters')
@@ -159,7 +170,7 @@ def adapt(converted,source_root,out,roster):
                     'specularFalloffMult':160 if kind=='metal' else 80 if kind=='skin' else 45,
                     'specularFresnel':.085 if kind=='metal' else .035}
             for n,value in values.items():E.SubElement(p,'Item',name=n,type='Vector',x=str(value),y='0',z='0',w='0')
-            details.append({'source_material':source_path,'kind':kind,'specular_source':str(metal_path) if metal_path else 'nonmetal baseline','gloss_source':'original normal B','shader':shader.findtext('FileName')})
+            details.append({'source_material':source_path,'kind':kind,'specular_source':str(metal_path) if metal_path else 'nonmetal baseline','gloss_source':'original normal B','shader':shader.findtext('FileName'),'strand_adaptation':strand_report})
         for geometry in tree.findall('.//Geometries/Item'):convert_layout(geometry)
         palette=identity(tree.getroot()) if len(tree.findall('Skeleton/Bones/Item'))<=256 else compact(tree.getroot())
         E.indent(tree);tree.write(dest/(name+'.ydr.xml'),encoding='utf-8',xml_declaration=True)

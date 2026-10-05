@@ -50,6 +50,7 @@ struct CreatureSpec {
     int stagger_ms = 500;
     bool ranged_enabled = true;
     float body_radius=.5f,body_height=2.8f,vertical_reach=4.0f,weapon_radius=.12f;
+    const char* visual_child=nullptr;
 };
 
 // Hit timers now follow inspected source attack-motion landmarks. Contact
@@ -60,7 +61,7 @@ inline constexpr std::array<CreatureSpec, 4> creatures{{
     {"Starscourge Radahn", "ergt_radahn", "ergt_radahn_anims", "a000_000020", "a000_002100", "a000_003000", "a000_010000",
      6500,5.2f,9.0f,45,1833,2200,3934,-.04f,180.0f,"a000_008140",1234,false,2.5f,10.3f,12.0f,.45f},
     {"Fire Giant", "ergt_firegiant", "ergt_firegiant_anims", "a000_000020", "a000_002100", "a000_003000", "a000_010000",
-     14000,4.0f,18.0f,65,2833,3700,6667,-.23f,180.0f,"a000_008700",7000,false,4.0f,23.0f,26.0f,2.2f},
+     14000,4.0f,46.8f,65,2833,3700,6667,-.598f,180.0f,"a000_008700",7000,false,10.4f,59.8f,67.6f,5.72f,"ergt_firegiant_part1"},
     {"Godfrey, First Elden Lord", "ergt_godfrey", "ergt_godfrey_anims", "a000_000020", "a000_002100", "a000_003000", "a000_010000",
      5000,3.8f,5.5f,38,1100,1600,3834,-.04f,180.0f,"a000_008700",5334,false,.9f,6.5f,8.0f,.55f},
 }};

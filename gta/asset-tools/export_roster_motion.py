@@ -71,7 +71,9 @@ def build(root,roster,out):
                     if len(weapons)==1:ends.extend([0]*6)
                     samples.append([*step,*ends])
                 hit_windows=windows(source_events['events'],duration) if name==boss['clips'][2] else []
-                tracks[name]=(duration,np.asarray(samples),hit_windows)
+                values=np.asarray(samples);scale=float(boss.get('model_scale',1))
+                values[:,:3]*=scale;values[:,4:]*=scale # yaw/time are unchanged
+                tracks[name]=(duration,values,hit_windows)
         if set(tracks)!=set(boss['clips']):raise ValueError('Missing clip')
         lines=['// PRIVATE DERIVED GAME DATA - NEVER PUBLISH','#pragma once','namespace ergt {']
         for name,(duration,samples,contact) in tracks.items():
