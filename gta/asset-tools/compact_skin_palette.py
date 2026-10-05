@@ -15,7 +15,7 @@ def identity(drawable):
     Larger rigs require a separately verified strategy; never wrap their IDs.
     """
     count=len(drawable.findall('Skeleton/Bones/Item'))
-    if not 0<count<=256:raise ValueError('Identity skin indices require <=256 bones')
+    if not 0<count<=255:raise ValueError('Identity skin indices require <=255 bones')
     reports=[]
     for geometry in drawable.findall('.//Geometries/Item'):
         ids=geometry.find('BoneIDs')
@@ -42,7 +42,7 @@ def compact(drawable):
         weights=data[:,wi:wi+4];indices=data[:,ii:ii+4].astype(int);active=weights>0
         if (indices[active]<0).any() or (indices[active]>=len(palette)).any():raise ValueError('Skin index outside old palette')
         before=palette[indices[active]];used=np.unique(before)
-        if len(used)>256:raise ValueError('Geometry needs bone-aware partitioning before native export')
+        if len(used)>255:raise ValueError('Geometry needs bone-aware partitioning before native export')
         remap={int(old):new for new,old in enumerate(used)};new_indices=np.zeros_like(indices)
         for row,lane in np.argwhere(active):new_indices[row,lane]=remap[int(palette[indices[row,lane]])]
         if not np.array_equal(used[new_indices[active]],before):raise ValueError('Skin association changed')

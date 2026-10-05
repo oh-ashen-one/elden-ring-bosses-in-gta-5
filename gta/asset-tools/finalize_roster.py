@@ -7,6 +7,7 @@ from xml.etree import ElementTree as E
 from rebuild_animation import SourceGLB,TargetRig,rebuild
 from correct_bind_heads import correct,source_axes
 from source_animation_template import create
+from skeleton_identity import refresh
 from align_ground_contact import CONTACTS,BODY_RADII,adjust,body_box
 
 def finalize(materials,interchange,roster,out):
@@ -19,6 +20,7 @@ def finalize(materials,interchange,roster,out):
         doc=E.parse(src/(name+'.ydr.xml'));corrections=correct(doc,source)
         if char in ('c4760','c4720'):corrections.append(source_axes(doc,source))
         TargetRig(doc,source) # Keep the strict 2mm source/target joint guard.
+        refresh(doc.getroot())
         floor=CONTACTS[char][1];adjust(doc.getroot(),floor,allow_lower=True);body_box(doc.getroot(),BODY_RADII[char])
         drawable=dst/(name+'.ydr.xml');E.indent(doc);doc.write(drawable,encoding='utf-8',xml_declaration=True)
         template=dst/'template.xml';create(name,b['clips'][0],template)

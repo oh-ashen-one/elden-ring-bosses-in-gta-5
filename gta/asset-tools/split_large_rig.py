@@ -10,6 +10,7 @@ from xml.etree import ElementTree as E
 import numpy as np
 from upgrade_visuals import SIZES
 from geometry_fidelity import reject_inward
+from skeleton_identity import refresh
 
 def rows(g):
     vb=g.find('VertexBuffer');names=[n.tag for n in vb.find('Layout')];widths=[SIZES[n] for n in names]
@@ -61,7 +62,8 @@ def partition(root,limit=255):
                     triangles+=len(g.findtext('IndexBuffer/Data').split())//3
                 if not len(gs):lod.remove(model)
         if index!=len(geometries):raise ValueError('Unhandled geometry hierarchy')
-        reject_inward(doc);result.append((doc,{'bones':len(selected),'geometries':len(group['geometries']),'triangles':triangles,'weighted_associations_preserved':True}))
+        reject_inward(doc);ids=refresh(doc)
+        result.append((doc,{'bones':len(selected),'geometries':len(group['geometries']),'triangles':triangles,'weighted_associations_preserved':True,'skeleton_cache_ids':ids}))
     original_triangles=sum(len(g.findtext('IndexBuffer/Data').split())//3 for g in geometries)
     if sum(r[1]['triangles'] for r in result)!=original_triangles:raise ValueError('Faces lost/duplicated across parts')
     return result

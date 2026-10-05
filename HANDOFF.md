@@ -2,6 +2,13 @@
 
 Updated 2026-10-05. **Complete-model/material candidate installed; guarded GTA technical render review in progress.**
 
+## Newest live failure isolated: skeleton cache identifiers / fur pass
+
+- `20261005-building-giant` was installed (source908d48c, ASI17e6ff992d35de31dd74579422553f1b3e30bf6ffe8329f247d96cd8f51123e0), reached Story Mode and created both Fire Giant pieces with accepted idle. Actual `building-firegiant-front.png` still FAILS pose; `uv2-radahn-front.png` shows strand opacity but white transparent sheen. No crash; fifth owned run closed gracefully.
+- Both Fire Giant parts accidentally retained identical original304-bone Unknown50/54/58 skeleton cache IDs. The pinned szio documentation explicitly warns this causes mixed-up rigs. New `skeleton_identity.py` refreshes nonzero topology/bind IDs after rig/scaling/partition changes. The shader's matrix array has255 slots; index255 signals cloth, so identity/compact guards now cap at255 bones (max index254).
+- Ordinary hair/fur uses pinned `normal_spec_cutout.sps`, bucket3, HardAlphaBlend1; spectral Beast_Light stays alpha-blended. This is a concrete candidate, not a proven appearance fix.
+- Prepared private `gta-cache-cutout`, `dlc-cache-cutout`; DLC SHA256 `53eea3c3ab10071f8e12e3356d9009c8a11c4e8f49d96c29f9d1b5018a945c06`. Same geometry/texture bytes/clips and ASI as the building candidate; only skeleton identifiers/material pass metadata change. Next reversible install and fixed-camera test. GTA currently CLOSED; our own authorized restart reservation still holds.
+
 ## Latest completed runtime evidence / building-height candidate
 
 - `20261005-outward-faces` was installed and tested in actual GTA on the M3. Source `b75b9e3`, camera ASI from `6bb9573`. All four bosses spawned; zero crashes across four owned runs, each closed normally.

@@ -161,18 +161,18 @@ def adapt(converted,source_root,out,roster):
             diffuse_name=add_texture(diffuse_name,diffuse,source=diffuse_path if not fur and not fin_fur and not (hair and 'chrcustomize' in stype) else None)
             normal_name=add_texture(normal_name,normal,'NORMAL',source=normal_path if adapted_normal is None else None)
             spec_name=add_texture(spec_name,spec_pixels(normal,pixels(metal_path) if metal_path else None,kind),'SPECULAR')
-            blend=hair or fur;shader.find('Name').text='normal_spec';shader.find('FileName').text='normal_spec_alpha.sps' if blend else 'normal_spec.sps';shader.find('RenderBucket').set('value','1' if blend else '0')
+            blend=hair or fur;cutout=blend and 'beast_light' not in stype;shader.find('Name').text='normal_spec';shader.find('FileName').text='normal_spec_cutout.sps' if cutout else 'normal_spec_alpha.sps' if blend else 'normal_spec.sps';shader.find('RenderBucket').set('value','3' if cutout else '1' if blend else '0')
             old=shader.find('Parameters');shader.remove(old);p=E.SubElement(shader,'Parameters')
             for n,value in [('DiffuseSampler',diffuse_name),('BumpSampler',normal_name),('SpecSampler',spec_name)]:
                 i=E.SubElement(p,'Item',name=n,type='Texture');E.SubElement(i,'Name').text=value
-            values={'HardAlphaBlend':0 if blend else 1,'useTessellation':0,'wetnessMultiplier':0,'bumpiness':1,
+            values={'HardAlphaBlend':1 if cutout or not blend else 0,'useTessellation':0,'wetnessMultiplier':0,'bumpiness':1,
                     'specMapIntMask':1,'specularIntensityMult':.7 if kind=='metal' else .35,
                     'specularFalloffMult':160 if kind=='metal' else 80 if kind=='skin' else 45,
                     'specularFresnel':.085 if kind=='metal' else .035}
             for n,value in values.items():E.SubElement(p,'Item',name=n,type='Vector',x=str(value),y='0',z='0',w='0')
             details.append({'source_material':source_path,'kind':kind,'specular_source':str(metal_path) if metal_path else 'nonmetal baseline','gloss_source':'original normal B','shader':shader.findtext('FileName'),'strand_adaptation':strand_report})
         for geometry in tree.findall('.//Geometries/Item'):convert_layout(geometry)
-        palette=identity(tree.getroot()) if len(tree.findall('Skeleton/Bones/Item'))<=256 else compact(tree.getroot())
+        palette=identity(tree.getroot()) if len(tree.findall('Skeleton/Bones/Item'))<=255 else compact(tree.getroot())
         E.indent(tree);tree.write(dest/(name+'.ydr.xml'),encoding='utf-8',xml_declaration=True)
         if (src/(name+'_anims.ycd.xml')).exists():shutil.copy2(src/(name+'_anims.ycd.xml'),dest/(name+'_anims.ycd.xml'))
         receipt['material_fidelity']={'shader_count':len(shaders),'white_spec_removed':True,'normal_packing':'RG compatible; original B used for gloss','runtime_verified':False};receipt['skin_palettes']=palette

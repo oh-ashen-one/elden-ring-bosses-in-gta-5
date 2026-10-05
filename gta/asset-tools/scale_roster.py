@@ -9,6 +9,7 @@ from pathlib import Path
 from xml.etree import ElementTree as E
 import numpy as np
 from upgrade_visuals import SIZES
+from skeleton_identity import refresh
 
 def scale_drawable(doc,scale):
     if not math.isfinite(scale) or not .1<=scale<=5:raise ValueError('Unreviewed model scale')
@@ -54,7 +55,7 @@ def prepare(converted,out,roster):
     for b in roster:
         c,n=b['character'],b['model'];dst=out/c;shutil.copytree(converted/c,dst);scale=float(b.get('model_scale',1))
         if scale==1:continue
-        drawable=E.parse(dst/(n+'.ydr.xml'));scale_drawable(drawable.getroot(),scale);E.indent(drawable);drawable.write(dst/(n+'.ydr.xml'),encoding='utf-8',xml_declaration=True)
+        drawable=E.parse(dst/(n+'.ydr.xml'));scale_drawable(drawable.getroot(),scale);refresh(drawable.getroot());E.indent(drawable);drawable.write(dst/(n+'.ydr.xml'),encoding='utf-8',xml_declaration=True)
         animation=E.parse(dst/(n+'_anims.ycd.xml'));scale_animation(animation.getroot(),scale);E.indent(animation);animation.write(dst/(n+'_anims.ycd.xml'),encoding='utf-8',xml_declaration=True)
         p=dst/(n+'.conversion.json');r=json.loads(p.read_text())
         if r.get('applied_model_scale',1)!=1:raise ValueError('Refusing a double scale')

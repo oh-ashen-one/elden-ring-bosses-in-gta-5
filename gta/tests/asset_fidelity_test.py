@@ -23,13 +23,14 @@ class Fidelity(unittest.TestCase):
         for i in range(5):
             b=E.SubElement(bones,'Item');E.SubElement(b,'Name').text='bone'+str(i)
             for tag,v in [('Tag',100+i),('Index',i),('ParentIndex',-1 if i==0 else 0),('SiblingIndex',-1)]:E.SubElement(b,tag,value=str(v))
+            E.SubElement(b,'Translation',x='0',y='0',z='0');E.SubElement(b,'Rotation',x='0',y='0',z='0',w='1');E.SubElement(b,'Scale',x='1',y='1',z='1')
         gs=E.SubElement(E.SubElement(E.SubElement(root,'DrawableModelsHigh'),'Item'),'Geometries')
         for pair in [(1,2),(3,4)]:
             g=E.SubElement(gs,'Item');E.SubElement(g,'BoneIDs').text=','.join(map(str,pair));vb=E.SubElement(g,'VertexBuffer');layout=E.SubElement(vb,'Layout')
             for n in ['Position','BlendWeights','BlendIndices','Normal']:E.SubElement(layout,n)
             E.SubElement(vb,'Data').text='0 0 0 255 0 0 0 0 0 0 0 0 0 1\n1 0 0 255 0 0 0 1 0 0 0 0 0 1\n0 1 0 255 0 0 0 0 0 0 0 0 0 1'
             E.SubElement(E.SubElement(g,'IndexBuffer'),'Data').text='0 1 2'
-        parts=partition_rig(root,3);self.assertEqual(len(parts),2);self.assertEqual(sum(r['triangles'] for _,r in parts),2)
+        parts=partition_rig(root,3);self.assertEqual(len(parts),2);self.assertNotEqual(parts[0][1]['skeleton_cache_ids'],parts[1][1]['skeleton_cache_ids']);self.assertEqual(sum(r['triangles'] for _,r in parts),2)
         for (part,report),expected in zip(parts,[['bone1','bone2','bone1'],['bone3','bone4','bone3']]):
             names=[b.findtext('Name') for b in part.findall('Skeleton/Bones/Item')];g=part.find('.//Geometries/Item');f=fields(g)
             self.assertEqual([names[int(i)] for i in f['BlendIndices'][:,0]],expected)
