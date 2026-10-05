@@ -117,9 +117,12 @@ int diagnostic_failures=0;
 std::uint32_t diagnostic_hash=0,diagnostic_started=0;
 wchar_t diagnostic_request_path[32768]{};
 std::uint32_t last_request_check=0;
-int review_camera=0,review_view=0;
+int review_camera=0,review_view=0,review_weapon_target=0;
+std::uint32_t review_weapon_hash=0,review_weapon_deadline=0;
 std::uint32_t review_until=0;
 void end_review() {
+    if(review_weapon_hash)hook.invoke(0xAA08EF13F341C8FCULL,review_weapon_hash);
+    review_weapon_hash=0;review_weapon_target=0;
     if(review_camera){
         hook.invoke(0x07E5B515DB0636FCULL,false,false,0,true,false,0);
         hook.invoke(0x865908C81A2C22E9ULL,review_camera,true);
@@ -485,6 +488,28 @@ void sync_visual_child(Actor& actor) {
         hook.invoke(0x40FDEDB72F8293B2ULL,actor.visual_child);
     }
 }
+// Fixed native-projectile diagnostic. It exercises actual engine collision
+// and damage from an elevated firing point; it is not a manual flight test.
+void tick_review_weapon(int player,std::uint32_t now) {
+    if(!review_weapon_hash)return;
+    auto& actor=actors[0];
+    const bool valid=actor.entity==review_weapon_target && actor.spec && exists(actor.entity) && !actor.cleanup_requested &&
+        hook.invoke<std::uint32_t>(0x9F47B058362C84B5ULL,actor.entity)==hash(actor.spec->model);
+    if(!valid || static_cast<std::int32_t>(review_weapon_deadline-now)<=0){
+        hook.invoke(0xAA08EF13F341C8FCULL,review_weapon_hash);review_weapon_hash=0;return;
+    }
+    if(!hook.invoke<int>(0x36E353271F0E90EEULL,review_weapon_hash))return;
+    const auto base=coords(actor.entity);const float height=actor.spec->body_height*.8f;
+    const float heading=hook.invoke<float>(0xE83D4F9BA2A38914ULL,actor.entity);
+    const auto from=ergt::add(base,ergt::rotate_heading({0,-std::max(15.f,actor.spec->body_radius*5.f),height},heading));
+    const auto to=ergt::add(base,{0,0,height});
+    if(finite(from)&&finite(to)){
+        const int damage=review_weapon_hash==hash("WEAPON_RPG")?300:30;
+        hook.invoke(0x867654CBC7606F2CULL,from.x,from.y,from.z,to.x,to.y,to.z,damage,true,review_weapon_hash,player,true,false,-1.f);
+        if(log_file){std::fprintf(log_file,"event=technical_native_projectile entity=%d weapon=%08x target_height=%.3f damage_argument=%d\n",actor.entity,review_weapon_hash,height,damage);std::fflush(log_file);}
+    }
+    hook.invoke(0xAA08EF13F341C8FCULL,review_weapon_hash);review_weapon_hash=0;
+}
 // Owner-authorized technical view only: local fixed commands, no listener,
 // no arbitrary scripts or persistent gameplay changes. Expires after 45s and
 // immediately yields back on normal mod controls/network/actor removal.
@@ -518,6 +543,15 @@ void read_diagnostic_request(std::uint32_t now) {
     // A file-only, fixed-command technical test; no listener or arbitrary code.
     if (std::strcmp(token,"CHECK_IMPORTS_ONCE\n")==0 && _wremove(diagnostic_request_path)==0)
         begin_diagnostics(now);
+    else if(std::strcmp(token,"REVIEW_FIGHT\n")==0 && _wremove(diagnostic_request_path)==0){
+        end_review();fighting=true;review_view=0;review_until=now+45000;record("technical_combat_review_enabled");
+    }
+    else if((std::strcmp(token,"REVIEW_HEADSHOT\n")==0 || std::strcmp(token,"REVIEW_ROCKET\n")==0) && _wremove(diagnostic_request_path)==0){
+        if(!review_weapon_hash && actors[0].entity && exists(actors[0].entity)){
+            review_weapon_hash=hash(token[7]=='H'?"WEAPON_CARBINERIFLE":"WEAPON_RPG");review_weapon_target=actors[0].entity;review_weapon_deadline=now+5000;
+            hook.invoke(0x5443438F033E29C3ULL,review_weapon_hash,31,0);
+        }
+    }
     else if(std::strcmp(token,"REVIEW_STOP\n")==0 && _wremove(diagnostic_request_path)==0)end_review();
     else if(std::strcmp(token,"REVIEW_CLEAR\n")==0 && _wremove(diagnostic_request_path)==0)clear();
     else if((std::strcmp(token,"REVIEW_FRONT\n")==0 || std::strcmp(token,"REVIEW_SIDE\n")==0 || std::strcmp(token,"REVIEW_DETAIL\n")==0) && _wremove(diagnostic_request_path)==0){
@@ -920,6 +954,7 @@ void run() {
             text(0.025f,0.08f,controls,0.25f);
         }
         for(auto& actor:actors)sync_visual_child(actor);
+        tick_review_weapon(player,now);
         tick_review(now);
         boss_hud();
         hook.wait(0);

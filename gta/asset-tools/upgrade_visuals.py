@@ -42,18 +42,18 @@ def normal_pixels(pixels):
 
 
 def write_dds(path, pixels, normal=False):
-    """RGBA8 with a complete mip chain. No lossy extra compression/upscaling."""
+    """BGRA8 with a complete mip chain. No lossy extra compression/upscaling."""
     height, width = pixels.shape[:2]
     levels = []
     image = Image.fromarray(pixels)
     while True:
         level = np.array(image)
         if normal: level = normal_pixels(level)
-        levels.append(level.tobytes())
+        levels.append(level[:,:,[2,1,0,3]].copy().tobytes())
         if image.size == (1, 1): break
         image = image.resize((max(1,image.width//2),max(1,image.height//2)),Image.Resampling.LANCZOS)
     header = [124, 0x2100f, height, width, width*4, 0, len(levels), *([0]*11),
-              32, 0x41, 0, 32, 0xff, 0xff00, 0xff0000, 0xff000000,
+              32, 0x41, 0, 32, 0xff0000, 0xff00, 0xff, 0xff000000,
               0x401008, 0, 0, 0, 0]
     with path.open('xb') as f: f.write(b'DDS '+struct.pack('<31I',*header)+b''.join(levels))
     return width, height, len(levels)
@@ -119,7 +119,7 @@ def upgrade(source, root, output):
             item=ET.SubElement(dictionary,'Item');ET.SubElement(item,'Name').text=Path(filename).stem
             ET.SubElement(item,'Unk32',value='0');ET.SubElement(item,'Usage').text='NORMAL' if normal else 'DIFFUSE'
             for tag,value in [('ExtraFlags',0),('Width',w),('Height',h),('MipLevels',mips)]:ET.SubElement(item,tag,value=str(value))
-            ET.SubElement(item,'Format').text='D3DFMT_A8B8G8R8';ET.SubElement(item,'FileName').text=filename
+            ET.SubElement(item,'Format').text='D3DFMT_A8R8G8B8';ET.SubElement(item,'FileName').text=filename
             conversions[filename]={'width':w,'height':h,'mips':mips}
             return Path(filename).stem
         spec_name=texture(np.full((4,4,4),255,dtype=np.uint8),'ergt_spec_white.dds')

@@ -114,7 +114,7 @@ def adapt(converted,source_root,out,roster):
                     if fmt is None:raise ValueError('Unsupported source DDS metadata: '+str(source))
                 metrics={'source':str(source),'source_payload_sha256':hashlib.sha256(original[offset:]).hexdigest(),'pixel_payload_identical':True,'header_normalized':changed}
             else:
-                _,_,levels=write_dds(path,data);encoded=path.read_bytes();fmt='D3DFMT_A8B8G8R8'
+                _,_,levels=write_dds(path,data);encoded=path.read_bytes();fmt='D3DFMT_A8R8G8B8'
                 if not np.array_equal(read_image(path),data):raise ValueError('Lossless derived map mismatch')
                 metrics={'derived_shader_map':True,'lossless_base_pixels':True}
             item=E.SubElement(dictionary,'Item');E.SubElement(item,'Name').text=label;E.SubElement(item,'Unk32',value='0');E.SubElement(item,'Usage').text=usage

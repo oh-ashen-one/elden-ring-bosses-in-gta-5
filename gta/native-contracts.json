@@ -389,6 +389,22 @@
     "0x4487C259F0F70977": {
       "name": "SET_ENTITY_ANIM_CURRENT_TIME",
       "arguments": 4
+    },
+    "0x867654CBC7606F2C": {
+      "name": "SHOOT_SINGLE_BULLET_BETWEEN_COORDS",
+      "arguments": 13
+    },
+    "0x5443438F033E29C3": {
+      "name": "REQUEST_WEAPON_ASSET",
+      "arguments": 3
+    },
+    "0x36E353271F0E90EE": {
+      "name": "HAS_WEAPON_ASSET_LOADED",
+      "arguments": 1
+    },
+    "0xAA08EF13F341C8FC": {
+      "name": "REMOVE_WEAPON_ASSET",
+      "arguments": 1
     }
   }
 }

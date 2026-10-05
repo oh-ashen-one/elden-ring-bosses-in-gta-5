@@ -2,6 +2,13 @@
 
 Updated 2026-10-05. **Complete-model/material candidate installed; guarded GTA technical render review in progress.**
 
+## Latest current rendering result
+
+- `20261005-cache-cutout` actual GTA frame `cache-firegiant-front.png` confirms the distinct skeleton cache IDs resolve the split rig's gross deformation.60m Fire Giant is coherent, with face/arms/torso/shield aligned. This is actual runtime evidence; full moving/combat/reset acceptance remains pending.
+- Seventh current-day owned run `20261005-bgra-isolation` kept identical geometry/animation/rig and used losslessly reordered BGRA8 derived maps. `bgra-radahn-front.png`, `bgra-firegiant-front.png`, `bgra-godfrey-front.png`, `bgra-malenia-front.png` captured. Radahn strands are red; the previous Radahn comparison also changed the alpha/cutout pass, so do not claim format-only causation. Fire Giant's remaining white source areas include explicit Snow materials. Hair/spectral shading still needs owner visual judgment.
+- BGRA DLC SHA256 `e56d75659dc99a0a8cfaff4de088a78ab0c816e4b10cc352d38127884471a768`; source shape/clip textures at `gta-bgra-isolation`, package `dlc-bgra-isolation`. Installed ASI still908d48c at this checkpoint. Run closed normally; still zero crashes this work session.
+- New original runtime code adds bounded fight/elevated native carbine/RPG checks through the existing request file. It compiled and all21 suites passed. Next commit/push/install this ASI with the same BGRA DLC, perform actual movement/contact/damage checks, then owner handoff. Do not confuse a fixed native projectile diagnostic with piloted helicopter gameplay or normal weapon balance.
+
 ## Newest live failure isolated: skeleton cache identifiers / fur pass
 
 - `20261005-building-giant` was installed (source908d48c, ASI17e6ff992d35de31dd74579422553f1b3e30bf6ffe8329f247d96cd8f51123e0), reached Story Mode and created both Fire Giant pieces with accepted idle. Actual `building-firegiant-front.png` still FAILS pose; `uv2-radahn-front.png` shows strand opacity but white transparent sheen. No crash; fifth owned run closed gracefully.
