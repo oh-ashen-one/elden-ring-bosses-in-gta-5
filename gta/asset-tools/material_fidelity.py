@@ -13,7 +13,7 @@ import numpy as np
 from PIL import Image
 from upgrade_visuals import SIZES,read_image,normal_pixels,convert_layout,write_dds
 from normalize_dds import normalize_dds
-from compact_skin_palette import compact
+from compact_skin_palette import compact,identity
 
 def key(path):return PureWindowsPath(path).stem.lower()
 def sample(image,uv):
@@ -161,7 +161,7 @@ def adapt(converted,source_root,out,roster):
             for n,value in values.items():E.SubElement(p,'Item',name=n,type='Vector',x=str(value),y='0',z='0',w='0')
             details.append({'source_material':source_path,'kind':kind,'specular_source':str(metal_path) if metal_path else 'nonmetal baseline','gloss_source':'original normal B','shader':shader.findtext('FileName')})
         for geometry in tree.findall('.//Geometries/Item'):convert_layout(geometry)
-        palette=compact(tree.getroot())
+        palette=identity(tree.getroot()) if len(tree.findall('Skeleton/Bones/Item'))<=256 else compact(tree.getroot())
         E.indent(tree);tree.write(dest/(name+'.ydr.xml'),encoding='utf-8',xml_declaration=True)
         if (src/(name+'_anims.ycd.xml')).exists():shutil.copy2(src/(name+'_anims.ycd.xml'),dest/(name+'_anims.ycd.xml'))
         receipt['material_fidelity']={'shader_count':len(shaders),'white_spec_removed':True,'normal_packing':'RG compatible; original B used for gloss','runtime_verified':False};receipt['skin_palettes']=palette

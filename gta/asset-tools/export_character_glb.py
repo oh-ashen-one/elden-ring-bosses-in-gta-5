@@ -231,7 +231,10 @@ def export(root, char, destination, masks, max_animations, clip_names=None, incl
         faces = next((f for f in mesh.face_sets if int(f.flags) == 0), mesh.face_sets[0])
         triangles = faces.triangulate(uses_0xffff_separators=len(vertices) < 65535)
         if (triangles < 0).any() or (triangles >= len(vertices)).any(): raise ValueError("Invalid triangle")
-        triangles = triangles[:, [0, 2, 1]].copy()
+        # FLVER front faces are clockwise in its left-handed coordinates.
+        # Mirroring Z already converts them to outward RH/glTF winding.
+        # Reversing the indices again made >99% of faces point inward.
+        triangles = triangles.copy()
         triangles_total += len(triangles)
         # Zero-weight lanes must still reference an existing joint.
         mapped = np.zeros_like(joints)

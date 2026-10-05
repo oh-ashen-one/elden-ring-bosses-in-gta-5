@@ -6,13 +6,26 @@ from types import SimpleNamespace
 from xml.etree import ElementTree as E
 import numpy as np
 sys.path.insert(0,str(Path(__file__).parents[1]/'asset-tools'))
-from compact_skin_palette import compact
+from compact_skin_palette import compact,identity
+from geometry_fidelity import reject_inward
 from correct_bind_heads import correct,source_axes
 from rebuild_animation import TargetRig,matrix,world_matrices,Y_UP_TO_Z_UP
 from texture_dictionaries import partition,parenting
 from animation_conversion_test import drawable
 
 class Fidelity(unittest.TestCase):
+    def test_mirrored_flver_faces_must_not_be_reversed_twice(self):
+        # Clockwise LH source triangle becomes outward RH simply by mirroring
+        # Z. The old extra index swap made the visible outer face disappear.
+        root=E.fromstring('<Drawable><Geometries><Item><VertexBuffer><Layout><Position/><Normal/></Layout><Data>0 0 0 0 1 0  1 0 0 0 1 0  0 0 -1 0 1 0</Data></VertexBuffer><IndexBuffer><Data>'+('0 1 2 '*20)+'</Data></IndexBuffer></Item></Geometries></Drawable>')
+        self.assertEqual(reject_inward(root)['outward'],20)
+        root.find('.//IndexBuffer/Data').text='0 2 1 '*20
+        with self.assertRaisesRegex(ValueError,'inward faces'):reject_inward(root)
+
+    def test_global_identity_mapping_keeps_the_same_weighted_joints(self):
+        root=E.fromstring('<Drawable><Skeleton><Bones>'+('<Item/>'*5)+'</Bones></Skeleton><Geometries><Item><BoneIDs>4, 1</BoneIDs><VertexBuffer><Layout><BlendWeights/><BlendIndices/></Layout><Data>128 127 0 0 0 1 0 0</Data></VertexBuffer></Item></Geometries></Drawable>')
+        identity(root);g=root.find('.//Geometries/Item');row=np.fromstring(g.findtext('VertexBuffer/Data'),sep=' ')
+        self.assertEqual(row[4:6].tolist(),[4,1]);self.assertEqual(g.findtext('BoneIDs'),'0, 1, 2, 3, 4')
     def test_high_global_joint_indices_survive_byte_palette(self):
         root=E.fromstring('<Drawable><Geometries><Item><BoneIDs>'+','.join(map(str,range(305)))+'</BoneIDs><VertexBuffer><Layout><BlendWeights/><BlendIndices/></Layout><Data>128 127 0 0 302 4 0 0\n255 0 0 0 299 0 0 0</Data></VertexBuffer></Item></Geometries></Drawable>')
         report=compact(root);g=root.find('.//Geometries/Item');palette=list(map(int,g.findtext('BoneIDs').split(',')))

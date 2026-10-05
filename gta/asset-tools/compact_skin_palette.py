@@ -7,6 +7,29 @@ Preserve every weighted GLOBAL joint association while compacting that palette.
 import numpy as np
 from upgrade_visuals import SIZES
 
+def identity(drawable):
+    """Animated GTA object path: use global indices when the rig fits a byte.
+
+    Local per-geometry palettes passed CodeWalker checks but visibly scattered
+    the object's parts in GTA. Full identity palettes restore the working path.
+    Larger rigs require a separately verified strategy; never wrap their IDs.
+    """
+    count=len(drawable.findall('Skeleton/Bones/Item'))
+    if not 0<count<=256:raise ValueError('Identity skin indices require <=256 bones')
+    reports=[]
+    for geometry in drawable.findall('.//Geometries/Item'):
+        ids=geometry.find('BoneIDs')
+        if ids is None or not ids.text:continue
+        palette=np.array([int(v) for v in ids.text.split(',')]);vb=geometry.find('VertexBuffer');names=[n.tag for n in vb.find('Layout')]
+        widths=[SIZES[n] for n in names];data=np.fromstring(vb.findtext('Data'),sep=' ').reshape(-1,sum(widths))
+        wi=sum(widths[:names.index('BlendWeights')]);ii=sum(widths[:names.index('BlendIndices')]);active=data[:,wi:wi+4]>0
+        old=data[:,ii:ii+4].astype(int);new=np.zeros_like(old);new[active]=palette[old[active]]
+        if (new<0).any() or (new>=count).any():raise ValueError('Global skin index outside skeleton')
+        data[:,ii:ii+4]=new;ids.text=', '.join(map(str,range(count)))
+        vb.find('Data').text='\n'+'\n'.join(' '.join(format(float(v),'.9g') for v in row) for row in data)+'\n'
+        reports.append({'old_palette':len(palette),'new_palette':count,'global_identity_indices':True,'weighted_global_joints_preserved':True})
+    return reports
+
 def compact(drawable):
     reports=[]
     for geometry in drawable.findall('.//Geometries/Item'):

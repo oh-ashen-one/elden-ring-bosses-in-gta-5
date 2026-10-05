@@ -2,6 +2,13 @@
 
 Updated 2026-10-05. **Complete-model/material candidate installed; guarded GTA technical render review in progress.**
 
+## Face winding repair in progress — newest evidence
+
+- Fixed camera capture `native-malenia-front-immediate.png` shows the identity-palette pose is coherent, but rendered surfaces remain wrong. UV comparison confirms native coordinates match the original GLB within ~7.1e-8; do not randomly flip textures/UVs.
+- Main visual root cause identified: original export mirrored Z AND reversed triangle indices, producing >99% inward-facing triangles against authored normals for all four bosses. That culls the intended outside surfaces and exposes interiors. `geometry_fidelity.py` corrects this known legacy export into new files; exporter and packaging regression gate fixed. See `gta/VISUAL-REPAIR-20261005.md` for measured counts.
+- Corrected private sources `SourceAssets/roster-20261005/gta-outward`, native build `dlc-outward`, DLC SHA256 `c5b1858c83253d426253dff53f302b739fc002040ab53b1b9f4a1bc6f480b462`. Malenia/Radahn/Godfrey use full identity/global skin indices; Fire Giant remains a separately unverified large-rig case. Every texture and clip is preserved.
+- GTA was closed gracefully (third owned test, still zero crashes) for this asset update. Install corrected package, reopen through our existing exclusive owner reservation, then use fixed native camera screenshots to verify Malenia before proceeding to the other three. This is not yet a visual pass.
+
 ## Latest live test status
 
 - First new-candidate launch reached Story Mode, spawned/animated Malenia and was closed gracefully. Actual close-up `Evidence/20261005-complete-boss-materials/malenia-close-live.png` FAILS visual acceptance; owner said “looks messed up.” No crash. Do not call this repaired.

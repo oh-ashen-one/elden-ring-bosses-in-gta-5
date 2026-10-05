@@ -16,6 +16,7 @@ from xml.etree import ElementTree as ET
 from normalize_dds import normalize_dds
 from dlc_manifest import validate_registration
 from texture_dictionaries import partition, parenting, normalize_names
+from geometry_fidelity import reject_inward
 
 CHARACTERS = [("c2120", "ergt_malenia"), ("c3181", "ergt_redwolf"), ("c2270", "ergt_crab")]
 
@@ -63,6 +64,7 @@ def main():
         conversion = output / "conversion-input" / character
         conversion.mkdir(parents=True)
         drawable_xml = folder / f"{name}.ydr.xml"
+        reject_inward(ET.parse(drawable_xml))
         shutil.copy2(drawable_xml, conversion / drawable_xml.name)
         normalized_document=ET.parse(conversion/drawable_xml.name);normalize_names(normalized_document)
         normalized_document.write(conversion/drawable_xml.name,encoding='utf-8',xml_declaration=True)
