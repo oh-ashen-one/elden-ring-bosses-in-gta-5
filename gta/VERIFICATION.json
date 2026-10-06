@@ -41,7 +41,7 @@
     "Giant has conservative collision movement, no building navigation/destruction",
     "Two-sided cape correction is installed with this candidate but still needs visual review"
   ],
-  "installed": false,
+  "installed": true,
   "payload_files_verified": 6,
   "retail_exe_sha256": "677e4e355cfbdb13273b1d992407e3c261b3a108dc4dd5c8a0c4c1da651802e5",
   "dlc_sha256": "641824cb2c5093f8eaf6451699f47283692aa74c9dadc9e36df0e835b8ab4170",
@@ -53,5 +53,8 @@
     "dictionaries": 56,
     "issues": 0,
     "asset_payload_changed": false
-  }
+  },
+  "binary_source_commit": "fea2e2741d0ab86b8d9a81b55d99df1b499f7987",
+  "asi_sha256": "d65b1699c90690a2d2b25d2abe8ef14ab2017575d4ef97a9e85d669f53f36ff7",
+  "payload_upgrade_backup": "Backups/upgrade-20261006T195304Z-56517517"
 }
