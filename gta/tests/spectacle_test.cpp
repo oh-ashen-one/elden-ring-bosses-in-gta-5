@@ -28,6 +28,12 @@ int main(){
     check(wave_crossed(3,4,3.8f,1)&&!wave_crossed(3,4,10,1)&&!wave_crossed(3,4,3.8f,10),"ground shockwave cannot hit outside ring or an airborne helicopter");
     check(camera_interrupted(true,false,false,false,true)&&camera_interrupted(false,true,false,false,true)&&
         camera_interrupted(false,false,false,false,false),"camera always yields to input or missing boss");
+    auto relocated=separate_spawn({0,0,0},2.f,[](Vec3 p){return horizontal_distance(p,{})>10;});
+    check(relocated.valid&&horizontal_distance(relocated.point,{})>10,"new bosses search clear space instead of intersecting");
+    check(!separate_spawn({0,0,0},2.f,[](Vec3){return false;}).valid,"blocked spawn neighborhood must fail closed");
+    check(!separate_spawn({0,0,0},2.f,[](Vec3){return false;},true).valid,"reset cannot silently shift a blocked anchor");
+    auto giant_surface=boss_target_point({12,0,0},{},10.4f);
+    check(horizontal_distance({12,0,0},giant_surface)<2.f,"small bosses approach giant surface rather than unreachable torso center");
     for(const auto& spec:creatures){
         Combat combat(&spec);Observation o{{},{spec.melee_range,0,0},true,true,true,false};
         // Small hits reach phase threshold without invoking stagger.

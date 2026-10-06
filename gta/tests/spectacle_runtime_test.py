@@ -10,9 +10,12 @@ import tempfile
 
 root = Path(__file__).resolve().parents[1]
 source = (root / 'src/encounter_plugin.cpp').read_text()
-actor = source[source.index('struct Actor {'):source.index('std::array<Actor, 1> actors;')]
+actor = source[source.index('struct Actor {'):source.index('std::deque<Actor> actors(1);')]
+targeting = source[source.index('int choose_target('):source.index('void move_with_collision(')]
 fixture = r'''
 #include <map>
+#include <deque>
+#include <unordered_map>
 #include <vector>
 #include <string>
 #include <cstdio>
@@ -24,7 +27,8 @@ std::map<int,Entity> world;
 std::map<std::uint64_t,int> calls;
 std::vector<std::string> events;
 int cast_result=2,cast_hit=0,next_entity=1000,explosions=0,spawned=0,deletes=0,player_id=1;
-bool input_pressed=false,delete_failure=false,models_loaded=true;
+bool input_pressed=false,delete_failure=false,models_loaded=true,line_of_sight=true;
+FILE* log_file=nullptr;
 float animation_phase=0;ergt::Vec3 cast_point{9,8,7};
 bool exists(int id){return world.count(id)>0;}
 ergt::Vec3 coords(int id){return world.at(id).p;}
@@ -46,7 +50,7 @@ struct Hook {
   else if(h==0x12534C348C6CB68BULL)result=a[0]==1;
   else if(h==0x0A7B270912999B3CULL)result=world.at(a[0]).mission;
   else if(h==0x7F6DB52EEFC96DF8ULL)result=a[0]==hash("taxi");
-  else if(h==0xFCDFF7B72D23A1ACULL)result=1;
+  else if(h==0xFCDFF7B72D23A1ACULL)result=line_of_sight;
   else if(h==0x1C99BB7B6E96D16FULL)world.at(a[0]).velocity={num(a[1]),num(a[2]),num(a[3])};
   else if(h==0x239A3351AC1DA385ULL)world.at(a[0]).p={num(a[1]),num(a[2]),num(a[3])};
   else if(h==0x539E0AE3E6634B9FULL||h==0xEA386986E786A54FULL||h==0x9614299DCB53E54BULL){
@@ -69,13 +73,13 @@ struct Hook {
   else if(h==0x1F0B79228E461EC9ULL)result=1;
   else if(h==0xF3A21BCD95725A4AULL)result=input_pressed;
   else if(h==0xB51194800B257161ULL)result=800;
-  if constexpr(std::is_same_v<R,ergt::NativeVector>)return {};
+  if constexpr(std::is_same_v<R,ergt::NativeVector>){if(h==0x2274BC1C4885E333ULL){auto p=coords(a[0]);return {num(a[1])-p.x,0,num(a[2])-p.y,0,num(a[3])-p.z,0};}return {};}
   else if constexpr(!std::is_void_v<R>)return static_cast<R>(result);
  }
 }hook;
 '''
 globals_ = r'''
-std::array<Actor,1> actors;
+std::deque<Actor> actors(1);
 std::array<int,512> nearby_peds{};int nearby_ped_count=0;
 struct Vehicle {int entity=0;};std::array<Vehicle,128> nearby_vehicles{};int nearby_vehicle_count=0;
 struct {int vehicle=0;}qa;
@@ -83,14 +87,19 @@ struct {bool active=false,vehicle=false,use_anchor=false;ergt::Vec3 anchor{};flo
 int owned_helicopter=0,selected=0;bool fighting=true;char notice[192]{};
 void clear();
 void begin_spawn(bool,std::uint32_t){pending.active=true;}
+Actor* find_boss(int entity){for(auto& a:actors)if(a.entity==entity&&a.spec&&!a.cleanup_requested)return &a;return nullptr;}
+bool living_boss(const Actor& a){return exists(a.entity)&&a.spec&&!a.cleanup_requested&&a.combat.state()!=ergt::CombatState::defeated&&world.at(a.entity).model==hash(a.spec->model);}
+Actor& focus_actor(){for(auto& a:actors)if(a.entity)return a;return actors.front();}
+#include "boss_battle.hpp"
 #include "spectacle_runtime.hpp"
-void clear(){clear_showcase();actors={};}
+void clear(){clear_showcase();actors.assign(1,Actor{});}
+TARGETING_HELPER
 void reset_fixture(){
- show={};actors={};pending={};world.clear();calls.clear();events.clear();explosions=0;deletes=0;spawned=0;
- cast_result=2;cast_hit=0;input_pressed=false;delete_failure=false;models_loaded=true;fighting=true;
+ show={};boss_effects.clear();reset_lineup.clear();actors.assign(1,Actor{});pending={};world.clear();calls.clear();events.clear();explosions=0;deletes=0;spawned=0;
+ cast_result=2;cast_hit=0;input_pressed=false;delete_failure=false;models_loaded=true;line_of_sight=true;fighting=true;
  nearby_vehicle_count=0;nearby_ped_count=0;
  world[1]={1,{0,0,0},{},false,false,{}};
- world[40]={40,{0,30,0},{},true,false,{}};
+ world[40]={hash(ergt::creatures[2].model),{0,30,0},{},true,false,{}};
  actors[0].entity=40;actors[0].spec=&ergt::creatures[2];actors[0].combat.reset(actors[0].spec);
  show.boss=40;show.began=1;
 }
@@ -111,14 +120,14 @@ int main(){
  reset_fixture();
  for(int id=60;id<63;id++){world[id]={hash("taxi"),{float(id-60),32,0},{},false,true,{}};nearby_vehicles[nearby_vehicle_count++].entity=id;}
  world[61].mission=true;world[62].seats[-1]=1;
- auto& a=actors[0];a.spec=&ergt::creatures[1];a.combat.reset(a.spec);
+ auto& a=actors[0];a.spec=&ergt::creatures[1];a.combat.reset(a.spec);world[40].model=hash(a.spec->model);
  gather_traffic(a,1,100);lift_traffic(a,1,116);
- check(show.traffic[0].entity==60&&!show.traffic[1].entity,"gravity excludes mission and occupied player cars");
+ check(boss_effects[40].traffic[0].entity==60&&!boss_effects[40].traffic[1].entity,"gravity excludes mission and occupied player cars");
  check(ergt::length(world[60].velocity)>0&&ergt::length(world[61].velocity)==0&&ergt::length(world[62].velocity)==0,"only selected traffic receives lift velocity");
- show.aim={40,20,5};throw_traffic(a,1);check(!show.traffic[0].entity&&world[60].velocity.x>0,"released car flies ballistically with no continuing steering");
+ boss_effects[40].aim={40,20,5};throw_traffic(a,1);check(!boss_effects[40].traffic[0].entity&&world[60].velocity.x>0,"released car flies ballistically with no continuing steering");
  clear_showcase();check(exists(60)&&exists(61)&&exists(62),"cleanup never deletes ambient traffic");
  reset_fixture();
- auto& caster=actors[0];caster.spec=&ergt::creatures[1];caster.combat.reset(caster.spec);
+ auto& caster=actors[0];caster.spec=&ergt::creatures[1];caster.combat.reset(caster.spec);world[40].model=hash(caster.spec->model);
  const ergt::MotionSample poses[2]={{{},0,{0,0,2},{0,4,2}},{{},0,{0,0,2},{0,4,2}}};
  const ergt::ContactWindow contacts[1]={{.4f,.5f}};
  const ergt::MotionTrack track={"fixture","attack",3.f,poses,2,true,false,contacts,1};
@@ -126,11 +135,11 @@ int main(){
  caster.target=1;caster.combat.tick(16,{{0,30,0},{0,0,0},true,true,true,false});show.city=false;
  world[60]={hash("taxi"),{0,32,0},{},false,true,{}};nearby_vehicle_count=1;nearby_vehicles[0].entity=60;
  animation_phase=.30f;tick_showcase_actor(caster,1,100,16);
- check(show.traffic[0].entity==60,"real adapter arms gravity from the active source attack");
+ check(boss_effects[40].traffic[0].entity==60,"real adapter arms gravity from the active source attack");
  animation_phase=.35f;tick_showcase_actor(caster,1,116,16);
- check(show.traffic[0].entity==60,"timer/frame progression before source cue cannot release");
+ check(boss_effects[40].traffic[0].entity==60,"timer/frame progression before source cue cannot release");
  animation_phase=.41f;tick_showcase_actor(caster,1,132,16);
- check(!show.traffic[0].entity&&std::count(events.begin(),events.end(),"gravity_release_source_cue")==1,"production adapter releases on observed contact crossing");
+ check(!boss_effects[40].traffic[0].entity&&std::count(events.begin(),events.end(),"gravity_release_source_cue")==1,"production adapter releases on observed contact crossing");
  animation_phase=.43f;tick_showcase_actor(caster,1,148,16);
  check(std::count(events.begin(),events.end(),"gravity_release_source_cue")==1,"production adapter prevents duplicate source releases");
  reset_fixture();show.responders[0].vehicle=60;show.responders[0].car_model=hash("police");world[60]={hash("police"),{},{},true,true,{{-1,1}}};
@@ -142,14 +151,41 @@ int main(){
  fighting=false;tick_city(actors[0],1,40000);check(show.responders[0].vehicle==0&&world.size()==2,"pause clears only owned responders");
  reset_fixture();show.view=1;show.camera_until=30000;tick_film(1,100);tick_film(1,116);check(show.camera==800,"camera requires a resolved placement cast");
  input_pressed=true;tick_film(1,132);check(!show.camera&&!show.view,"movement restores gameplay camera immediately");
- reset_fixture();remember_boss_spawn(2,{0,80,0},45);request_encounter_reset(100);check(show.reset_pending&&selected==2,"reset keeps original encounter identity");
+ reset_fixture();actors[0].spawn_origin={0,80,0};actors[0].spawn_heading=45;remember_boss_spawn(2,{0,80,0},45);request_encounter_reset(100);check(show.reset_pending&&reset_lineup.front().preset==2,"reset keeps original encounter identity");
  tick_encounter_reset(116);check(pending.active&&pending.use_anchor&&pending.anchor.y==80&&pending.heading==45,"reset retains original arena anchor without teleporting player");
- puts("Production spectacle adapter lifecycle fixtures passed; no game launched");
+ // Dynamic pool: more than the previous limit and independently killable.
+ reset_fixture();actors.clear();
+ for(int i=0;i<40;i++){Actor a;a.entity=200+i;a.spec=&ergt::creatures[i%4];a.combat.reset(a.spec);a.spawn_origin={float(i*60),100,0};world[a.entity]={hash(a.spec->model),a.spawn_origin,{},true,false,{}};actors.push_back(a);}
+ check(actors.size()==40,"boss container has no one/four/eight actor ceiling");
+ auto& attacker=actors[0];auto& victim=actors[4];world[attacker.entity].p={0,0,0};world[victim.entity].p={.5f,0,0};
+ const ergt::MotionSample blade[2]={{{},0,{-1,0,1},{1,0,1}},{{},0,{-1,0,1},{1,0,1}}};
+ const ergt::MotionTrack melee={"fixture","slash",3.f,blade,2,true,false,contacts,1};
+ attacker.motion=&melee;attacker.melee_clip=true;attacker.active_clip=attacker.spec->attack_clip;attacker.animation_accepted=true;
+ attacker.blade_phase=.35f;attacker.blade_origin={};animation_phase=.41f;
+ check(choose_target(attacker,1,1000)==victim.entity,"production targeting prefers rival over nearby player");
+ const float health=victim.combat.health();boss_blade_contacts(attacker,1000,true);
+ check(victim.combat.health()==health-336&&attacker.combat.ratio()==1,"actual source sweep damages a same-type rival, never self");
+ boss_blade_contacts(attacker,1016,true);check(victim.combat.health()==health-336,"one contact per rival per original attack window");
+ victim.combat.reset(victim.spec);attacker.boss_victims.clear();line_of_sight=false;boss_blade_contacts(attacker,1032,true);
+ check(victim.combat.health()==health,"wall obstruction prevents rival melee damage");
+ line_of_sight=true;victim.combat.damage(100000);boss_blade_contacts(attacker,1048,true);check(victim.combat.health()==0,"dead rival cannot revive or receive repeated effects");
+ check(choose_target(attacker,1,1600)!=victim.entity,"dead rival is removed from production target selection");
+ request_encounter_reset(2000);check(reset_lineup.size()==40,"reset preserves the whole formation, including duplicate/dead bosses");
+ for(int i=0;i<40;i++){pending.active=false;tick_encounter_reset(2100+i*100);check(pending.use_anchor&&pending.anchor.y==100,"each reset boss keeps its own anchor");}
+ pending.active=false;tick_encounter_reset(7000);check(!show.reset_pending&&reset_lineup.empty(),"battle reset queue completes without a one-boss limit");
+ // Isolated effect state: two Radahns cannot steal the same car.
+ reset_fixture();Actor second=actors[0];second.entity=41;actors.push_back(second);world[41]=world[40];
+ actors[0].spec=&ergt::creatures[1];actors[1].spec=&ergt::creatures[1];world[40].model=world[41].model=hash(ergt::creatures[1].model);
+ world[60]={hash("taxi"),{0,32,0},{},false,true,{}};nearby_vehicle_count=1;nearby_vehicles[0].entity=60;
+ gather_traffic(actors[0],1,100);gather_traffic(actors[1],1,100);
+ check(boss_effects[40].traffic[0].entity==60&&!boss_effects[41].traffic[0].entity,"two gravity casters must not share traffic ownership");
+ release_traffic(boss_effects[41]);check(boss_effects[40].traffic[0].entity==60,"clearing one caster cannot cancel another caster");
+ puts("Production spectacle and multi-boss lifecycle fixtures passed; no game launched");
 }
 '''
 with tempfile.TemporaryDirectory(prefix='ergt-spectacle-') as directory:
     p = Path(directory)
-    (p / 'test.cpp').write_text(fixture + actor + globals_)
+    (p / 'test.cpp').write_text(fixture + actor + globals_.replace('TARGETING_HELPER', targeting))
     subprocess.run(['c++', '-std=c++17', '-Wall', '-Wextra', '-Werror', '-I', str(root / 'src'),
                     str(p / 'test.cpp'), '-o', str(p / 'test')], check=True)
     subprocess.run([str(p / 'test')], check=True)

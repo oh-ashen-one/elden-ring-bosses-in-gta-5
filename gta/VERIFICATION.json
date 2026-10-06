@@ -1,8 +1,8 @@
 {
   "schema_version": 2,
-  "candidate": "20261006-city-spectacle",
+  "candidate": "20261006-multi-boss",
   "date": "2026-10-06",
-  "scope": "source/build checks only; owner handles runtime testing",
+  "scope": "multi-boss source/build and native asset-binding checks only; owner runtime test pending",
   "game_launched_during_update": false,
   "gpu_reservation_claimed": false,
   "retail_modified_during_update": false,
@@ -11,14 +11,14 @@
   "performance_verified": false,
   "owner_gameplay_accepted": false,
   "offline_checks": {
-    "ctest_suites": 23,
+    "ctest_suites": 24,
     "result": "passed",
     "windows_x64_asi": "built with existing private source-motion header",
     "native_signatures": "pinned API arity including spectacle adapter",
     "asset_payload": "previously audited cape candidate; unchanged source clips and textures"
   },
-  "runtime_marker": "loaded_city_spectacle_20261006",
-  "previous_candidate": "20261005-seated-state",
+  "runtime_marker": "loaded_multi_boss_battles_20261006",
+  "previous_candidate": "20261006-city-spectacle",
   "previous_owner_feedback": "Everything here looks great; requested enhancements after playing the earlier candidate.",
   "features": {
     "fire_giant_projectiles": "source phase + swept collision",
@@ -31,7 +31,8 @@
     "second_phase": "custom GTA phase, existing source clips",
     "filming": "HUD plus3 optional cameras",
     "reset": "original spawn anchor, owned resources only",
-    "co_op": false
+    "co_op": false,
+    "boss_battles": "dynamic actor pool, duplicate types, rival targeting, source-weapon contacts, shared effect budget"
   },
   "remaining": [
     "New native AI, projectile visuals, balance, camera and performance await owner playtest",
@@ -43,9 +44,20 @@
   "installed": true,
   "payload_files_verified": 6,
   "retail_exe_sha256": "677e4e355cfbdb13273b1d992407e3c261b3a108dc4dd5c8a0c4c1da651802e5",
-  "binary_source_commit": "ac67e8d02787cc8e61ae2ce223910c596392f8ae",
-  "asi_sha256": "b0210d4763d23f3ca5ddd24b69a0dcd677460b51731e400858657b4402ca8f7d",
   "dlc_sha256": "641824cb2c5093f8eaf6451699f47283692aa74c9dadc9e36df0e835b8ab4170",
-  "rollback_candidate": "StagedCandidates/20261006-before-city-spectacle",
-  "payload_upgrade_backup": "Backups/upgrade-20261006T061123Z-179029bb"
+  "rollback_candidate": "StagedCandidates/20261006-before-multi-boss",
+  "material_binding_audit": {
+    "references": 468,
+    "shader_instances": 156,
+    "native_textures": 240,
+    "dictionaries": 56,
+    "issues": 0,
+    "asset_payload_changed": false
+  },
+  "binary_source_commit": "fea2e2741d0ab86b8d9a81b55d99df1b499f7987",
+  "asi_sha256": "d65b1699c90690a2d2b25d2abe8ef14ab2017575d4ef97a9e85d669f53f36ff7",
+  "payload_upgrade_backup": "Backups/upgrade-20261006T195304Z-56517517",
+  "owner_project_complete": true,
+  "owner_publication_approved": "2026-10-06",
+  "publication_scope": "Public source release; no additional rendered gameplay verification inferred from release approval"
 }

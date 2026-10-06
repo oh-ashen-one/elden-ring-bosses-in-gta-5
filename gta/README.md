@@ -2,7 +2,9 @@
 
 Original GTA V Story Mode mod code and a local conversion pipeline for owned Elden Ring creatures. Current characters: **Malenia, Starscourge Radahn, Fire Giant, Godfrey**.
 
-**Status: owner liked the previous playable build; the2026-10-06 single-player enhancement candidate needs owner testing.** Added source-cued travelling fireballs, gravity-thrown traffic, bounded police/SWAT/helicopter support, one custom phase2 transition per boss, filming cameras and anchored encounter reset. Co-op is excluded. The owner explicitly reserved this update's runtime testing: GTA was not opened. See [implementation boundaries](SPECTACLE-20261006.md), [coverage](encounter-coverage.json) and [owner test steps](OWNER-TEST.md). Exact ER shaders, cloth, AI and full movesets are not imported. Earlier car/weapon/attack/death/reset evidence remains tied to the earlier candidate.
+**Public source release v0.1.0, approved by the owner on October 6, 2026.** Includes multi-boss combat, source-cued fireballs, gravity traffic, bounded city support, custom phase transitions, filming cameras and whole-lineup reset. See [getting started](../GETTING_STARTED.md), [feature boundaries](SPECTACLE-20261006.md), [coverage](encounter-coverage.json) and [controls/test guide](OWNER-TEST.md). Latest additions are build/offline-tested; independent rendered verification remains limited to the earlier core build. Exact ER shaders, cloth, AI and full movesets are not imported.
+
+[Compiled material binding audit](MATERIAL-AUDIT-20261006.md) found all468 references resolve without downscaling or rewriting textures. The multi-boss candidate is source/build-checked only; the owner handles its runtime test.
 
 [ER Mario lessons and concrete application](ER-MARIO-LESSONS.md) records the reference review without claiming its engine hooks work in GTA.
 
@@ -10,7 +12,7 @@ Existing profiles can be updated with `tools/upgrade_profile.py --candidate /pat
 
 ## What is implemented
 
-- Original Windows x64 ASI: creature selection/spawning, one active boss at a time during new-roster validation, health bars, native health-loss/hit-flag damage intake, custom chase/melee/stagger/enrage behavior, source-animation playback, reset, optional weapons and an armed helicopter.
+- Original Windows x64 ASI: creature selection/spawning, multiple bosses and duplicate types, rival targeting and source-timed boss-versus-boss contacts, health bars, native health-loss/hit-flag damage intake, custom chase/melee/stagger/enrage behavior, source-animation playback, reset, optional weapons and an armed helicopter.
 - Offline asset extraction from owned Elden Ring archives, rigged interchange exports, textures/material adaptation, background data-only Blender/Sollumz conversion, native GTA resource conversion and DLC packaging.
 - Twenty selected original animation clips, coarse body collision, and a five-render-archetype local DLC (four bosses; Fire Giant has two synchronized pieces). Assets, textures and game-derived metadata are private, not Git contents.
 - A reversible APFS profile manager that keeps original retail bytes intact and scopes the Wine DLL override to GTA5.exe.
@@ -21,7 +23,9 @@ Existing profiles can be updated with `tools/upgrade_profile.py --candidate /pat
 Requires CMake and C++17. Visual conversion tests additionally require Python with NumPy and Pillow (included in the asset-tool requirements). For the Windows target on Mac, install MinGW-w64 from Homebrew.
 
 ```sh
-cmake -S gta -B build/gta-native -DCMAKE_BUILD_TYPE=Release
+python3 -m venv .venv
+.venv/bin/python -m pip install -r gta/requirements-test.lock
+cmake -S gta -B build/gta-native -DCMAKE_BUILD_TYPE=Release -DPython3_EXECUTABLE="$PWD/.venv/bin/python"
 cmake --build build/gta-native
 ctest --test-dir build/gta-native --output-on-failure
 
@@ -64,8 +68,11 @@ Create a separate accountless **ERGTA-Tools** Windows 10 64-bit CrossOver bottle
 .cache/gta-tools/asset-python/bin/python gta/asset-tools/build_owned_assets.py \
   --elden-game '/path/to/ELDEN RING/Game' \
   --gta-game '/path/to/Grand Theft Auto V' \
-  --out '/path/to/private/ergt-assets'
+  --out '/path/to/private/ergt-assets' \
+  --gpu-root '/path/to/your/verified/shared-gpu-coordinator'
 ```
+
+The guarded driver requires a compatible coordinator at `--gpu-root` containing `bin/gpu_slot.py`. The hardcoded Studio shortcuts are local adapters, not portable launchers. Do not point a second lock directory at a shared machine to bypass existing coordination.
 
 This reconstructs local artifacts and does not launch either game. The dependency bootstrap and complete conversion orchestration were exercised on the Studio with a fresh asset output directory. The earlier rebuilt DLC matched its installed candidate byte-for-byte. The current roster was rebuilt from owned source data and preserved private inputs, including geometry-only Blender conversion, then inspected in actual GTA. A clean second-machine reconstruction and complete owner playtest remain unverified. Dependency revisions and downloaded runtime hashes are recorded in [dependencies.json](dependencies.json).
 

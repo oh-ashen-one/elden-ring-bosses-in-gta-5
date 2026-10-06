@@ -1,6 +1,26 @@
 # GTA V × Elden Ring handoff
 
-Updated 2026-10-06. **The owner liked the earlier playable build and authorized all five single-player enhancements, excluding co-op. Do not open GTA for testing: the owner will do it.** New source/Windows build checks pass; the candidate is installed reversibly. Runtime acceptance of the new features is pending.
+Updated 2026-10-06. **Owner declared this project complete and explicitly authorized publication of all project code to the main public repository.** Publish the completed source; do not launch GTA or resume implementation/testing unless requested. Publication approval is not new rendered-gameplay evidence.
+
+## Public release authorization and handoff
+
+- Owner instruction: “this project here is completely done. Push all the code to the main public GitHubs that we have and make sure it's ready to be shared with people.” This authorizes merging PR3, creating the conventional `main` branch from that published result and making it the default, and publishing the source release for **this GTA project**. It does not authorize changing unrelated crossover repositories.
+- Canonical public repo: `https://github.com/oh-ashen-one/elden-ring-bosses-in-gta-5`; the old MW2 URL redirects to this same repository. Public entrypoints are `README.md`, `GETTING_STARTED.md` and `CHANGELOG.md`. Target source release: `v0.1.0`.
+- GitHub CI previously lacked NumPy/Pillow/SciPy. The release task adds a pinned source-test environment and waits for actual green GitHub checks before merge. No game/render launch is part of publication.
+- Tracked files and historical protected-extension paths were inspected: no retail archives, converted assets, motion-enabled ASI, DLL/EXE runtimes, saves or keys are included. A bounded credential-pattern scan of tracked content found no matches. Existing upstream source/fonts/catalog data and licenses are retained. Regenerated/private data remains excluded.
+- The existing installed private multi-boss payload stays unchanged, source metadata `bbca12e22c3f48c63e13d9cee336674f5c29ca10`, binary source `fea2e2741d0ab86b8d9a81b55d99df1b499f7987`. Publishing docs/CI does not require reinstalling or reopening GTA. For exact installed source verification, use the recorded candidate revision rather than a later documentation commit.
+- The latest multi-boss/spectacle runtime was not independently rendered, and no second-machine setup is verified. The owner has approved release; keep those evidence boundaries in the docs, without reopening project work automatically.
+- Previous sections below are historical implementation context and earlier permission states; this explicit release authorization supersedes their “merge not authorized” language for this publication.
+
+## Current multi-boss / material-feedback work
+
+- Current task branch: `codex/multi-boss-battles`, based on public default `codex/boss-motion-polish@03f78a6`. Do not merge/push the default branch without owner permission. Original task ownership continues in this checkout.
+- Owner asked for the friend's material advice to be evaluated and for unrestricted boss spawning so they fight each other. Their earlier instruction **not to open GTA for testing** remains in force. M3 Ultra/Mac15,14/hostnameMac verified; no renderer or GPU reservation used.
+- Dynamic stable-address actor pool replaces the one-slot array. New spawns find clear nearby space. Rivals, including duplicate types, get target priority; source weapon sweeps damage their separate health, trigger stagger/death and reject blocked/stale/repeated contacts. Ordinary player/NPC melee damage is unchanged; boss-vs-boss contact uses12× that damage for initial balance.
+- Per-boss gravity/phase/shockwave state; two Radahns cannot control the same car. Fireballs, city units and lights use one shared budget, not a full duplicated city per boss.0 restarts the whole lineup at original anchors;3 clears all; four visible HUD bars plus total count; camera prefers a live selected boss.
+-24 offline suites and Windows x64 compilation pass. Production fixtures exercise40 actor slots/lineup reset, actual rival targeting, duplicate-type damage, wall rejection and independent caster state. This is not a40-boss game/performance test.
+- CodeWalker decoded5 render pieces,156 shader instances and240 textures in56 YTDs. All468 samplers resolve through the native archetype and packed parenting chain; DDS dimensions/mips and shader vectors match. No missing texture fix, global green flip, downscale or recompression is indicated. DLC stays SHA256641824cb2c5093f8eaf6451699f47283692aa74c9dadc9e36df0e835b8ab4170. See `gta/MATERIAL-AUDIT-20261006.md`.
+- Candidate `20261006-multi-boss` is installed and six payloads/profile/exe verified. Binary source `fea2e2741d0ab86b8d9a81b55d99df1b499f7987`; ASI SHA256 `d65b1699c90690a2d2b25d2abe8ef14ab2017575d4ef97a9e85d669f53f36ff7`. Payload backup `Backups/upgrade-20261006T195304Z-56517517`; complete prior city candidate at `StagedCandidates/20261006-before-multi-boss`. Retail is unchanged. Follow `gta/OWNER-TEST.md` for the owner test; do not launch automatically.
 
 ## Public repository identity
 
@@ -9,7 +29,7 @@ Updated 2026-10-06. **The owner liked the earlier playable build and authorized 
 - This change is repository presentation only. The installed private candidate remains source metadata `6ed0ad8c62a0e96e4e08587e5cdb6fef68523d42`, binary source `ac67e8d02787cc8e61ae2ce223910c596392f8ae`; its payload and game files were not changed. Use that exact source revision for candidate/source verification. No GTA launch is authorized by this rename.
 - Local checkout directory retains its historical name so existing scripts, task attachments and private asset paths keep working. Future implementation should use a fresh `codex/` task branch after this branch becomes the public landing branch; never silently merge default/main.
 
-## Current enhancement work
+## Earlier single-boss enhancement baseline
 
 - Original thread/branch ownership is unchanged: `codex/boss-motion-polish`; main merge not authorized. M3 Ultra/Mac15,14 verified locally; current hostname `Mac`. Brain3be383eed864 freshly verified. No GTA/engine/GPU launch or reservation during this update.
 - Implemented source-cued Fire Giant travelling fireballs and ground waves, Radahn gravity-thrown ambient cars, bounded native police/SWAT/helicopter support, one custom phase2 transition per boss, clean filming HUD/cameras and original-anchor encounter reset. Co-op excluded.

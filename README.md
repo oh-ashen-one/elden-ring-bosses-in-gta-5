@@ -1,27 +1,31 @@
 # Elden Ring Bosses in GTA 5
 
+[![Source checks](https://github.com/oh-ashen-one/elden-ring-bosses-in-gta-5/actions/workflows/checks.yml/badge.svg?branch=main)](https://github.com/oh-ashen-one/elden-ring-bosses-in-gta-5/actions/workflows/checks.yml)
+
 Fight **Malenia, Starscourge Radahn, Fire Giant and Godfrey inside actual GTA V Story Mode** using GTA guns, explosives, cars and helicopter weapons.
 
 This is an open-source mod and local asset-conversion toolkit. The imported Elden Ring models, rigs and animation clips run inside GTA with custom GTA-side encounter behavior. The in-game mod is called **Elden Los Santos**.
 
-## Current status
+## Public source release
 
 The core crossover has run on an **M3 Ultra through CrossOver with GTA V Legacy 1.0.3889.0**. Technical gameplay checks covered imported animation, native gun/car/Buzzard damage, attack contacts, stagger, defeat and reset. The owner subsequently reported that the playable build looked great.
 
-The latest **2026-10-06 enhancement build** adds travelling fireballs, gravity-thrown traffic, police/SWAT/helicopter support, custom second phases, filming cameras and quick reset. Its Windows build and 23 offline test suites pass; **these new features still require the owner's in-game playtest**. They are not claimed as verified gameplay or original Elden Ring AI.
+The **v0.1.0 source release** includes multi-boss battles, travelling fireballs, gravity-thrown traffic, police/SWAT/helicopter support, custom second phases, filming cameras and quick reset. Publication was approved by the project owner on October 6, 2026.
 
-**Start here:** [Setup and build instructions](gta/README.md) · [Playtest guide and controls](gta/OWNER-TEST.md) · [Latest features and limits](gta/SPECTACLE-20261006.md)
+**Verification scope:** the Windows mod compiles and 24 offline regression suites pass. The latest multi-boss/spectacle additions have not been independently verified in rendered gameplay; the complete setup has not been reproduced on a second machine. Those limits are documented without treating build checks as gameplay evidence.
+
+**Start here:** [Getting started](GETTING_STARTED.md) · [Technical setup and build instructions](gta/README.md) · [Playtest guide and controls](gta/OWNER-TEST.md) · [Latest features and limits](gta/SPECTACLE-20261006.md)
 
 ## Bosses and encounters
 
 | Boss | Encounter |
 | --- | --- |
 | **Malenia** | Original imported rig/clips, source-timed sword contact, stagger and defeat. |
-| **Starscourge Radahn** | Dual-sword contact, with GTA traffic gravity throws in the new candidate. |
-| **Fire Giant** | Enlarged to approximately 60 metres for helicopter-scale fights; the new candidate adds travelling fireballs and ground shockwaves. |
-| **Godfrey** | Original imported axe animation/contact, with a custom second-phase ground shockwave in the new candidate. |
+| **Starscourge Radahn** | Dual-sword contact, with GTA traffic gravity throws in the source release. |
+| **Fire Giant** | Enlarged to approximately 60 metres for helicopter-scale fights; the source release adds travelling fireballs and ground shockwaves. |
+| **Godfrey** | Original imported axe animation/contact, with a custom second-phase ground shockwave in the source release. |
 
-The mod runs one boss at a time. You can explore GTA between encounters; there is no ten-minute play limit. The new city-support and filming features are optional. Co-op is not included.
+The mod removes the fixed boss-count restriction and lets bosses fight each other, including duplicates. Actual game capacity and performance still apply. You can explore GTA between encounters; there is no ten-minute play limit. The new city-support and filming features are optional. Co-op is not included.
 
 ## What you need
 
@@ -40,7 +44,9 @@ The currently tested host is an M3 Ultra running Windows GTA V through CrossOver
 | [gta/tools/](gta/tools/) | Guarded launch, package verification and reversible installation. |
 | [gta/tests/](gta/tests/) | Native API, combat, collision, asset and installation regression checks. |
 | [gta/OWNER-TEST.md](gta/OWNER-TEST.md) | Controls, precise test steps and rollback. |
-| [HANDOFF.md](HANDOFF.md) | Current implementation state and outstanding owner review. |
+| [HANDOFF.md](HANDOFF.md) | Implementation handoff and verification history. |
+
+See the [compiled material audit](gta/MATERIAL-AUDIT-20261006.md) for the texture/shader feedback check.
 
 ## Fidelity and scope
 

@@ -3,7 +3,7 @@
 from pathlib import Path
 import subprocess,tempfile
 root=Path(__file__).parents[1];source=(root/'src/encounter_plugin.cpp').read_text()
-actor=source[source.index('struct Actor {'):source.index('std::array<Actor, 1> actors;')]
+actor=source[source.index('struct Actor {'):source.index('std::deque<Actor> actors(1);')]
 cleanup=source[source.index('void remove_actor('):source.index('void clear()')]
 fixture=r'''
 #include <map>

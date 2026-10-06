@@ -1,6 +1,6 @@
 {
-  "candidate": "20261006-city-spectacle",
-  "scope": "Five single-player enhancements; owner requested no runtime launch. Offline checks only for this candidate.",
+  "candidate": "20261006-multi-boss",
+  "scope": "Multi-boss targeting, contact, effect isolation, whole-lineup reset; owner runtime test pending",
   "bosses": [
     {
       "character": "c2120",
@@ -94,7 +94,7 @@
       ]
     }
   ],
-  "active_actor_limit": 1,
+  "active_actor_limit": null,
   "source_attack_events": "Original owned TAE AttackBehavior intervals; native phase contact sampling",
   "source_clips_per_boss": 5,
   "ranged_attacks": "Implemented GTA fireballs and gravity traffic; runtime unverified",
@@ -137,7 +137,7 @@
     }
   ],
   "performance_scope": "M3 Ultra; exclusive game;30-second native frame samples;1920x1080 captured window, launch override; saved VSync2/SamplingMode0; exact internal scaling not independently established",
-  "previous_candidate": "20261005-seated-state",
+  "previous_candidate": "20261006-city-spectacle",
   "previous_owner_feedback": "Everything here looks great; requested enhancements after playing the earlier candidate.",
   "baseline_technical_runtime_checks": {
     "candidate": "20261005-seated-state",
@@ -183,6 +183,16 @@
     "second_phase": "custom GTA phase, existing source clips",
     "filming": "HUD plus3 optional cameras",
     "reset": "original spawn anchor, owned resources only",
-    "co_op": false
+    "co_op": false,
+    "boss_battles": "dynamic actor pool, duplicate types, rival targeting, source-weapon contacts, shared effect budget"
+  },
+  "active_actor_limit_note": "No fixed mod count cap; native game capacity and real performance apply",
+  "material_binding_audit": {
+    "references": 468,
+    "shader_instances": 156,
+    "native_textures": 240,
+    "dictionaries": 56,
+    "issues": 0,
+    "asset_payload_changed": false
   }
 }

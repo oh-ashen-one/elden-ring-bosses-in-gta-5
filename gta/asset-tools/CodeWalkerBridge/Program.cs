@@ -9,7 +9,7 @@ using CodeWalker.GameFiles;
 
 CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
 CultureInfo.CurrentUICulture = CultureInfo.InvariantCulture;
-if (args.Length != 3 || (args[0] != "convert" && args[0] != "pack" && args[0] != "prepare-dlclist" && args[0] != "inspect-ydr" && args[0] != "inspect-ytyp"))
+if (args.Length != 3 || (args[0] != "convert" && args[0] != "pack" && args[0] != "prepare-dlclist" && args[0] != "inspect-ydr" && args[0] != "inspect-ytyp" && args[0] != "audit-materials"))
 {
     Console.Error.WriteLine("Usage: CodeWalkerBridge convert INPUT.ydr.xml|INPUT.ycd.xml|INPUT.ytyp.xml NEW_OUTPUT, or pack SOURCE_DIRECTORY NEW_RPF");
     return 2;
@@ -19,6 +19,33 @@ try
     string source = Path.GetFullPath(args[1]);
     string destination = Path.GetFullPath(args[2]);
     if (File.Exists(destination)) throw new IOException("Refusing to overwrite an existing asset");
+    if(args[0] == "audit-materials")
+    {
+        // Decode the actual native resources, not just the conversion XML.
+        var dictionaries = Directory.GetFiles(source,"*.ytd").Select(path => {
+            var file = new YtdFile(); RpfFile.LoadResourceFile(file,File.ReadAllBytes(path),13);
+            return new { name=Path.GetFileNameWithoutExtension(path), textures=(file.TextureDict?.Textures?.data_items ?? []).Select(t =>
+                new { name=t.Name,width=t.Width,height=t.Height,mips=t.Levels,format=t.Format.ToString() }).ToArray() };
+        }).ToArray();
+        var drawables = Directory.GetFiles(source,"*.ydr").Select(path => {
+            var file=new YdrFile();file.Load(File.ReadAllBytes(path));
+            return new { name=Path.GetFileNameWithoutExtension(path), shaders=(file.Drawable?.ShaderGroup?.Shaders?.data_items ?? []).Select(shader => {
+                var parameters=shader.ParametersList;
+                return new { file_hash=(uint)shader.FileName, render_bucket=shader.RenderBucket,
+                    parameters=(parameters?.Parameters ?? []).Select((p,i)=>new {
+                        name_hash=(uint)parameters!.Hashes[i],type=p.DataType,
+                        texture=(p.Data as TextureBase)?.Name,
+                        vector=p.Data is SharpDX.Vector4 v?new[]{v.X,v.Y,v.Z,v.W}:null
+                    }).ToArray() };
+            }).ToArray() };
+        }).ToArray();
+        var archetypes=Directory.GetFiles(source,"*.ytyp").SelectMany(path=>{
+            var file=new YtypFile();RpfFile.LoadResourceFile(file,File.ReadAllBytes(path),2);
+            return file.AllArchetypes.Select(a=>new {model_hash=(uint)a.BaseArchetypeDef.assetName,texture_dictionary_hash=(uint)a.BaseArchetypeDef.textureDictionary}).ToArray();
+        }).ToArray();
+        File.WriteAllText(destination,JsonSerializer.Serialize(new { dictionaries,drawables,archetypes,runtime_verified=false },new JsonSerializerOptions {WriteIndented=true}));
+        Console.WriteLine(JsonSerializer.Serialize(new {dictionaries=dictionaries.Length,drawables=drawables.Length}));return 0;
+    }
     if (args[0] == "inspect-ytyp")
     {
         var file = new YtypFile(); RpfFile.LoadResourceFile(file, File.ReadAllBytes(source), 2);

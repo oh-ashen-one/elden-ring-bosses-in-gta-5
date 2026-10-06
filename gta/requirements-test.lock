@@ -1,0 +1,5 @@
+# Source-only regression tests; versions match the verified asset environment.
+numpy==2.5.3
+pillow==12.3.0
+scipy==1.18.1
+ispc_texcomp==1.0.1

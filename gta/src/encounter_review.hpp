@@ -21,7 +21,7 @@ void review_delete_vehicle(int player) {
         if(hook.invoke<int>(0x997ABD671D25CA0BULL,player,false)&&hook.invoke<int>(0x9A9112A0FE9A4713ULL,player,false)==qa.vehicle) {
             hook.invoke(0xAAA34F8A7CB32098ULL,player);
             auto p=qa.return_position;
-            if(exists(actors[0].entity)&&actors[0].spec){p=ergt::add(coords(actors[0].entity),{std::max(35.f,actors[0].spec->body_radius*7.f),0,1.f});}
+            if(exists(focus_actor().entity)&&focus_actor().spec){p=ergt::add(coords(focus_actor().entity),{std::max(35.f,focus_actor().spec->body_radius*7.f),0,1.f});}
             hook.invoke(0x239A3351AC1DA385ULL,player,p.x,p.y,p.z,false,false,true);
         }
         hook.invoke(0xEA386986E786A54FULL,&qa.vehicle);
@@ -65,7 +65,7 @@ bool encounter_review_command(const char* token,std::uint32_t now) {
     if(!qa.active)return false;
     qa.until=now+600000;
     if(std::strcmp(token,"REVIEW_METRICS\n")==0){qa.frames=0;qa.metrics_until=now+30000;record("review_metrics_begin");return true;}
-    auto& actor=actors[0];
+    auto& actor=focus_actor();
     const bool actor_ok=exists(actor.entity)&&actor.spec&&!actor.cleanup_requested&&hook.invoke<std::uint32_t>(0x9F47B058362C84B5ULL,actor.entity)==hash(actor.spec->model);
     if(std::strcmp(token,"REVIEW_CAR\n")==0||std::strcmp(token,"REVIEW_PARK\n")==0||std::strcmp(token,"REVIEW_HELI\n")==0) {
         if(!actor_ok){record("review_no_actor");return true;}
@@ -114,7 +114,7 @@ void tick_encounter_review(int player,std::uint32_t now) {
         hook.invoke(0x8E2530AA8ADA980EULL,player,90.f);hook.invoke(0xE679E3E06E363892ULL,12,0,0);
         qa.stage_until=0;record("encounter_review_airfield",player);return;
     }
-    auto& actor=actors[0];const bool actor_ok=exists(actor.entity)&&actor.spec&&!actor.cleanup_requested&&hook.invoke<std::uint32_t>(0x9F47B058362C84B5ULL,actor.entity)==hash(actor.spec->model);
+    auto& actor=focus_actor();const bool actor_ok=exists(actor.entity)&&actor.spec&&!actor.cleanup_requested&&hook.invoke<std::uint32_t>(0x9F47B058362C84B5ULL,actor.entity)==hash(actor.spec->model);
     if(qa.load_until) {
         if(!actor_ok||static_cast<std::int32_t>(qa.load_until-now)<=0){review_delete_vehicle(player);record("review_vehicle_load_failed");}
         else if(hook.invoke<int>(0x98A4EB5D89A0C952ULL,qa.vehicle_model)) {
