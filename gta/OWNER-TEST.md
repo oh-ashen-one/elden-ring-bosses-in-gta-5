@@ -67,6 +67,14 @@ If the first gate fails, the later gates are not passed. If appearance fails, st
 
 Steam's existing GTA folder points to the active profile. APFS cloning shares the original game blocks; this did not create a second full-size game-data copy. Only GTA5.exe's `dinput8` DLL override was set in Wine; its prior value is recorded. Other games' overrides, authentication stores and existing saves were not changed.
 
+## Restore the previous accepted mod build
+
+Quit GTA, then run this Studio-local command. It uses the same stopped-game checks and rollback journal; it does not launch GTA:
+
+```sh
+python3 ~/Applications/EldenLosSantosPreview/Tools/upgrade_profile.py --candidate "$HOME/Library/Application Support/EldenLosSantos/StagedCandidates/20261006-before-city-spectacle"
+```
+
 ## Restore the unmodified game
 
 Quit GTA first, then run:

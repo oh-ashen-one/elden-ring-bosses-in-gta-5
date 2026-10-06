@@ -39,5 +39,13 @@
     "Malenia phase2 changes cadence; no new source attacks",
     "Giant has conservative collision movement, no building navigation/destruction",
     "Two-sided cape correction is installed with this candidate but still needs visual review"
-  ]
+  ],
+  "installed": true,
+  "payload_files_verified": 6,
+  "retail_exe_sha256": "677e4e355cfbdb13273b1d992407e3c261b3a108dc4dd5c8a0c4c1da651802e5",
+  "binary_source_commit": "ac67e8d02787cc8e61ae2ce223910c596392f8ae",
+  "asi_sha256": "b0210d4763d23f3ca5ddd24b69a0dcd677460b51731e400858657b4402ca8f7d",
+  "dlc_sha256": "641824cb2c5093f8eaf6451699f47283692aa74c9dadc9e36df0e835b8ab4170",
+  "rollback_candidate": "StagedCandidates/20261006-before-city-spectacle",
+  "payload_upgrade_backup": "Backups/upgrade-20261006T061123Z-179029bb"
 }
