@@ -497,6 +497,14 @@
     "0x96A05E4FB321B1BA": {
       "name": "SET_PED_SHOOTS_AT_COORD",
       "arguments": 5
+    },
+    "0x997ABD671D25CA0B": {
+      "name": "IS_PED_IN_ANY_VEHICLE",
+      "arguments": 2
+    },
+    "0xD3DBCE61A490BE02": {
+      "name": "TASK_LEAVE_VEHICLE",
+      "arguments": 3
     }
   }
 }

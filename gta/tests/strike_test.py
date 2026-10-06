@@ -24,6 +24,7 @@ prefix = r'''
 struct Actor {int entity=10;const ergt::CreatureSpec* spec=&ergt::creatures[0];};
 std::array<int,512> nearby_peds{};int nearby_ped_count=0;
 std::map<int,int> cars, engine_writes, ped_hits;
+int exited_ped=0;
 std::map<int,float> engine_health;
 bool exists(int e){return e>0;}
 ergt::Vec3 coords(int){return {2,0,0};}
@@ -38,6 +39,7 @@ struct FakeHook {
   } else {
    double result=0;
    if(h==0xFCDFF7B72D23A1ACULL)result=1;
+   else if(h==0x997ABD671D25CA0BULL)result=cars[e] && e!=exited_ped;
    else if(h==0x9A9112A0FE9A4713ULL)result=cars[e];
    else if(h==0xC45D23BAF168AAB8ULL)result=engine_health.count(e)?engine_health[e]:1000;
    return static_cast<R>(result);
@@ -45,7 +47,7 @@ struct FakeHook {
  }
 }hook;
 void check(bool ok,const char* why){if(!ok){std::fprintf(stderr,"%s\n",why);std::exit(1);}}
-void reset(){cars.clear();engine_writes.clear();engine_health.clear();ped_hits.clear();nearby_ped_count=0;}
+void reset(){exited_ped=0;cars.clear();engine_writes.clear();engine_health.clear();ped_hits.clear();nearby_ped_count=0;}
 '''
 main = r'''
 int main(){
@@ -56,6 +58,9 @@ int main(){
  reset();cars[100]=1000;cars[101]=1000;nearby_peds[0]=101;nearby_ped_count=1;
  strike_nearby(actor,100,origin,target);
  check(engine_writes[1000]==1,"One vehicle took repeated passenger damage");
+ reset();cars[100]=1000;exited_ped=100;
+ strike_nearby(actor,100,origin,target);
+ check(ped_hits[100]==1 && engine_writes.empty(),"Exited pedestrian was treated as a vehicle because of a stale handle");
  for(const int capacity:{33,256}) {
  reset();
  for(int i=0;i<capacity;i++){

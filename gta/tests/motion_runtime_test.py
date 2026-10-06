@@ -38,6 +38,7 @@ struct Hook{
   else if(h==0x1F0B79228E461EC9ULL)result=playing;
   else if(h==0xE83D4F9BA2A38914ULL)result=0;
   else if(h==0x3317DEDB88C95038ULL)result=0;
+  else if(h==0x997ABD671D25CA0BULL)result=cars[a[0]]!=0;
   else if(h==0x9A9112A0FE9A4713ULL)result=cars[a[0]];
   else if(h==0x9F47B058362C84B5ULL)result=1;
   else if(h==0x03E8D3D5F549087AULL){

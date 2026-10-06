@@ -7,7 +7,7 @@ struct EncounterReview {
     float return_heading=0;
     int return_wanted=0,vehicle=0,vehicle_kind=0,fire_mode=0;
     std::uint32_t vehicle_model=0,load_until=0,until=0,fire_until=0,last_sample=0;
-    std::uint32_t selected_weapon=0,creep_until=0;
+    std::uint32_t selected_weapon=0,creep_until=0,stage_until=0;
     std::array<float,4096> frame_ms{};
     int frames=0;
     std::uint32_t metrics_until=0;
@@ -18,7 +18,7 @@ bool review_vehicle_owned() {
 }
 void review_delete_vehicle(int player) {
     if(review_vehicle_owned()) {
-        if(hook.invoke<int>(0x9A9112A0FE9A4713ULL,player,false)==qa.vehicle) {
+        if(hook.invoke<int>(0x997ABD671D25CA0BULL,player,false)&&hook.invoke<int>(0x9A9112A0FE9A4713ULL,player,false)==qa.vehicle) {
             hook.invoke(0xAAA34F8A7CB32098ULL,player);
             auto p=qa.return_position;
             if(exists(actors[0].entity)&&actors[0].spec){p=ergt::add(coords(actors[0].entity),{std::max(35.f,actors[0].spec->body_radius*7.f),0,1.f});}
@@ -50,17 +50,17 @@ bool encounter_review_command(const char* token,std::uint32_t now) {
     const int player=hook.invoke<int>(0xD80958FC74E988A6ULL);
     if(std::strcmp(token,"REVIEW_RETURN\n")==0){clear();end_encounter_review(player);return true;}
     if(std::strcmp(token,"REVIEW_AIRFIELD\n")==0) {
-        if(qa.active||hook.invoke<int>(0x9A9112A0FE9A4713ULL,player,false)){record("review_setup_refused");return true;}
+        if(qa.active){record("review_setup_already_active");return true;}
+        const bool seated=hook.invoke<int>(0x997ABD671D25CA0BULL,player,false)!=0;
+        const int last_vehicle=hook.invoke<int>(0x9A9112A0FE9A4713ULL,player,false);
+        if(log_file){std::fprintf(log_file,"event=review_seat_state seated=%d vehicle=%d\n",seated,last_vehicle);std::fflush(log_file);}
         clear();qa.active=true;qa.return_position=coords(player);
         qa.return_heading=hook.invoke<float>(0xE83D4F9BA2A38914ULL,player);
         qa.return_wanted=hook.invoke<int>(0xE28E54788CE8F12DULL,hook.invoke<int>(0x4F8644AF03D0E0D6ULL));
         qa.until=now+600000;fighting=false;
-        // Sandy Shores runway; source ground query is required before spawning.
-        hook.invoke(0x07503F7948F491A7ULL,1740.f,3260.f,42.f);
-        hook.invoke(0x239A3351AC1DA385ULL,player,1740.f,3260.f,42.f,false,false,true);
-        hook.invoke(0x8E2530AA8ADA980EULL,player,90.f);
-        hook.invoke(0xE679E3E06E363892ULL,12,0,0);
-        record("encounter_review_airfield",player);return true;
+        qa.stage_until=now+5000;
+        if(seated&&exists(last_vehicle))hook.invoke(0xD3DBCE61A490BE02ULL,player,last_vehicle,16);
+        record("encounter_review_staging",player);return true;
     }
     if(!qa.active)return false;
     qa.until=now+600000;
@@ -84,7 +84,7 @@ bool encounter_review_command(const char* token,std::uint32_t now) {
         if(log_file){std::fprintf(log_file,"event=review_heli_weapon accepted=%d hash=%08x\n",accepted,qa.selected_weapon);std::fflush(log_file);}return true;
     }
     if(std::strcmp(token,"REVIEW_FOOT_GUN\n")==0||std::strcmp(token,"REVIEW_FOOT_RPG\n")==0) {
-        if(!actor_ok||hook.invoke<int>(0x9A9112A0FE9A4713ULL,player,false)){record("review_foot_fire_refused");return true;}
+        if(!actor_ok||hook.invoke<int>(0x997ABD671D25CA0BULL,player,false)){record("review_foot_fire_refused");return true;}
         qa.selected_weapon=hash(token[12]=='G'?"WEAPON_CARBINERIFLE":"WEAPON_RPG");
         hook.invoke(0xBF0FD6E56C964FCBULL,player,qa.selected_weapon,100,false,true);
         hook.invoke(0xADF692B254977C0CULL,player,qa.selected_weapon,true);
@@ -104,6 +104,16 @@ void tick_encounter_review(int player,std::uint32_t now) {
     if(!qa.active)return;
     if(static_cast<std::int32_t>(qa.until-now)<=0||hook.invoke<int>(0x3317DEDB88C95038ULL,player,true)) {clear();end_encounter_review(player);return;}
     hook.invoke(0xB302540597885499ULL,hook.invoke<int>(0x4F8644AF03D0E0D6ULL));
+    if(qa.stage_until){
+        if(hook.invoke<int>(0x997ABD671D25CA0BULL,player,false)){
+            if(static_cast<std::int32_t>(qa.stage_until-now)<=0){record("review_vehicle_exit_failed");end_encounter_review(player);}
+            return;
+        }
+        hook.invoke(0x07503F7948F491A7ULL,1740.f,3260.f,42.f);
+        hook.invoke(0x239A3351AC1DA385ULL,player,1740.f,3260.f,42.f,false,false,true);
+        hook.invoke(0x8E2530AA8ADA980EULL,player,90.f);hook.invoke(0xE679E3E06E363892ULL,12,0,0);
+        qa.stage_until=0;record("encounter_review_airfield",player);return;
+    }
     auto& actor=actors[0];const bool actor_ok=exists(actor.entity)&&actor.spec&&!actor.cleanup_requested&&hook.invoke<std::uint32_t>(0x9F47B058362C84B5ULL,actor.entity)==hash(actor.spec->model);
     if(qa.load_until) {
         if(!actor_ok||static_cast<std::int32_t>(qa.load_until-now)<=0){review_delete_vehicle(player);record("review_vehicle_load_failed");}

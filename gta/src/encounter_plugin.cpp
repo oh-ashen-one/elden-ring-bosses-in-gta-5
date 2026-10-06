@@ -716,7 +716,7 @@ void blade_contacts(Actor& actor,int primary,std::uint32_t now,bool enabled) {
         if(!exists(ped)||hook.invoke<int>(0x3317DEDB88C95038ULL,ped,true))continue;
         const auto victim=coords(ped);
         if(!finite_vec(victim)||length(subtract(victim,origin))>actor.spec->melee_range+actor.spec->body_height+4.0f)continue;
-        const int car=hook.invoke<int>(0x9A9112A0FE9A4713ULL,ped,false);
+        const int car=hook.invoke<int>(0x997ABD671D25CA0BULL,ped,false)?hook.invoke<int>(0x9A9112A0FE9A4713ULL,ped,false):0;
         const int id=exists(car)?car:ped;
         if(std::find(actor.blade_victims.begin(),actor.blade_victims.begin()+actor.blade_victim_count,id)!=actor.blade_victims.begin()+actor.blade_victim_count)continue;
         NativeVector minimum{},maximum{};
@@ -781,7 +781,7 @@ void strike_nearby(Actor& actor,int primary,ergt::Vec3 origin,ergt::Vec3 target)
         if(range>actor.spec->melee_range+0.5f || std::abs(p.z-origin.z)>4) continue;
         const float forward=(p.x-origin.x)*(target.x-origin.x)+(p.y-origin.y)*(target.y-origin.y);
         if(forward<0 || !hook.invoke<int>(0xFCDFF7B72D23A1ACULL,actor.entity,ped,17)) continue;
-        const int car=hook.invoke<int>(0x9A9112A0FE9A4713ULL,ped,false);
+        const int car=hook.invoke<int>(0x997ABD671D25CA0BULL,ped,false)?hook.invoke<int>(0x9A9112A0FE9A4713ULL,ped,false):0;
         if(car && exists(car)) {
             if(std::find(hit_cars.begin(),hit_cars.begin()+car_count,car)!=hit_cars.begin()+car_count) continue;
             if(car_count<static_cast<int>(hit_cars.size())) hit_cars[car_count++]=car;
@@ -975,7 +975,7 @@ void run() {
         finish_spawn(player,now);
         tick_reference_probe(player,now);
         tick_diagnostics(player,now);
-        const int vehicle=hook.invoke<int>(0x9A9112A0FE9A4713ULL,player,false);
+        const int vehicle=hook.invoke<int>(0x997ABD671D25CA0BULL,player,false)?hook.invoke<int>(0x9A9112A0FE9A4713ULL,player,false):0;
         for (auto& actor:actors) update_actor(actor,player,vehicle,now,dt);
         if(now<hud_until || pending.active) {
             char title[160];
