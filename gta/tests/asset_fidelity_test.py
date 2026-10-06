@@ -12,6 +12,7 @@ from split_large_rig import partition as partition_rig
 from scale_roster import scale_drawable,scale_animation
 from fur_material import bake
 from cutout_fidelity import remap_alpha
+from hair_shadow import bake_shadow
 from material_fidelity import fields,sample
 from correct_bind_heads import correct,source_axes
 from rebuild_animation import TargetRig,matrix,world_matrices,Y_UP_TO_Z_UP
@@ -19,6 +20,13 @@ from texture_dictionaries import partition,parenting
 from animation_conversion_test import drawable
 
 class Fidelity(unittest.TestCase):
+    def test_authored_hair_shadow_uses_secondary_uv_and_preserves_strand_alpha(self):
+        g=E.fromstring('<Item><VertexBuffer><Layout><Position/><TexCoord0/><TexCoord1/></Layout><Data>0 0 0 0 0 .01 .01\n1 0 0 1 0 .01 .99\n0 1 0 0 1 .99 .01</Data></VertexBuffer><IndexBuffer><Data>0 1 2</Data></IndexBuffer></Item>')
+        p=np.full((16,16,4),[190,98,83,140],np.uint8);mask=np.full((16,16,4),255,np.uint8);mask[:8,:,:3]=40
+        result,report=bake_shadow([g],p,mask)
+        np.testing.assert_array_equal(result[:,:,3],p[:,:,3]);self.assertTrue(report['alpha_unchanged'])
+        self.assertLess(int(result[0,2,0]),int(result[0,12,0]));self.assertEqual(int(result[0,12,0]),190)
+
     def test_cutout_mapping_preserves_every_source_accept_reject_decision_and_rgb(self):
         p=np.zeros((1,256,4),np.uint8);p[0,:,3]=np.arange(256);p[:,:,:3]=[71,126,193]
         for threshold in [45,70,85,128,140,200]:

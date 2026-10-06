@@ -63,9 +63,9 @@ int main() {
  expect(stopped_after_hit.combat.health(),2640,"Recent pre-impact speed was discarded");
  Actor mixed; nearby_vehicles[0]={100,0,0}; frame={9968,true,true,1,32}; observe_damage(mixed,1,1000);
  expect(mixed.combat.health(),3568,"Parked-contact filter swallowed a simultaneous bullet");
- Actor remote_gun; nearby_vehicles[0]={100,35,35}; frame={9970,true,true,100,30,false}; observe_damage(remote_gun,1,3000);
+ Actor remote_gun; nearby_vehicles[0]={100,35,35}; frame={9970,false,true,100,30,false}; observe_damage(remote_gun,1,3000);
  expect(remote_gun.combat.health(),3570,"Distant helicopter gunfire fabricated physical impact damage");
- Actor remote_rocket; frame={8800,true,true,100,1200,false}; observe_damage(remote_rocket,1,4000);
+ Actor remote_rocket; frame={8800,false,true,100,1200,false}; observe_damage(remote_rocket,1,4000);
  expect(remote_rocket.combat.health(),2400,"Vehicle impact filter swallowed a real helicopter rocket");
  Actor explosive; frame={8800,true,false,1,1200}; observe_damage(explosive,1,1000);
  expect(explosive.combat.health(),2400,"Native explosive damage was lost");

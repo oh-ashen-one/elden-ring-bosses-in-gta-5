@@ -47,6 +47,7 @@ struct Actor {
     unsigned played_reaction = 0;
     bool pose_transition_required = false, repositioning=false;
     bool corpse_settled = false;
+    std::uint32_t corpse_settle_started=0;
     float committed_heading = 0;
     ergt::Vec3 blade_origin{}, queued_movement{}, sweep_from{}, sweep_to{};
     std::array<int,3> sweep_handles{};
@@ -542,7 +543,7 @@ void read_diagnostic_request(std::uint32_t now) {
     FILE* request=_wfopen(diagnostic_request_path,L"rb");
     if (!request) return;
     char token[32]{};std::fgets(token,sizeof(token),request);std::fclose(request);
-    const std::array<const char*,11> encounter_tokens={"REVIEW_RETURN\n","REVIEW_AIRFIELD\n","REVIEW_METRICS\n","REVIEW_CAR\n","REVIEW_PARK\n","REVIEW_HELI\n","REVIEW_HELI_GUN\n","REVIEW_HELI_ROCKET\n","REVIEW_PLAYER_BACK\n","REVIEW_FOOT_GUN\n","REVIEW_FOOT_RPG\n"};
+    const std::array<const char*,12> encounter_tokens={"REVIEW_RETURN\n","REVIEW_AIRFIELD\n","REVIEW_METRICS\n","REVIEW_CAR\n","REVIEW_PARK\n","REVIEW_HELI\n","REVIEW_HELI_GUN\n","REVIEW_HELI_ROCKET\n","REVIEW_PLAYER_BACK\n","REVIEW_FOOT_GUN\n","REVIEW_FOOT_RPG\n","REVIEW_CREEP\n"};
     for(const char* allowed:encounter_tokens)if(std::strcmp(token,allowed)==0&&_wremove(diagnostic_request_path)==0){encounter_review_command(token,now);return;}
     // A file-only, fixed-command technical test; no listener or arbitrary code.
     if (std::strcmp(token,"CHECK_IMPORTS_ONCE\n")==0 && _wremove(diagnostic_request_path)==0)
@@ -575,21 +576,26 @@ void observe_damage(Actor& actor,int player,std::uint32_t now) {
     if(player_hit) actor.last_attacked=now;
     // Small native collision/settling losses must not bleed an idle boss dry.
     if(!weapon && !vehicle && loss<80) loss=0;
-    if(vehicle && now-actor.last_impact>=650) {
-        float impact=0;
+    if(vehicle) {
+        float impact=0;bool physical_contact=false;
         for(int i=0;i<nearby_vehicle_count;i++) {
             auto& v=nearby_vehicles[i];
             if(exists(v.entity) && hook.invoke<int>(0xC86D67D52A707CF8ULL,actor.entity,v.entity,true)) {
-                // Vehicle weapons also set the vehicle-damage flag. Only a
-                // physical contact with this actor may use speed-based damage.
+                // Mounted weapons can set the vehicle flag without the generic
+                // weapon flag. Keep their measured HP loss; only real contact
+                // may receive speed damage or physical recovery time.
                 if(hook.invoke<int>(0x17FFC1B2BA35A494ULL,actor.entity,v.entity)){v.last_contact=now;v.contact_actor=actor.entity;}
-                if(v.contact_actor==actor.entity && v.last_contact && now-v.last_contact<=300)
+                if(v.contact_actor==actor.entity && v.last_contact && now-v.last_contact<=300){
+                    physical_contact=true;
                     impact=std::max(impact,ergt::impact_damage(std::max(v.speed,v.prior_speed)));
+                }
             }
         }
-        if(impact>0) { loss=std::max(loss,impact);actor.last_impact=now;record("vehicle_impact",actor.entity,impact); }
-        else if(!weapon) loss=0; // A stationary/unattributed vehicle contact is not an impact.
-    } else if(vehicle && !weapon) loss=0;
+        if(physical_contact){
+            if(impact>0 && now-actor.last_impact>=650){loss=std::max(loss,impact);actor.last_impact=now;record("vehicle_impact",actor.entity,impact);}
+            else if(!weapon)loss=0; // Settling/parked contacts or a repeated impact.
+        } else if(loss>0 && !weapon)record("noncontact_vehicle_native_damage",actor.entity,loss);
+    }
     if(loss<=0 && weapon && now-actor.last_fallback>=80) {
         // Fallback is explicitly player-attributed; NPC hits use actual HP loss.
         if(player_hit) {
@@ -838,15 +844,20 @@ void update_actor(Actor& actor,int player,int,std::uint32_t now,int dt) {
         // final pose. Disabling collision in mid-air would remove ground contact.
         float ground=0;
         if(hook.invoke<int>(0xC906A7DAB05C8D2BULL,position.x,position.y,position.z+2.0f,&ground,false,false) &&
-           std::abs(position.z-(ground-actor.spec->minimum_z+.05f))<.3f &&
+           std::abs(position.z-(ground-actor.spec->minimum_z+.05f))<std::max(.3f,actor.spec->body_height*.08f) &&
            hook.invoke<float>(0xD5037BA82E12416FULL,actor.entity)<.5f){
+            if(!actor.corpse_settle_started)actor.corpse_settle_started=now;
+            if(now-actor.corpse_settle_started>=750){
             const float heading=hook.invoke<float>(0xE83D4F9BA2A38914ULL,actor.entity);
             hook.invoke(0x8524A8B0171D5E07ULL,actor.entity,0.0f,0.0f,heading,2,true);
-            hook.invoke(0x239A3351AC1DA385ULL,actor.entity,position.x,position.y,ground-actor.spec->minimum_z+.05f,true,true,false);
+            // Preserve the physically supported position on uneven ground.
+            // A giant cannot use Malenia's30cm tolerance or a standing collider
+            // forever after its source pose has collapsed horizontally.
             hook.invoke(0x428CA6DBD1094446ULL,actor.entity,true);
             hook.invoke(0x1A9205C1B9EE827FULL,actor.entity,false,false);
             actor.corpse_settled=true;record("corpse_settled",actor.entity);
-        }
+            }
+        } else actor.corpse_settle_started=0;
     }
     if(fighting && (state==ergt::CombatState::chasing || state==ergt::CombatState::idle) && alive && !impact_recovery) {
         const float heading=ergt::heading_to_target(position,target,actor.spec->model_heading_offset+(decision.reposition?180.f:0.f));
@@ -944,7 +955,7 @@ void run() {
         // The regular weapon wheel and controller bindings remain available.
         for (const int control:{157,158,160,164,165,159}) hook.invoke(0xFE99B66D079CF6BCULL,0,control,true);
         const unsigned command=commands.exchange(0);
-        if(command) {qa.fire_until=0;end_review();hud_until=now+6000;}
+        if(command) {qa.fire_until=0;qa.creep_until=0;end_review();hud_until=now+6000;}
         scan_world(player,now);
         if (command&select_next) selected=(selected+1)%static_cast<int>(ergt::creatures.size());
         read_diagnostic_request(now);

@@ -4,6 +4,10 @@ Updated 2026-10-05. **Owner authorized this thread to finish the remaining mater
 
 ## Current continuation
 
+- Second run confirmed three full Malenia kills/settles/resets, repeated source-phase contacts after spacing, and real Buzzard rockets killing Fire Giant followed by full-health giant reset. `run2.log` and named private screenshots record it. Still no subjective full-moveset acceptance.
+- Final refinement keeps measured non-contact vehicle HP loss even when GTA omits its generic weapon flag; only contact adds kinetic damage/recovery. It also includes a low-speed creep/stop contact check and the previously omitted owned UV1 hair-shadow texture. The giant's already-still corpse used a humanoid30cm root tolerance; settling now scales tolerance with body size and requires750ms stability, preserves supported position and removes the obsolete standing collider. Final live check pending.
+- New private editable assets `gta-authored-hair-shadow`, package `dlc-authored-hair-shadow`, DLC85d063521c99f4b2cb45f06c4b73b9aae2b8e0b065575b4cac406310a8d2ba53. Geometry/rigs/clips unchanged from the verified source baseline. Alpha remap and shadow baking are explicit GTA shader adaptations, not renderer parity. Source/regression21 suites passed.
+
 - First live continuation run: real Sultan collision caused362.28+36.76 damage and source stagger; native on-foot carbine reducedHP; RPG led to real defeat and settled source kneeling pose (close screenshot). Malenia also struck the PLAYER at source phase0.42427, reducingHP150→123.
 - Real Buzzard gun and rocket selection accepted; mounted weapons damaged the60m giant while player occupied/flew the helicopter. Found remote weapon hits also set GTA's vehicle-damage flag, falsely activating impact recovery. Source now requires current/recent physical contact for speed damage.
 - Found close-hugging range exploited the single lunge. Malenia now turns and uses the existing source run to create space before recommitting; no custom animation. Added1.5s stagger resistance after the source reaction to avoid indefinite RPG restart lock. These refinements await the second live run.
@@ -12,7 +16,7 @@ Updated 2026-10-05. **Owner authorized this thread to finish the remaining mater
 
 - Source candidate adds original per-material alpha thresholds and mip coverage preservation. The first package correctly rejected a split-child sampler name mismatch; `gta-cutout-thresholds-v2` uses the shared parent names. Actual appearance is still unverified.
 - Local fixed review commands stage a temporary airfield check, real Sultan/Buzzard vehicles and their native weapons, on-foot fire, and30-second engine frame-time samples. They expire and restore the player's original location/heading/wanted state. They never edit boss HP to manufacture a pass; technical setup is distinct from a manual playthrough.
-- Twenty-one source suites passed, and current Windows ASI compiled. Shared brain freshness verified, no competing renderer/hold observed, original desktop notification processes predate the owner's already-confirmed clear desktop; CrossOver UI is responsive. No game launched yet this continuation.
+- Twenty-one source suites passed, and current Windows ASI compiled. Shared brain freshness verified, no competing renderer/hold observed, original desktop notification processes predate the owner's already-confirmed clear desktop; CrossOver UI is responsive. Two continuation runs completed without a crash and closed normally.
 - Commands documented in `encounter_review.hpp`; use `REVIEW_RETURN` to restore after a technical run. No listener or arbitrary scripts. Native contracts are pinned and checked. Final runtime outcomes follow after actual checks; earlier evidence below remains bounded historical evidence.
 
 ## Ownership and authority

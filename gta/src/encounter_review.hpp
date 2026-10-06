@@ -7,7 +7,7 @@ struct EncounterReview {
     float return_heading=0;
     int return_wanted=0,vehicle=0,vehicle_kind=0,fire_mode=0;
     std::uint32_t vehicle_model=0,load_until=0,until=0,fire_until=0,last_sample=0;
-    std::uint32_t selected_weapon=0;
+    std::uint32_t selected_weapon=0,creep_until=0;
     std::array<float,4096> frame_ms{};
     int frames=0;
     std::uint32_t metrics_until=0;
@@ -20,7 +20,8 @@ void review_delete_vehicle(int player) {
     if(review_vehicle_owned()) {
         if(hook.invoke<int>(0x9A9112A0FE9A4713ULL,player,false)==qa.vehicle) {
             hook.invoke(0xAAA34F8A7CB32098ULL,player);
-            const auto p=qa.return_position;
+            auto p=qa.return_position;
+            if(exists(actors[0].entity)&&actors[0].spec){p=ergt::add(coords(actors[0].entity),{std::max(35.f,actors[0].spec->body_radius*7.f),0,1.f});}
             hook.invoke(0x239A3351AC1DA385ULL,player,p.x,p.y,p.z,false,false,true);
         }
         hook.invoke(0xEA386986E786A54FULL,&qa.vehicle);
@@ -28,7 +29,7 @@ void review_delete_vehicle(int player) {
     }
     qa.vehicle=0;
     if(qa.vehicle_model)hook.invoke(0xE532F5D78798DAABULL,qa.vehicle_model);
-    qa.vehicle_model=0;qa.load_until=0;qa.fire_until=0;
+    qa.vehicle_model=0;qa.load_until=0;qa.fire_until=0;qa.creep_until=0;
 }
 void end_encounter_review(int player) {
     end_review();qa.fire_until=0;qa.metrics_until=0;
@@ -89,6 +90,10 @@ bool encounter_review_command(const char* token,std::uint32_t now) {
         hook.invoke(0xADF692B254977C0CULL,player,qa.selected_weapon,true);
         qa.fire_until=now+3000;qa.fire_mode=2;record("review_foot_fire_started",player);return true;
     }
+    if(std::strcmp(token,"REVIEW_CREEP\n")==0) {
+        if(review_vehicle_owned() && qa.vehicle_kind==2){qa.creep_until=now+5000;record("review_creep_started",qa.vehicle);}
+        return true;
+    }
     if(std::strcmp(token,"REVIEW_PLAYER_BACK\n")==0) {
         review_delete_vehicle(player);const auto p=coords(actor.entity);
         if(actor_ok){hook.invoke(0x239A3351AC1DA385ULL,player,p.x+35.f,p.y,p.z+1.f,false,false,true);record("review_player_repositioned",player);}return true;
@@ -124,6 +129,14 @@ void tick_encounter_review(int player,std::uint32_t now) {
                 }
                 record("review_vehicle_created",qa.vehicle,static_cast<float>(qa.vehicle_kind));
             } else record("review_vehicle_create_failed");
+        }
+    }
+    if(qa.creep_until) {
+        if(!review_vehicle_owned()||qa.vehicle_kind!=2)qa.creep_until=0;
+        else if(static_cast<std::int32_t>(qa.creep_until-now)<=0){
+            hook.invoke(0xAB54A438726D25D5ULL,qa.vehicle,0.f);hook.invoke(0xE4E2FD323574965CULL,qa.vehicle,true);qa.creep_until=0;record("review_creep_stopped",qa.vehicle);
+        } else {
+            hook.invoke(0xE4E2FD323574965CULL,qa.vehicle,false);hook.invoke(0xAB54A438726D25D5ULL,qa.vehicle,.65f);
         }
     }
     if(qa.fire_until) {
