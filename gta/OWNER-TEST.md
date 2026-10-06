@@ -2,7 +2,7 @@
 
 **2026-10-05 tested technical preview.** Malenia, Starscourge Radahn, Fire Giant and Godfrey replace the old Crab/Wolf menu. Fire Giant is now approximately **60m tall**, intentionally enlarged2.6× for helicopter-scale encounters.
 
-Actual M3 GTA checks covered rendered spawns, Malenia sword contact against NPCs, native rifle/RPG intake, stagger and three clear/spawn cycles. These are bounded mechanical checks; final appearance, full defeat/reset, driving and flying are still for your review. Hair/fur and GTA lighting remain approximations of the original renderer.
+Actual M3 tests covered car impacts, slow physical contact, player carbine/RPG, real Buzzard guns/rockets, animation-phase attacks against NPCs/the player/an occupied helicopter, Malenia's three complete kills/resets, and giant defeat/settling/reset. The source hair-shadow atlas and cutout thresholds were restored/adapted. This is a playable technical preview; your remaining review is appearance, handling and difficulty. GTA shading/cloth and full boss movesets still differ from Elden Ring. FXAA is now enabled on this Studio and was verified in-game.
 
 ## Start
 
@@ -23,12 +23,12 @@ Use the **top-row number keys 1–6**. No Fn key is needed. These keys are reser
 
 Use a clear outdoor area for the first test. These are animated creature objects with custom GTA-side combat; they are not a port of the Elden Ring executable or its complete AI.
 
-## Malenia test — stop at the first failed gate
+## Owner play / subjective review
 
 1. **Spawn and appearance:** load your existing Story Mode save in a clear outdoor area. Malenia is the default selection. Press **4 once** to pause aggression, then **2 once**. Wait up to five seconds. If “Failed zlib call,” a loading failure, or a crash returns, stop; do not cycle the roster or keep retrying. Send the exact message.
 2. **Close-up:** with aggression paused, inspect her face/helmet/hair, body proportions, sword and feet from the front and side. She should hold an animated idle, with no crumpled mesh or missing texture patches. If wrong, send one close-up screenshot and stop; logs cannot establish visual quality.
 3. **Sword encounter:** press **5**, shoot once or twice, then **4** to resume. Back away and sidestep a swing. Check foot/body movement and the lunge, committed facing, a connected hit when in reach, and a miss when you evade. Nearby NPCs may also attract her aggression. She currently has one source sword attack, not the full Elden Ring moveset.
-4. **Damage and stagger:** use several rifle rounds, one RPG, then a moving-car impact. HP should drop, a heavy hit should interrupt her with a visible reaction, and a parked car touching her should not drain HP. Source tests alone do not confirm these channels.
+4. **Damage and stagger:** use several rifle rounds, one RPG, then a moving-car impact. HP should drop, a heavy hit should interrupt her with a visible reaction, and a parked car touching her should not drain HP. Those incoming channels were checked in the actual game; judge whether their strength feels right.
 5. **Defeat and reset:** finish her, observe the kneeling defeat and settled body, press **3**, then **2**. Repeat three times; HP and attack state should reset and no old bodies or damage should remain.
 6. **Helicopter:** press **6** and test Buzzard weapons. Report damage, stability and how the encounter looks from the air. Key3 keeps your helicopter; key6 preserves a usable one and can replace its destroyed wreck.
 
@@ -39,7 +39,7 @@ If the first gate fails, the later gates are not passed. If appearance fails, st
 1. Use a broad beach or airfield with open ground ahead. At this scale a city street can place his body through buildings.
 2. From a fresh launch: press **4** to pause aggression, **1 twice** to select Fire Giant, then **2**. Wait for the full two-part animated model.
 3. Press **6** for the armed Buzzard, enter it with normal GTA controls, and climb above nearby obstacles. Circle the giant's torso/head. His approximate height is60m and his body collision scales with him.
-4. Test helicopter guns/rockets, then **4** to enable his aggression. The earlier native projectile test hit47.84m up his body, but manual Buzzard combat/balance has not been passed.
+4. Test helicopter guns/rockets, then **4** to enable his aggression. Actual Buzzard gun/rocket damage and giant defeat were verified, and a source attack contacted an occupied Buzzard. Pilot handling and difficulty remain your subjective call.
 5. **3** clears the giant while preserving your helicopter. **2** starts a fresh boss.
 
 ## Locations on this Studio
@@ -68,7 +68,7 @@ The command restores the exact original directory to Steam's path and restores t
 - No original spell/VFX, voice or cloth simulation. No travelling projectile is implemented. Source hair/fur materials require GTA alpha/shader adaptation, which must be judged in real rendered frames.
 - Conservative body boxes receive native bullets/physics; sampled weapon sweeps handle outgoing contact. Movement stops at obstacles but does not route around buildings. Giants may be constrained in city streets.
 - Original source diffuse/normal DDS mip bytes are preserved, with header-only sRGB normalization. Derived gloss/metal/opacity maps are source-resolution lossless BGRA8. GTA lighting will differ from Elden Ring; do not claim one-to-one renderer parity.
-- Fixed native rifle/RPG damage, stagger and create/clear checks passed in this candidate. Manual cars/Buzzard, complete kills/resets and balance remain unverified. No FPS or complete encounter acceptance is implied.
+- Native car/weapon/attack/death/reset checks passed for the core encounters. Radahn/Godfrey have rendered-spawn coverage. Approximate earlier game-reported rates were27–31FPS in1080p windows; no60FPS claim. Final difficulty/video quality is not marked accepted.
 - Story Mode only. Network-session guard remains active. Keep the private rollback until owner acceptance.
 
 **Do not upload or share the private package or its motion-enabled ASI:** it contains assets extracted from your games and separately obtained runtime files. The public repository distributes original source and conversion/setup instructions, not those files.

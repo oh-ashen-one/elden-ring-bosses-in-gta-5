@@ -1,6 +1,6 @@
 {
-  "candidate": "20261005-lunge-spacing",
-  "scope": "Source assets with GTA-side behavior; bounded actual runtime checks; owner acceptance pending",
+  "candidate": "20261005-seated-state",
+  "scope": "Bounded actual GTA mechanics verified for Malenia and Fire Giant; subjective acceptance and full roster balance pending",
   "bosses": [
     {
       "character": "c2120",
@@ -101,10 +101,11 @@
   "technical_runtime_verified": false,
   "subjective_acceptance": false,
   "known_limits": [
-    "Different renderer/material model; hair/ghost/snow shader quality requires owner judgment",
-    "No original AI, cloth physics, sounds, VFX or full movesets",
+    "GTA renderer adaptations: hair/fur/ghost lighting and UV flattening differ from ER",
+    "No original AI, cloth physics, sounds, VFX, phase2 or full movesets",
     "Coarse body collision; no pathfinding; large open area required for giant",
-    "Manual vehicle/Buzzard, complete kill-reset cycles, balance and FPS remain unverified"
+    "Subjective controls, difficulty and video-quality acceptance pending",
+    "Radahn/Godfrey have rendered-spawn coverage; full encounter balance not verified"
   ],
   "technical_runtime_checks": {
     "four_bosses_rendered": true,
@@ -115,9 +116,55 @@
     "giant_elevated_native_projectile_target_height_m": 47.84,
     "giant_native_rifle_damage": 24,
     "giant_native_rpg_applied_damage": 1600,
-    "complete_fight": false,
-    "manual_vehicle_helicopter_combat": false,
-    "death": "Earlier runtime log shows defeat and settle; no decisive death image",
-    "performance_benchmark": false
-  }
+    "complete_fight": "Technical incoming/outgoing contact, damage, defeat, cleanup and reset; no full original moveset claim",
+    "manual_vehicle_helicopter_combat": "Native engine vehicle/weapon actions plus keyboard throttle; no human balance verdict",
+    "death": "Source kneeling/collapse and settled bodies observed; giant standing collision cleanup verified by runtime event",
+    "performance_benchmark": "Bounded game-reported frame-time samples, not uncapped GPU performance",
+    "real_sultan_impact_damage": [
+      369.66,
+      39.85
+    ],
+    "real_creeping_contact_hp_loss": 0,
+    "real_creeping_speed_mps": 0.65,
+    "malenia_three_complete_kill_settle_reset_cycles": true,
+    "giant_mounted_weapons_damage": true,
+    "giant_mounted_rocket_defeat_and_reset": true,
+    "giant_final_corpse_settle_and_reset": true,
+    "giant_contact_on_occupied_buzzard": true,
+    "malenia_contact_on_player": true,
+    "native_mounted_gun_burst_damage": 2490,
+    "false_kinetic_events_during_final_gun_burst": 0,
+    "player_death_cleanup_observed": true,
+    "fxaa_live_capture": true
+  },
+  "performance_samples": [
+    {
+      "candidate": "20261005-completion",
+      "scene": "Malenia",
+      "frames": 921,
+      "mean_ms": 32.614,
+      "p95_ms": 37.249,
+      "p99_ms": 44.459,
+      "fxaa": false
+    },
+    {
+      "candidate": "20261005-completion",
+      "scene": "Fire Giant and Buzzard",
+      "frames": 808,
+      "mean_ms": 37.178,
+      "p95_ms": 46.195,
+      "p99_ms": 49.061,
+      "fxaa": false
+    },
+    {
+      "candidate": "20261005-seated-state",
+      "scene": "Malenia",
+      "frames": 937,
+      "mean_ms": 32.068,
+      "p95_ms": 36.263,
+      "p99_ms": 39.571,
+      "fxaa": true
+    }
+  ],
+  "performance_scope": "M3 Ultra; exclusive game;30-second native frame samples;1920x1080 captured window, launch override; saved VSync2/SamplingMode0; exact internal scaling not independently established"
 }
