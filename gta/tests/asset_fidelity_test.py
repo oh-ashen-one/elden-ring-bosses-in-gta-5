@@ -13,6 +13,7 @@ from scale_roster import scale_drawable,scale_animation
 from fur_material import bake
 from cutout_fidelity import remap_alpha
 from hair_shadow import bake_shadow
+from two_sided_surfaces import add_back_surface
 from material_fidelity import fields,sample
 from correct_bind_heads import correct,source_axes
 from rebuild_animation import TargetRig,matrix,world_matrices,Y_UP_TO_Z_UP
@@ -20,6 +21,16 @@ from texture_dictionaries import partition,parenting
 from animation_conversion_test import drawable
 
 class Fidelity(unittest.TestCase):
+    def test_two_sided_cloth_keeps_front_and_opposite_winding_with_identical_skin(self):
+        g=E.fromstring('<Item><VertexBuffer><Layout><Position/><BlendWeights/><BlendIndices/><Normal/><TexCoord0/><Tangent/></Layout><Data>0 0 0 128 127 0 0 7 9 0 0 0 0 1 0 0 1 0 0 1\n1 0 0 255 0 0 0 9 0 0 0 0 0 1 1 0 1 0 0 1\n0 1 0 255 0 0 0 7 0 0 0 0 0 1 0 1 1 0 0 1</Data></VertexBuffer><IndexBuffer><Data>0 1 2</Data></IndexBuffer></Item>')
+        before={k:v.copy() for k,v in fields(g).items()};report=add_back_surface(g);after=fields(g)
+        for key in ['Position','BlendWeights','BlendIndices','TexCoord0']:
+            np.testing.assert_array_equal(after[key][:3],before[key]);np.testing.assert_array_equal(after[key][3:],before[key])
+        np.testing.assert_array_equal(after['Normal'][3:],-before['Normal']);np.testing.assert_array_equal(after['Tangent'][3:,-1],-before['Tangent'][:,-1])
+        tri=np.fromstring(g.findtext('IndexBuffer/Data'),sep=' ',dtype=int).reshape(-1,3);p=after['Position'][tri]
+        cross=np.cross(p[:,1]-p[:,0],p[:,2]-p[:,0]);self.assertGreater(cross[0,2],0);self.assertLess(cross[1,2],0)
+        self.assertEqual(report['added_reverse_triangles'],1)
+
     def test_authored_hair_shadow_uses_secondary_uv_and_preserves_strand_alpha(self):
         g=E.fromstring('<Item><VertexBuffer><Layout><Position/><TexCoord0/><TexCoord1/></Layout><Data>0 0 0 0 0 .01 .01\n1 0 0 1 0 .01 .99\n0 1 0 0 1 .99 .01</Data></VertexBuffer><IndexBuffer><Data>0 1 2</Data></IndexBuffer></Item>')
         p=np.full((16,16,4),[190,98,83,140],np.uint8);mask=np.full((16,16,4),255,np.uint8);mask[:8,:,:3]=40

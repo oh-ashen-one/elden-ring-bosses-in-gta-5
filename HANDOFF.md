@@ -1,6 +1,14 @@
 # GTA V × Elden Ring handoff
 
-Updated 2026-10-05. **Actual native combat checks completed; original assets with GTA-side behavior, ready for owner subjective review.** No full ER AI/moveset/renderer-parity claim.
+Updated 2026-10-05. **Owner rejected the visible cape cut. A focused two-sided-surface candidate is staged; GTA must stay closed while another session uses the M3.** Previous combat evidence remains valid, but the cape correction is not visually verified.
+
+## Latest cape repair / owner launch hold
+
+- The owner said Malenia's cape looked cut in half in `final-fxaa-malenia.png`, then explicitly said not to open GTA because another session is using the M3. No game/GPU process was launched, no slot was claimed and no active game payload was replaced during this repair.
+- Both source cape meshes exist (upper923/lower270 source vertices), with20 exact shared seam points. Those anchors remain coincident in the sampled original idle/run/attack/stagger/death poses. The source face sets disable backface culling, and the glTF retained doubleSided; conversion to the ordinary GTA shader lost that surface behavior. This is a confirmed conversion gap and a focused hypothesis for the visible cut, pending the same-angle live comparison.
+- `two_sided_surfaces.py` preserves the existing front surfaces and adds reverse-facing copies with identical positions/UVs/weights and opposite normals/tangent handedness. Only Malenia's two cape materials are selected. Added1664 reverse triangles; original animations/bones/textures untouched. Twelve asset-fidelity fixtures pass.
+- Private candidate inputs: `SourceAssets/roster-20261005/gta-cape-two-sided`; native `dlc-cape-two-sided`; DLC SHA256641824cb2c5093f8eaf6451699f47283692aa74c9dadc9e36df0e835b8ab4170. Independent archive audit passes. Native-resource comparison confirms ONLY `ergt_malenia.ydr` changed; other models, textures and all clips are byte-identical.
+- The installed preview remains `20261005-seated-state` below. The staged candidate is separate and unverified in GTA. Next, after the owner releases the M3: revalidate guards, reversible install, capture the exact side/back angle plus a moving pose, and compare. Do not call the cape repaired until those actual frames confirm it. No launch or reminder is queued.
 
 ## Ownership / current installation
 

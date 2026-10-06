@@ -76,9 +76,10 @@ def main():
     run(sys.executable,tools/'split_large_rig.py','--converted',output/'gta-scaled','--roster',roster_path,'--out',output/'gta-parts')
     run(sys.executable,tools/'cutout_fidelity.py','--converted',output/'gta-parts','--source-root',output,'--roster',output/'gta-parts/render-roster.json','--out',output/'gta-cutouts')
     run(sys.executable,tools/'hair_shadow.py','--converted',output/'gta-cutouts','--geometry',output/'gta','--source-root',output,'--roster',output/'gta-parts/render-roster.json','--out',output/'gta-shadows')
+    run(sys.executable,tools/'two_sided_surfaces.py','--converted',output/'gta-shadows','--roster',roster_path,'--out',output/'gta-surfaces')
     run(sys.executable,tools/'export_roster_motion.py','--root',output,'--roster',roster_path,'--out',output/'motion')
     dotnet=cache/'dotnet/dotnet';bridge=repo/'build/cw-bridge/CodeWalkerBridge.dll'
-    run(sys.executable,tools/'build_dlc.py','--converted',output/'gta-shadows','--out',output/'dlc-build','--dotnet',dotnet,'--bridge',bridge,'--roster',output/'gta-parts/render-roster.json','--external-textures')
+    run(sys.executable,tools/'build_dlc.py','--converted',output/'gta-surfaces','--out',output/'dlc-build','--dotnet',dotnet,'--bridge',bridge,'--roster',output/'gta-parts/render-roster.json','--external-textures')
     run(sys.executable,tools/'rpf_audit.py',output/'dlc-build/dlc.rpf','--out',output/'archive-audit.json')
     run(dotnet,bridge,"prepare-dlclist",args.gta_game.resolve(),output/"newmods/common/data/dlclist.xml")
     print("Private owned-asset DLC prepared. No game launched. Runtime verification is still required.")
