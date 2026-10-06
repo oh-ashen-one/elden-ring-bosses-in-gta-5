@@ -1,6 +1,14 @@
 # GTA V × Elden Ring handoff
 
-Updated 2026-10-06. **Owner declared this project complete and explicitly authorized publication of all project code to the main public repository.** Publish the completed source; do not launch GTA or resume implementation/testing unless requested. Publication approval is not new rendered-gameplay evidence.
+Updated 2026-10-06. **Project closed at the owner's request; source published.** PR3 is merged, `main` is the public default, and source release `v0.1.0` is live. Do not launch GTA or resume implementation/testing unless requested. Publication approval is not new rendered-gameplay evidence.
+
+## Verified publication result
+
+- Public repository: `https://github.com/oh-ashen-one/elden-ring-bosses-in-gta-5`, visibilityPUBLIC, default branch`main`.
+- PR3 merged at2026-10-06T20:20:40Z; merge commit`e38c7e429db3005370e4a24413eb2d52a74458dd` contains the complete multi-boss branch and publication fixes. Both Rust and GTA GitHub check jobs passed before merge, including all24 GTA suites.
+- Published source release: `https://github.com/oh-ashen-one/elden-ring-bosses-in-gta-5/releases/tag/v0.1.0`, not draft/prerelease. Its tag points to the verified merge commit. Any later publication-receipt-only commit does not change the released game implementation.
+- Legacy Mac/Terminal release remains historical and is labeled accordingly; the new source release is the latest. No proprietary assets or playable private package were uploaded. The installed mod profile was left untouched.
+- No remaining implementation, runtime run, reminder or background task is queued by this thread. Future work requires a new owner request.
 
 ## Public release authorization and handoff
 
