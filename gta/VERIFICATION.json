@@ -56,5 +56,8 @@
   },
   "binary_source_commit": "fea2e2741d0ab86b8d9a81b55d99df1b499f7987",
   "asi_sha256": "d65b1699c90690a2d2b25d2abe8ef14ab2017575d4ef97a9e85d669f53f36ff7",
-  "payload_upgrade_backup": "Backups/upgrade-20261006T195304Z-56517517"
+  "payload_upgrade_backup": "Backups/upgrade-20261006T195304Z-56517517",
+  "owner_project_complete": true,
+  "owner_publication_approved": "2026-10-06",
+  "publication_scope": "Public source release; no additional rendered gameplay verification inferred from release approval"
 }

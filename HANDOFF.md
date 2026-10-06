@@ -1,6 +1,16 @@
 # GTA V × Elden Ring handoff
 
-Updated 2026-10-06. **The owner liked the earlier playable build and authorized all five single-player enhancements, excluding co-op. Do not open GTA for testing: the owner will do it.** New source/Windows build checks pass; the candidate is installed reversibly. Runtime acceptance of the new features is pending.
+Updated 2026-10-06. **Owner declared this project complete and explicitly authorized publication of all project code to the main public repository.** Publish the completed source; do not launch GTA or resume implementation/testing unless requested. Publication approval is not new rendered-gameplay evidence.
+
+## Public release authorization and handoff
+
+- Owner instruction: “this project here is completely done. Push all the code to the main public GitHubs that we have and make sure it's ready to be shared with people.” This authorizes merging PR3, creating the conventional `main` branch from that published result and making it the default, and publishing the source release for **this GTA project**. It does not authorize changing unrelated crossover repositories.
+- Canonical public repo: `https://github.com/oh-ashen-one/elden-ring-bosses-in-gta-5`; the old MW2 URL redirects to this same repository. Public entrypoints are `README.md`, `GETTING_STARTED.md` and `CHANGELOG.md`. Target source release: `v0.1.0`.
+- GitHub CI previously lacked NumPy/Pillow/SciPy. The release task adds a pinned source-test environment and waits for actual green GitHub checks before merge. No game/render launch is part of publication.
+- Tracked files and historical protected-extension paths were inspected: no retail archives, converted assets, motion-enabled ASI, DLL/EXE runtimes, saves or keys are included. A bounded credential-pattern scan of tracked content found no matches. Existing upstream source/fonts/catalog data and licenses are retained. Regenerated/private data remains excluded.
+- The existing installed private multi-boss payload stays unchanged, source metadata `bbca12e22c3f48c63e13d9cee336674f5c29ca10`, binary source `fea2e2741d0ab86b8d9a81b55d99df1b499f7987`. Publishing docs/CI does not require reinstalling or reopening GTA. For exact installed source verification, use the recorded candidate revision rather than a later documentation commit.
+- The latest multi-boss/spectacle runtime was not independently rendered, and no second-machine setup is verified. The owner has approved release; keep those evidence boundaries in the docs, without reopening project work automatically.
+- Previous sections below are historical implementation context and earlier permission states; this explicit release authorization supersedes their “merge not authorized” language for this publication.
 
 ## Current multi-boss / material-feedback work
 
