@@ -1,85 +1,59 @@
-# Modern Warfare 2 AI
+# Elden Ring Bosses in GTA 5
 
-An open source experiment in combining **MW2, Minecraft, Skate 3 and Skyrim** through AI-assisted development.
+Fight **Malenia, Starscourge Radahn, Fire Giant and Godfrey inside actual GTA V Story Mode** using GTA guns, explosives, cars and helicopter weapons.
 
-**Current priority: Elden Ring bosses in GTA V**, fought with GTA guns and helicopter weapons. See the [active plan and crossover backlog](docs/CROSSOVER-BACKLOG.md). The earlier Terminal airport prototype is preserved for a later demo.
+This is an open-source mod and local asset-conversion toolkit. The imported Elden Ring models, rigs and animation clips run inside GTA with custom GTA-side encounter behavior. The in-game mod is called **Elden Los Santos**.
 
-> **Status: Mac setup preview.** The imported engine builds as a native Apple Silicon executable. A setup app and tested mission/block rule modules are available. The four-game Terminal mission is not playable yet; real game data and runtime integration/testing are still required.
+## Current status
 
-## GTA V × Elden Ring owner preview
+The core crossover has run on an **M3 Ultra through CrossOver with GTA V Legacy 1.0.3889.0**. Technical gameplay checks covered imported animation, native gun/car/Buzzard damage, attack contacts, stagger, defeat and reset. The owner subsequently reported that the playable build looked great.
 
-Original source and setup tools are under [gta/](gta/README.md). The owner liked the previous playable build with imported bosses, source-timed attacks, GTA car/gun/Buzzard damage, defeat and reset. **The2026-10-06 candidate adds travelling fireballs, gravity traffic, police/SWAT/air support, custom second phases and filming/reset controls. These additions are built and checked offline; the owner will test them in GTA.** See the [feature boundaries](gta/SPECTACLE-20261006.md) and [owner guide](gta/OWNER-TEST.md). Rendering remains a GTA shader adaptation. Retail-derived assets, motion-enabled binaries and third-party runtime files are private.
+The latest **2026-10-06 enhancement build** adds travelling fireballs, gravity-thrown traffic, police/SWAT/helicopter support, custom second phases, filming cameras and quick reset. Its Windows build and 23 offline test suites pass; **these new features still require the owner's in-game playtest**. They are not claimed as verified gameplay or original Elden Ring AI.
 
-## Mac setup preview
+**Start here:** [Setup and build instructions](gta/README.md) · [Playtest guide and controls](gta/OWNER-TEST.md) · [Latest features and limits](gta/SPECTACLE-20261006.md)
 
-- Build the native app with `bash scripts/build-mac.sh`.
-- Run original-code tests with `cargo test --workspace --locked`.
-- The app checks your locally supplied game data and keeps Terminal launch disabled until the required MW2 zone headers are present.
-- No game data is bundled or automatically downloaded. The builder/dragon/mission modules are not yet wired into a retail game session.
+## Bosses and encounters
 
-See [Mac setup](docs/MAC-SETUP.md), [verified build status](docs/BUILD-STATUS.md) and [upstream import provenance](docs/UPSTREAM-IMPORT.md).
+| Boss | Encounter |
+| --- | --- |
+| **Malenia** | Original imported rig/clips, source-timed sword contact, stagger and defeat. |
+| **Starscourge Radahn** | Dual-sword contact, with GTA traffic gravity throws in the new candidate. |
+| **Fire Giant** | Enlarged to approximately 60 metres for helicopter-scale fights; the new candidate adds travelling fireballs and ground shockwaves. |
+| **Godfrey** | Original imported axe animation/contact, with a custom second-phase ground shockwave in the new candidate. |
 
-## The idea: Terminal Playground
+The mod runs one boss at a time. You can explore GTA between encounters; there is no ten-minute play limit. The new city-support and filming features are optional. Co-op is not included.
 
-One map, one player, four sets of possibilities:
+## What you need
 
-- **MW2:** the airport, gunplay, bots, HUD and combat.
-- **Skate 3:** board movement, tricks and selected grind routes through the concourse and aircraft area.
-- **Minecraft:** placeable blocks, ramps and barricades layered onto Terminal.
-- **Skyrim:** an initial creature encounter and a spell or shout, with a dragon over the airport as a later visual target.
+- Your own **GTA V Legacy** and **Elden Ring** installations and locally supplied game assets.
+- The compatible native ASI / Script Hook V setup described in the [technical guide](gta/README.md).
+- The documented local conversion/build tools to produce your own private asset package.
 
-The proposed foundation is [2010 Rust Rewrite Mashup](https://github.com/chasmlol/2010-rust-rewrite-mashup), which already combines IW4L, skating and a Minecraft world. Its Minecraft building currently belongs to its Minecraft map; adding a block layer to Terminal is new work. Skyrim integration is also new work.
+The currently tested host is an M3 Ultra running Windows GTA V through CrossOver. This is a mod for the retail game, not a standalone game download or a native macOS port. The complete setup has not yet been reproduced on a second machine.
 
-[Read the integration plan](docs/TERMINAL-PLAN.md).
+## Code and documentation
 
-The proposed first release is a **ten-minute solo Terminal run**: build a ramp, skate it, earn a dragon killstreak from tricks, then call the strike and extract. The [demo specification](docs/DEMO-SPEC.md) defines the build order, gameplay goals and release checks.
+| Location | Contents |
+| --- | --- |
+| [gta/src/](gta/src/) | Native mod, combat, animation/root motion, damage, city support and filming controls. |
+| [gta/asset-tools/](gta/asset-tools/) | Local extraction, rig/material/animation conversion and DLC packaging. |
+| [gta/tools/](gta/tools/) | Guarded launch, package verification and reversible installation. |
+| [gta/tests/](gta/tests/) | Native API, combat, collision, asset and installation regression checks. |
+| [gta/OWNER-TEST.md](gta/OWNER-TEST.md) | Controls, precise test steps and rollback. |
+| [HANDOFF.md](HANDOFF.md) | Current implementation state and outstanding owner review. |
 
-## Projects our work builds on
+## Fidelity and scope
 
-We credit the research, tools and implementations that make this direction possible. The pinned 2010 Rust Rewrite Mashup is imported under `runtime/`, retaining its source credits, licenses and notices. Other projects remain references unless the import record says otherwise.
+We preserve imported source geometry, rigs and selected animations while adapting them to GTA's renderer and engine. GTA shading, hair/fur, cloth, collision and behavior differ from Elden Ring. This is not a one-to-one port of Elden Ring's renderer, complete boss movesets or AI. The new second phases and crossover abilities are our GTA-side encounter design.
 
-| Project | Authors / maintainers | Intended role |
-| --- | --- | --- |
-| [IW4L](https://github.com/vladtrc/iw4L) | vladtrc and contributors | MW2 runtime, asset loading, gameplay and rendering foundation. |
-| [2010 Rust Rewrite Mashup](https://github.com/chasmlol/2010-rust-rewrite-mashup) | chasmlol and contributors | Candidate starting implementation for MW2, Skate 3 and Minecraft together. |
-| [Skate 3 Rust Engine](https://github.com/SK8-ENGINE/skate-3-rust-engine) | SK8-ENGINE and contributors | Skating, animation, collision and modding references. |
-| [SkyCraft](https://github.com/chasmlol/SkyCraft) | chasmlol and contributors | Reference for interactions between Minecraft and Skyrim; its SKSE/Fabric bridge is not a drop-in IW4L module. |
+## Open source and credits
 
-Upstream authorship, licenses and notices are preserved alongside the code. The import record identifies the exact source revision and our changes. Credit here does not claim that we authored those projects.
+Our original code is [Apache-2.0 licensed](LICENSE). Upstream components retain their own licenses and attribution; see [NOTICE](NOTICE), [UPSTREAMS.json](UPSTREAMS.json), [asset-tool credits](gta/asset-tools/README.md) and the [ER Mario implementation lessons](gta/ER-MARIO-LESSONS.md).
 
-## More projects we studied
+**Retail game files, converted models/textures/animations, generated motion data, motion-enabled binaries, vendor runtimes, saves and credentials are not distributed in this public repository.** Players supply their own game content locally.
 
-These are additional references, not current dependencies:
+This is an unofficial fan project, unaffiliated with Rockstar Games, Take-Two, FromSoftware or Bandai Namco.
 
-- [San Andreas Unity](https://github.com/in0finite/SanAndreasUnity) — GTA San Andreas engine recreation in Unity.
-- [SM64CoopDX](https://github.com/coop-deluxe/sm64coopdx) — Mario 64 multiplayer and Lua modding.
-- [OpenGOAL](https://github.com/open-goal/jak-project) — Jak & Daxter decompilation, tooling and live code editing.
-- [Daggerfall Unity](https://github.com/Interkarma/daggerfall-unity) — a Unity recreation with extensive mod support.
-- [OpenMW](https://github.com/OpenMW/openmw) — Morrowind-compatible engine and world editor.
-- [Unleashed Recompiled](https://github.com/hedge-dev/UnleashedRecomp) — Sonic Unleashed recompilation and modding.
-- [universal-modder](https://github.com/rehan-remade/universal-modder) — modding workflows and a Minecraft/GTA V bridge example.
-- [libsm64](https://github.com/libsm64/libsm64) — Mario movement/rendering as an embeddable library.
+## Earlier prototype history
 
-The [more-games plan](docs/MORE-GAMES.md) covers reusable adapters and an optional CrossOver route for Windows hosts on Mac.
-
-The [source catalog](docs/SOURCES.md) records revisions, license observations, release links and video references. [UPSTREAMS.json](UPSTREAMS.json) is the machine-readable research snapshot.
-
-## First milestones
-
-1. Review the candidate base's component licenses, import eligible code with provenance, and establish a reproducible build on the intended host.
-2. Load Terminal and verify MW2 combat and skating in the same session.
-3. Implement placeable Minecraft blocks on Terminal with consistent collision and persistence.
-4. Add one Skyrim creature and one spell through a documented local asset conversion path.
-5. Verify that combat, skating, blocks and the new encounter interact correctly, then hand over a playable build for owner review.
-
-The baseline compilation and setup app are complete. Rendered baseline verification and the integrated gameplay milestones remain pending game data.
-
-## Open source and game content
-
-Our original contributions are offered under [Apache-2.0](LICENSE). Existing third-party components retain their own licenses; our license does not relicense them.
-
-This repository does not distribute proprietary game executables, maps, models, textures, audio, animations, ISOs or account data. Any needed commercial game content must be supplied locally by the user under the applicable terms. Converted game assets and caches remain local.
-
-This is an unofficial fan project, unaffiliated with Activision, Infinity Ward, EA, Mojang, Microsoft, Bethesda or ZeniMax. Names and trademarks belong to their respective owners.
-
-See [NOTICE](NOTICE), [the integration plan](docs/TERMINAL-PLAN.md) and [HANDOFF.md](HANDOFF.md) for provenance and current status.
+This repository began as **Modern Warfare 2 AI**, exploring an MW2 Terminal airport crossover. That older prototype remains in the history and legacy folders, including `runtime/`, `crates/` and the [Terminal plan](docs/TERMINAL-PLAN.md), with its upstream notices intact. It is not the current GTA mod or its setup path. Other active crossover builds, such as Dark Souls × MW2, are separate projects; the [backlog and ownership notes](docs/CROSSOVER-BACKLOG.md) record that split.

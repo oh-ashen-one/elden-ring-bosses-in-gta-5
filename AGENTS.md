@@ -1,6 +1,6 @@
-# Modern Warfare 2 AI
+# Elden Ring Bosses in GTA 5
 
-Read README.md, gta/README.md, docs/CROSSOVER-BACKLOG.md and HANDOFF.md before continuing. Terminal documents describe an older, preserved prototype.
+Read README.md, gta/README.md, docs/CROSSOVER-BACKLOG.md and HANDOFF.md before continuing. The public repository is `oh-ashen-one/elden-ring-bosses-in-gta-5` (renamed from `modern-warfare-2-ai`). Terminal documents/runtime describe an older, preserved prototype; GTA is the active product.
 
 - The vendored runtime builds on Apple Silicon; a setup app and tested rule modules exist. Retail gameplay and the combined mission are not verified. Read HANDOFF.md before claiming more.
 - On 2026-10-01 the owner prioritized GTA V × Elden Ring: bosses damaged by GTA firearms and helicopter weapons. Read docs/CROSSOVER-BACKLOG.md. Earlier Terminal work is preserved in the backlog.

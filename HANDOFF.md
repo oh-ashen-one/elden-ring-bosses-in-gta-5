@@ -2,6 +2,13 @@
 
 Updated 2026-10-06. **The owner liked the earlier playable build and authorized all five single-player enhancements, excluding co-op. Do not open GTA for testing: the owner will do it.** New source/Windows build checks pass; the candidate is installed reversibly. Runtime acceptance of the new features is pending.
 
+## Public repository identity
+
+- Owner requested a clear GTA/Elden Ring name after finding the stale Terminal landing page. Public repository identity is `oh-ashen-one/elden-ring-bosses-in-gta-5`; this is the same Git history/repository as the earlier `modern-warfare-2-ai`.
+- The intended default branch is the current GTA branch `codex/boss-motion-polish`; the old `codex/terminal-foundation` branch and legacy files are preserved. The root README now leads with GTA, setup, controls, implementation status and source/asset boundaries.
+- This change is repository presentation only. The installed private candidate remains source metadata `6ed0ad8c62a0e96e4e08587e5cdb6fef68523d42`, binary source `ac67e8d02787cc8e61ae2ce223910c596392f8ae`; its payload and game files were not changed. Use that exact source revision for candidate/source verification. No GTA launch is authorized by this rename.
+- Local checkout directory retains its historical name so existing scripts, task attachments and private asset paths keep working. Future implementation should use a fresh `codex/` task branch after this branch becomes the public landing branch; never silently merge default/main.
+
 ## Current enhancement work
 
 - Original thread/branch ownership is unchanged: `codex/boss-motion-polish`; main merge not authorized. M3 Ultra/Mac15,14 verified locally; current hostname `Mac`. Brain3be383eed864 freshly verified. No GTA/engine/GPU launch or reservation during this update.
@@ -27,7 +34,7 @@ The sections below preserve earlier baseline evidence. Their earlier holds, cand
 
 ## Ownership / current installation
 
-- This original GTA thread owns `codex/boss-motion-polish` in `oh-ashen-one/modern-warfare-2-ai`. Task branch pushed; main merge not authorized. The default chat cwd is a different lane: use this authoring checkout explicitly.
+- This original GTA thread owns `codex/boss-motion-polish` in `oh-ashen-one/elden-ring-bosses-in-gta-5`. Task branch pushed; main merge not authorized. The default chat cwd is a different lane: use this authoring checkout explicitly.
 - Owner explicitly authorized all remaining material, vehicle/helicopter, balance and defeat/reset work, actual M3 launches/captures and AppleScript/macOS input specifically for GTA. Other game/benchmark sessions remain untouched. SD migration/reminder remain cancelled.
 - Verified host `Mac`, Mac15,14, M3 Ultra, console midir. Shared brain3be383eed864 refreshed from GitHub this session.
 - Private bundle `~/Applications/EldenLosSantosPreview`; active profile `~/Library/Application Support/EldenLosSantos/Game`; original `Retail` sibling. GTA Legacy1.0.3889.0; retail exe SHA256677e4e355cfbdb13273b1d992407e3c261b3a108dc4dd5c8a0c4c1da651802e5 unchanged.
