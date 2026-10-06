@@ -15,6 +15,22 @@
 *.ba2
 *.iwd
 *.ff
+*.rpf
+*.ydr
+*.ytd
+*.ycd
+*.ytyp
+*.dds
+*.flver
+*.hkx
+*.dcx
+*.bnd
+*.asi
+*.dll
+*.exe
+*.sav
+**/bosses.hpp
+/private-preview/
 
 # Regenerable outputs
 /target/
