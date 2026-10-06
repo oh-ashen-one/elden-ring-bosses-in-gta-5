@@ -1,6 +1,6 @@
 # Elden Los Santos — owner preview
 
-**2026-10-06 city spectacle candidate — owner test required.** The previous build received the owner's “everything here looks great” feedback. This update adds five requested single-player features and the staged two-sided cape correction. **GTA was not opened for this update, as requested.** Source/build checks do not verify its new visuals, AI or balance. Co-op is excluded.
+**2026-10-06 multi-boss battle candidate — owner test required.** The previous build received the owner's “everything here looks great” feedback. This update retains the five single-player enhancements and cape correction, removes the one-boss restriction and adds boss-versus-boss combat. The texture binding audit passed; no texture resolution, shader or image-encoding change was applied. **GTA was not opened for this update, as requested.** Source/build checks do not verify its new visuals, AI or balance. Co-op is excluded.
 
 The previous candidate's actual M3 checks covered car impacts, player/Buzzard weapons, source contact timing, defeat and reset. Those results remain baseline evidence, not a pass for this candidate. Malenia, Starscourge Radahn, the approximately **60m Fire Giant**, and Godfrey are retained with the same source meshes and clips; only the already-staged cape backfaces change the asset package.
 
@@ -15,7 +15,7 @@ Use the **top-row number keys 0–9**. No Fn key is needed. These keys are reser
 | Key | Action |
 | --- | --- |
 | 1 | Select Malenia, Starscourge Radahn, Fire Giant, or Godfrey. |
-| 2 | Spawn the selected creature ahead of you. One active boss at a time while the new heavy roster is validated. |
+| 2 | Spawn the selected creature ahead of you. Repeat to add more bosses, including duplicates. Each spawn searches nearby clear space. |
 | 3 | Remove this mod's creatures. Keeps your helicopter. |
 | 4 | Pause/resume creature aggression. Starts ON. |
 | 5 | Receive a carbine and RPG with ammunition. |
@@ -23,13 +23,23 @@ Use the **top-row number keys 0–9**. No Fn key is needed. These keys are reser
 | 7 | Toggle city support. Starts ON: one police car, one SWAT SUV and one police helicopter, at most seven responders. |
 | 8 | Toggle clean filming HUD. Keeps the boss bar; hold GTA's weapon-wheel key normally when needed. |
 | 9 | Cycle wide, side, detail and normal cameras. Movement/firing, a menu or20 seconds returns control to the gameplay camera. |
-| 0 | Clear and restart the same boss at its original spawn point, with full HP and phase1. Keeps your helicopter; move away from that spawn point first. |
+| 0 | Clear and restart the entire current boss lineup at its original spawn points, with full HP and phase1. Keeps your helicopter; move away from those spawn points first. |
 
 Use a clear outdoor area for the first test. These are animated creature objects with custom GTA-side combat; they are not a port of the Elden Ring executable or its complete AI.
 
 ## Owner play / subjective review
 
-### New features — recommended first pass
+### Multi-boss battle — test this first
+
+1. Find a broad, clear outdoor area. Press4 to pause aggression and7 to turn city support OFF for the first battle.
+2. Press2 to spawn Malenia. Wait until she appears, press1 to choose Radahn and2 to add him. Both should remain present. Add a second Malenia to check duplicate-type support if desired.
+3. Press4 to resume. Nearby bosses should prioritize each other and take damage only from real source-animation contacts or GTA weapon/physics events. They can stagger, die and switch away from defeated targets. When no visible rival remains, the survivor resumes ordinary player/NPC aggression.
+4. Use1/9 for camera focus,8 for clean HUD. Up to four bars are shown plus the total count; hiding extra bars does not remove bosses. Step away from all original spawn positions and press0: the whole lineup should return sequentially with full health.3 clears all bosses/effects.
+5. Try Fire Giant in a larger space. Check that smaller bosses approach his reachable body surface rather than getting stuck trying to enter his torso, that hits reduce the correct boss bar, and that helicopter/gun damage still works.
+
+There is **no fixed boss-count cap in the mod**. Actual GTA entity/streaming capacity and performance still limit the machine; the40-actor offline fixture is not evidence that40 bosses render well. Boss damage is currently tuned separately (12× ordinary melee damage); battle balance needs your playtest. City support and fireball/light effects retain a shared resource budget across the battle.
+
+### City features — regression pass
 
 1. **Radahn traffic:** start beside a broad road with ordinary traffic. Select Radahn with1, spawn with2, then stand about30–50m away. During his original attack animation, up to three nearby ambient cars should lift, then fly toward the position he committed to. Dodge sideways. Your current vehicle, the supplied Buzzard and mission vehicles are excluded. A parking lot/airfield with no ambient cars cannot demonstrate this feature.
 2. **City response:** leave7 ON. After roughly6/18/30 seconds, police, SWAT and helicopter support each attempt to arrive. They use native driving/flying/shooting tasks against the boss, with actual bullet damage. Unsafe road placement or a failed model load skips that unit and logs the reason. Check that they target the boss, that the boss can retaliate, and whether the fight becomes too easy. Press7 to compare without support.
@@ -72,7 +82,7 @@ Steam's existing GTA folder points to the active profile. APFS cloning shares th
 Quit GTA, then run this Studio-local command. It uses the same stopped-game checks and rollback journal; it does not launch GTA:
 
 ```sh
-python3 ~/Applications/EldenLosSantosPreview/Tools/upgrade_profile.py --candidate "$HOME/Library/Application Support/EldenLosSantos/StagedCandidates/20261006-before-city-spectacle"
+python3 ~/Applications/EldenLosSantosPreview/Tools/upgrade_profile.py --candidate "$HOME/Library/Application Support/EldenLosSantos/StagedCandidates/20261006-before-multi-boss"
 ```
 
 ## Restore the unmodified game

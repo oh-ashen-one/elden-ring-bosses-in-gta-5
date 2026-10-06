@@ -8,7 +8,7 @@ This is an open-source mod and local asset-conversion toolkit. The imported Elde
 
 The core crossover has run on an **M3 Ultra through CrossOver with GTA V Legacy 1.0.3889.0**. Technical gameplay checks covered imported animation, native gun/car/Buzzard damage, attack contacts, stagger, defeat and reset. The owner subsequently reported that the playable build looked great.
 
-The latest **2026-10-06 enhancement build** adds travelling fireballs, gravity-thrown traffic, police/SWAT/helicopter support, custom second phases, filming cameras and quick reset. Its Windows build and 23 offline test suites pass; **these new features still require the owner's in-game playtest**. They are not claimed as verified gameplay or original Elden Ring AI.
+The latest **2026-10-06 enhancement build** adds travelling fireballs, gravity-thrown traffic, police/SWAT/helicopter support, custom second phases, filming cameras and quick reset. Its Windows build and offline test suites pass; **these new features still require the owner's in-game playtest**. They are not claimed as verified gameplay or original Elden Ring AI.
 
 **Start here:** [Setup and build instructions](gta/README.md) · [Playtest guide and controls](gta/OWNER-TEST.md) · [Latest features and limits](gta/SPECTACLE-20261006.md)
 
@@ -21,7 +21,7 @@ The latest **2026-10-06 enhancement build** adds travelling fireballs, gravity-t
 | **Fire Giant** | Enlarged to approximately 60 metres for helicopter-scale fights; the new candidate adds travelling fireballs and ground shockwaves. |
 | **Godfrey** | Original imported axe animation/contact, with a custom second-phase ground shockwave in the new candidate. |
 
-The mod runs one boss at a time. You can explore GTA between encounters; there is no ten-minute play limit. The new city-support and filming features are optional. Co-op is not included.
+The new multi-boss candidate removes the fixed boss-count restriction and lets bosses fight each other, including duplicates. It awaits owner runtime testing. You can explore GTA between encounters; there is no ten-minute play limit. The new city-support and filming features are optional. Co-op is not included.
 
 ## What you need
 
@@ -41,6 +41,8 @@ The currently tested host is an M3 Ultra running Windows GTA V through CrossOver
 | [gta/tests/](gta/tests/) | Native API, combat, collision, asset and installation regression checks. |
 | [gta/OWNER-TEST.md](gta/OWNER-TEST.md) | Controls, precise test steps and rollback. |
 | [HANDOFF.md](HANDOFF.md) | Current implementation state and outstanding owner review. |
+
+See the [compiled material audit](gta/MATERIAL-AUDIT-20261006.md) for the texture/shader feedback check.
 
 ## Fidelity and scope
 

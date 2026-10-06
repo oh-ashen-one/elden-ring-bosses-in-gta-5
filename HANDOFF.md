@@ -2,6 +2,16 @@
 
 Updated 2026-10-06. **The owner liked the earlier playable build and authorized all five single-player enhancements, excluding co-op. Do not open GTA for testing: the owner will do it.** New source/Windows build checks pass; the candidate is installed reversibly. Runtime acceptance of the new features is pending.
 
+## Current multi-boss / material-feedback work
+
+- Current task branch: `codex/multi-boss-battles`, based on public default `codex/boss-motion-polish@03f78a6`. Do not merge/push the default branch without owner permission. Original task ownership continues in this checkout.
+- Owner asked for the friend's material advice to be evaluated and for unrestricted boss spawning so they fight each other. Their earlier instruction **not to open GTA for testing** remains in force. M3 Ultra/Mac15,14/hostnameMac verified; no renderer or GPU reservation used.
+- Dynamic stable-address actor pool replaces the one-slot array. New spawns find clear nearby space. Rivals, including duplicate types, get target priority; source weapon sweeps damage their separate health, trigger stagger/death and reject blocked/stale/repeated contacts. Ordinary player/NPC melee damage is unchanged; boss-vs-boss contact uses12× that damage for initial balance.
+- Per-boss gravity/phase/shockwave state; two Radahns cannot control the same car. Fireballs, city units and lights use one shared budget, not a full duplicated city per boss.0 restarts the whole lineup at original anchors;3 clears all; four visible HUD bars plus total count; camera prefers a live selected boss.
+-24 offline suites and Windows x64 compilation pass. Production fixtures exercise40 actor slots/lineup reset, actual rival targeting, duplicate-type damage, wall rejection and independent caster state. This is not a40-boss game/performance test.
+- CodeWalker decoded5 render pieces,156 shader instances and240 textures in56 YTDs. All468 samplers resolve through the native archetype and packed parenting chain; DDS dimensions/mips and shader vectors match. No missing texture fix, global green flip, downscale or recompression is indicated. DLC stays SHA256641824cb2c5093f8eaf6451699f47283692aa74c9dadc9e36df0e835b8ab4170. See `gta/MATERIAL-AUDIT-20261006.md`.
+- Candidate `20261006-multi-boss` is being packaged for a stopped-game reversible upgrade. Prior city candidate must be preserved as `StagedCandidates/20261006-before-multi-boss`. Follow `gta/OWNER-TEST.md` for the owner test; do not launch automatically.
+
 ## Public repository identity
 
 - Owner requested a clear GTA/Elden Ring name after finding the stale Terminal landing page. Public repository identity is `oh-ashen-one/elden-ring-bosses-in-gta-5`; this is the same Git history/repository as the earlier `modern-warfare-2-ai`.
@@ -9,7 +19,7 @@ Updated 2026-10-06. **The owner liked the earlier playable build and authorized 
 - This change is repository presentation only. The installed private candidate remains source metadata `6ed0ad8c62a0e96e4e08587e5cdb6fef68523d42`, binary source `ac67e8d02787cc8e61ae2ce223910c596392f8ae`; its payload and game files were not changed. Use that exact source revision for candidate/source verification. No GTA launch is authorized by this rename.
 - Local checkout directory retains its historical name so existing scripts, task attachments and private asset paths keep working. Future implementation should use a fresh `codex/` task branch after this branch becomes the public landing branch; never silently merge default/main.
 
-## Current enhancement work
+## Earlier single-boss enhancement baseline
 
 - Original thread/branch ownership is unchanged: `codex/boss-motion-polish`; main merge not authorized. M3 Ultra/Mac15,14 verified locally; current hostname `Mac`. Brain3be383eed864 freshly verified. No GTA/engine/GPU launch or reservation during this update.
 - Implemented source-cued Fire Giant travelling fireballs and ground waves, Radahn gravity-thrown ambient cars, bounded native police/SWAT/helicopter support, one custom phase2 transition per boss, clean filming HUD/cameras and original-anchor encounter reset. Co-op excluded.

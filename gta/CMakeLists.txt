@@ -42,6 +42,7 @@ add_test(NAME animation_pose_axes COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRE
 add_test(NAME visual_part_ownership COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/visual_parts_test.py")
 add_test(NAME source_asset_fidelity COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/asset_fidelity_test.py")
 add_test(NAME spectacle_native_lifecycle COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/spectacle_runtime_test.py")
+add_test(NAME compiled_material_binding_audit COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/material_binding_test.py")
 
 if(WIN32)
   if(NOT MINGW)

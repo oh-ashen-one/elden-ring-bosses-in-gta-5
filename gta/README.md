@@ -4,13 +4,15 @@ Original GTA V Story Mode mod code and a local conversion pipeline for owned Eld
 
 **Status: owner liked the previous playable build; the2026-10-06 single-player enhancement candidate needs owner testing.** Added source-cued travelling fireballs, gravity-thrown traffic, bounded police/SWAT/helicopter support, one custom phase2 transition per boss, filming cameras and anchored encounter reset. Co-op is excluded. The owner explicitly reserved this update's runtime testing: GTA was not opened. See [implementation boundaries](SPECTACLE-20261006.md), [coverage](encounter-coverage.json) and [owner test steps](OWNER-TEST.md). Exact ER shaders, cloth, AI and full movesets are not imported. Earlier car/weapon/attack/death/reset evidence remains tied to the earlier candidate.
 
+[Compiled material binding audit](MATERIAL-AUDIT-20261006.md) found all468 references resolve without downscaling or rewriting textures. The multi-boss candidate is source/build-checked only; the owner handles its runtime test.
+
 [ER Mario lessons and concrete application](ER-MARIO-LESSONS.md) records the reference review without claiming its engine hooks work in GTA.
 
 Existing profiles can be updated with `tools/upgrade_profile.py --candidate /path/to/private/candidate --bundle /path/to/installed/preview --root /path/to/profile`. It verifies both packages, holds the profile mutation lock, refuses a running game, backs up changed files, updates package/profile together and rolls back ordinary failures. It never launches GTA or edits retail files, accounts, registry or saves. Preserve the journal/backup until owner acceptance.
 
 ## What is implemented
 
-- Original Windows x64 ASI: creature selection/spawning, one active boss at a time during new-roster validation, health bars, native health-loss/hit-flag damage intake, custom chase/melee/stagger/enrage behavior, source-animation playback, reset, optional weapons and an armed helicopter.
+- Original Windows x64 ASI: creature selection/spawning, multiple bosses and duplicate types, rival targeting and source-timed boss-versus-boss contacts, health bars, native health-loss/hit-flag damage intake, custom chase/melee/stagger/enrage behavior, source-animation playback, reset, optional weapons and an armed helicopter.
 - Offline asset extraction from owned Elden Ring archives, rigged interchange exports, textures/material adaptation, background data-only Blender/Sollumz conversion, native GTA resource conversion and DLC packaging.
 - Twenty selected original animation clips, coarse body collision, and a five-render-archetype local DLC (four bosses; Fire Giant has two synchronized pieces). Assets, textures and game-derived metadata are private, not Git contents.
 - A reversible APFS profile manager that keeps original retail bytes intact and scopes the Wine DLL override to GTA5.exe.
