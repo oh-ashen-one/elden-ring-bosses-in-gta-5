@@ -1,8 +1,20 @@
 # GTA V × Elden Ring handoff
 
-Updated 2026-10-05. **Owner rejected the visible cape cut. A focused two-sided-surface candidate is staged; GTA must stay closed while another session uses the M3.** Previous combat evidence remains valid, but the cape correction is not visually verified.
+Updated2026-10-06. **The owner liked the earlier playable build and authorized all five single-player enhancements, excluding co-op. Do not open GTA for testing: the owner will do it.** New source/Windows build checks pass; the candidate is being packaged for a reversible install. Runtime acceptance of the new features is pending.
 
-## Latest cape repair / owner launch hold
+## Current enhancement work
+
+- Original thread/branch ownership is unchanged: `codex/boss-motion-polish`; main merge not authorized. M3 Ultra/Mac15,14 verified locally; current hostname `Mac`. Brain3be383eed864 freshly verified. No GTA/engine/GPU launch or reservation during this update.
+- Implemented source-cued Fire Giant travelling fireballs and ground waves, Radahn gravity-thrown ambient cars, bounded native police/SWAT/helicopter support, one custom phase2 transition per boss, clean filming HUD/cameras and original-anchor encounter reset. Co-op excluded.
+- Controls1–6 retained;7 toggles city support,8 filming HUD,9 wide/side/detail/normal camera,0 resets encounter. Source-cued means measured native playback crossing the imported contact event, not an arbitrary explosion timer.
+- Existing five source clips/rigs/textures retained. New phase2 behavior is GTA-side design; Malenia gets cadence rather than a new original phase2 moveset. The staged two-sided cape surfaces are included. Owner approval of the old build does not verify that staged correction.
+-23 CTest suites and Windows x64 ASI build pass offline. Production native adapter fixtures cover pending/stale collision results, no target-only explosions, traffic exclusions, failed cleanup, late-result draining, responder native tasks, camera exit and reset. This is not rendered/gameplay evidence.
+- Private candidate planned at `~/Library/Application Support/EldenLosSantos/StagedCandidates/20261006-city-spectacle`. The stopped-game installer will preserve the previous accepted package and ordinary rollback journal. Installed-result receipt follows below once the install actually completes.
+- See `gta/SPECTACLE-20261006.md` for concrete behavior/limits and `gta/OWNER-TEST.md` for precise owner test steps. The next action after installation is **owner playtest**, not an autonomous launch.
+
+The sections below preserve earlier baseline evidence. Their earlier holds, candidate hashes and runtime passes must not be mistaken for a test of the new enhancement build.
+
+## Previous cape repair / superseded launch hold
 
 - The owner said Malenia's cape looked cut in half in `final-fxaa-malenia.png`, then explicitly said not to open GTA because another session is using the M3. No game/GPU process was launched, no slot was claimed and no active game payload was replaced during this repair.
 - Both source cape meshes exist (upper923/lower270 source vertices), with20 exact shared seam points. Those anchors remain coincident in the sampled original idle/run/attack/stagger/death poses. The source face sets disable backface culling, and the glTF retained doubleSided; conversion to the ordinary GTA shader lost that surface behavior. This is a confirmed conversion gap and a focused hypothesis for the visible cut, pending the same-angle live comparison.

@@ -18,7 +18,7 @@ int main() {
     require(boss.tick(16,o).telegraph, "airborne target receives a telegraph");
     o.target={25,0,30};
     bool blast=false;
-    for(int i=0;i<100;i++) { auto d=boss.tick(16,o); if(d.ranged_strike) { blast=true; require(d.aim.x==0,"ranged attack must not track after lock"); } }
+    for(int elapsed=0;elapsed<ranged_spec.windup_ms+32;elapsed+=16) { auto d=boss.tick(16,o); if(d.ranged_strike) { blast=true; require(d.aim.x==0,"ranged attack must not track after lock"); } }
     require(blast, "ranged strike eventually fires");
     boss.reset(&creatures[0]); o.target={1,0,0};o.airborne_target=false;
     boss.tick(16,o);o.combat_enabled=false;boss.tick(16,o);o.combat_enabled=true;

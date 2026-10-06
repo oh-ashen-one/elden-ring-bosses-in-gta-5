@@ -53,7 +53,7 @@ def validate(source):
 
 class NativeContracts(unittest.TestCase):
     def test_both_plugins_match_external_contracts(self):
-        for name in ['encounter_plugin.cpp', 'plugin.cpp', 'encounter_review.hpp']:
+        for name in ['encounter_plugin.cpp', 'plugin.cpp', 'encounter_review.hpp', 'spectacle_runtime.hpp']:
             with self.subTest(source=name):
                 self.assertGreater(validate((ROOT / 'src' / name).read_text()), 30)
 

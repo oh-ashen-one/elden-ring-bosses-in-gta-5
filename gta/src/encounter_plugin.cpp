@@ -6,6 +6,7 @@
 #include "scripthook.hpp"
 #include "combat.hpp"
 #include "motion.hpp"
+#include "spectacle.hpp"
 
 extern "C" __declspec(dllimport) int ergt_runtime_dependency();
 
@@ -15,10 +16,11 @@ HMODULE module_handle = nullptr;
 FILE* log_file = nullptr;
 bool registered = false;
 std::atomic<unsigned> commands{0};
-enum : unsigned { select_next=1, spawn=2, clear_all=4, toggle_combat=8, loadout=16, helicopter=32 };
+enum : unsigned { select_next=1, spawn=2, clear_all=4, toggle_combat=8, loadout=16, helicopter=32,
+    toggle_city=64, toggle_film=128, cycle_camera=256, reset_encounter=512 };
 int selected = 0;
 bool fighting = true;
-constexpr char controls[] = "1 select | 2 spawn | 3 clear | 4 combat | 5 loadout | 6 helicopter";
+constexpr char controls[] = "1 boss | 2 spawn | 3 clear | 4 combat | 5 guns | 6 heli | 7 city | 8 film | 9 camera | 0 reset";
 char notice[192] = "Choose a creature with 1, then press 2 to spawn. Creatures spawn aggressive. 4 pauses combat.";
 
 struct Actor {
@@ -101,6 +103,9 @@ struct Pending {
     std::uint32_t started = 0;
     bool model_ready = false;
     std::uint32_t child_hash=0;
+    bool use_anchor=false;
+    ergt::Vec3 anchor{};
+    float heading=0;
 } pending;
 void release_pending() {
     if(pending.hash)hook.invoke(0xE532F5D78798DAABULL,pending.hash);
@@ -155,7 +160,7 @@ void initialize_log() {
     log_file=_wfopen(path,L"a");
     std::wcscpy(slash+1,L"EldenLosSantos.import-check.request");
     std::wcscpy(diagnostic_request_path,path);
-    record("loaded_encounter_vehicle_review_20261005");
+    record("loaded_city_spectacle_20261006");
 }
 void text(float x,float y,const char* line,float scale=0.32f) {
     hook.invoke(0x66E0276CC5F6B9DAULL,0);
@@ -181,7 +186,7 @@ void animate(Actor& actor,const char* clip,bool loop) {
     actor.motion=ergt::find_motion(actor.spec->model,clip);actor.motion_cursor={};
     actor.blade_phase=-1;actor.blade_victim_count=0;actor.queued_movement={};
     actor.blade_window=-1;actor.motion_heading=hook.invoke<float>(0xE83D4F9BA2A38914ULL,actor.entity);
-    actor.playback_rate=1;
+    actor.playback_rate=std::strcmp(clip,actor.spec->attack_clip)==0?actor.combat.attack_rate():1.f;
     if(actor.motion && std::strcmp(clip,actor.spec->move_clip)==0) {
         const float speed=ergt::length(ergt::subtract(actor.motion->samples[actor.motion->count-1].root,actor.motion->samples[0].root))/actor.motion->duration;
         if(speed>0.01f)actor.playback_rate=std::clamp(actor.spec->speed*(actor.combat.enraged()?1.25f:1.0f)/speed,0.25f,2.0f);
@@ -252,7 +257,11 @@ void remove_actor(Actor& actor) {
     }
     actor=Actor{};
 }
+void clear_showcase();
+void end_film_camera();
+void remember_boss_spawn(int preset,ergt::Vec3 origin,float heading);
 void clear() {
+    clear_showcase();
     end_review();
     if (pending.active) { release_pending(); }
     if (diagnostic_index>=0) {
@@ -343,6 +352,7 @@ void finish_spawn(int player,std::uint32_t now) {
     }
     if (!pending.vehicle && !hook.invoke<int>(0xD031A9162D01088CULL,spec.dictionary)) return;
     auto p=hook.invoke<ergt::NativeVector>(0x1899F328B0E12848ULL,player,pending.vehicle?12.0f:0.0f,pending.vehicle?18.0f:std::max(18.0f,spec.body_radius*5.0f),0.0f);
+    if(pending.use_anchor) {p.x=pending.anchor.x;p.y=pending.anchor.y;p.z=pending.anchor.z;}
     if (!finite({p.x,p.y,p.z})) {
         record("invalid_spawn_position");
         release_pending();
@@ -401,6 +411,8 @@ void finish_spawn(int player,std::uint32_t now) {
                 hook.invoke(0x166E7CF68597D8B5ULL,entity,10000);
                 hook.invoke(0x6B76DC1F3AE6E6A3ULL,entity,10000,0,0u);
                 slot->native_health=hook.invoke<int>(0xEEF059FAD016D209ULL,entity);
+                if(pending.use_anchor)hook.invoke(0x8E2530AA8ADA980EULL,entity,pending.heading);
+                remember_boss_spawn(pending.preset,{p.x,p.y,z},hook.invoke<float>(0xE83D4F9BA2A38914ULL,entity));
                 animate(*slot,spec.idle_clip,true);
                 std::snprintf(notice,sizeof(notice),"%s spawned. Combat %s (4).",spec.label,fighting?"ON":"OFF");
                 record("creature_created",entity,slot->native_health);
@@ -567,6 +579,8 @@ void read_diagnostic_request(std::uint32_t now) {
     }
 }
 
+#include "spectacle_runtime.hpp"
+
 void observe_damage(Actor& actor,int player,std::uint32_t now) {
     const int health=hook.invoke<int>(0xEEF059FAD016D209ULL,actor.entity);
     float loss=static_cast<float>(std::max(0,actor.native_health-health));
@@ -636,7 +650,10 @@ int choose_target(Actor& actor,int player,std::uint32_t now) {
     };
     consider(player);
     for(int i=0;i<nearby_ped_count;i++) consider(nearby_peds[i]);
-    if(best!=actor.target) {actor.combat.cancel_attack();actor.pose_transition_required=actor.combat.state()!=ergt::CombatState::staggered;actor.target=best;record("target_changed",actor.entity,static_cast<float>(best));}
+    // Keep a committed source attack through a pool scan/closer NPC, unless
+    // its target is actually gone. Otherwise city responders cancel every hit.
+    if(best!=actor.target && valid(actor.target) && (actor.combat.state()==ergt::CombatState::melee_windup||actor.combat.state()==ergt::CombatState::ranged_windup||actor.combat.state()==ergt::CombatState::recovering))return actor.target;
+    if(best!=actor.target) {actor.combat.cancel_attack();actor.pose_transition_required=actor.combat.state()!=ergt::CombatState::staggered&&actor.combat.state()!=ergt::CombatState::phase_transition;actor.target=best;record("target_changed",actor.entity,static_cast<float>(best));}
     return best;
 }
 void move_with_collision(Actor& actor,ergt::Vec3 desired,std::uint32_t now,bool enabled) {
@@ -807,7 +824,8 @@ void update_actor(Actor& actor,int player,int,std::uint32_t now,int dt) {
     const bool alive=exists(target_entity) && !hook.invoke<int>(0x3317DEDB88C95038ULL,target_entity,true);
     const auto target=alive?coords(target_entity):position;
     const bool sight=alive && hook.invoke<int>(0xFCDFF7B72D23A1ACULL,actor.entity,target_entity,17);
-    const bool airborne=alive && hook.invoke<int>(0x298B91AE825E5705ULL,target_entity);
+    const int target_car=alive&&hook.invoke<int>(0x997ABD671D25CA0BULL,target_entity,false)?hook.invoke<int>(0x9A9112A0FE9A4713ULL,target_entity,false):0;
+    const bool airborne=alive && (hook.invoke<int>(0x298B91AE825E5705ULL,target_entity)||(exists(target_car)&&hook.invoke<float>(0x1DD55701034110E5ULL,target_car)>8.f));
     const bool impact_recovery=now-actor.last_impact<700;
     auto decision=actor.combat.tick(dt,{position,target,alive,sight,fighting,airborne});
     const auto state=actor.combat.state();
@@ -882,7 +900,7 @@ void update_actor(Actor& actor,int player,int,std::uint32_t now,int dt) {
         ergt::Vec3 root_delta{};
         const bool advancing=actor.motion_cursor.advance(*actor.motion,phase,actor.clip_loop,dt*0.001f*actor.playback_rate+0.08f,root_delta);
         const bool moving=state==ergt::CombatState::chasing || (actor.melee_clip && (state==ergt::CombatState::melee_windup || state==ergt::CombatState::recovering));
-        const bool reacting=state==ergt::CombatState::staggered || state==ergt::CombatState::defeated;
+        const bool reacting=state==ergt::CombatState::staggered || state==ergt::CombatState::defeated || state==ergt::CombatState::phase_transition;
         const bool enabled=(reacting || (moving && fighting && alive)) && !impact_recovery && !actor.corpse_settled && actor.animation_accepted;
         if(!advancing || !hook.invoke<int>(0x1F0B79228E461EC9ULL,actor.entity,actor.spec->dictionary,actor.active_clip,3))root_delta={};
         move_with_collision(actor,ergt::rotate_heading(root_delta,actor.motion_heading),now,enabled);
@@ -895,13 +913,11 @@ void update_actor(Actor& actor,int player,int,std::uint32_t now,int dt) {
             if(std::abs(z-position.z)<1.5f) hook.invoke(0x239A3351AC1DA385ULL,actor.entity,x,y,z,true,true,false);
         }
     }
-    if(decision.telegraph && target_entity==player) marker(decision.aim);
+    // Ranged release comes from the original animation's source contact cue
+    // in tick_showcase_actor, never an explosion at a timer-predicted target.
+    if(decision.telegraph && target_entity==player && !show.film) marker(decision.aim);
     if(decision.melee_strike && !actor.motion && !impact_recovery && attack_playback_ready(actor,"melee",position,target,now)) strike_nearby(actor,target_entity,position,target);
-    if(decision.ranged_strike && !impact_recovery && attack_playback_ready(actor,"ranged_area",position,decision.aim,now)) {
-        const auto p=decision.aim;
-        hook.invoke(0xE3AD2BDBAEE269ACULL,p.x,p.y,p.z,0,0.35f,true,false,0.15f,false);
-        record("ranged_strike",actor.entity);
-    }
+    tick_showcase_actor(actor,player,now,dt);
     const float ratio=actor.combat.ratio();
     actor.trail_health=std::max(ratio,actor.trail_health-dt*0.00015f);
 }
@@ -922,7 +938,7 @@ void boss_hud() {
         if(trail>0) rect(left+trail/2,y+0.028f,trail,0.009f,178,135,78,240);
         if(fill>0) rect(left+fill/2,y+0.028f,fill,0.009f,126,25,29,255);
         if(actor.combat.state()==ergt::CombatState::defeated) text(0.68f,y-0.009f,"DEFEATED",0.25f);
-        else if(actor.combat.enraged()) text(0.69f,y-0.009f,"ENRAGED",0.25f);
+        else if(actor.combat.second_phase()) text(0.69f,y-0.009f,"PHASE II",0.25f);
         row++;
     }
 }
@@ -936,6 +952,10 @@ void keyboard(DWORD key,WORD,BYTE,BOOL,BOOL alt,BOOL repeated,BOOL up) {
     else if(key=='4') flag=toggle_combat;
     else if(key=='5') flag=loadout;
     else if(key=='6') flag=helicopter;
+    else if(key=='7') flag=toggle_city;
+    else if(key=='8') flag=toggle_film;
+    else if(key=='9') flag=cycle_camera;
+    else if(key=='0') flag=reset_encounter;
     commands.fetch_or(flag);
 }
 void run() {
@@ -947,19 +967,24 @@ void run() {
         const int dt=static_cast<int>(std::min<std::uint32_t>(250,now-last)); last=now;
         if (hook.invoke<int>(0x9DE624D2FC4B603FULL) || hook.invoke<int>(0xB0034A223497FFCBULL) ||
             hook.invoke<int>(0x991251AFC3981F84ULL)) {
-            end_review(); commands.store(0); hook.wait(0); continue;
+            end_review();clear_showcase();commands.store(0); hook.wait(0); continue;
         }
         const int player=hook.invoke<int>(0xD80958FC74E988A6ULL);
-        if (!exists(player)) { end_review(); commands.store(0); hook.wait(0); continue; }
+        if (!exists(player)) { end_review();end_film_camera(); commands.store(0); hook.wait(0); continue; }
+        if(hook.invoke<int>(0x3317DEDB88C95038ULL,player,true)) {
+            if(actors[0].entity||pending.active||show.boss||show.camera)clear();
+            commands.store(0);hook.wait(0);continue;
+        }
         // Reserve top-row 1-6 for the mod without also selecting GTA weapons.
         // The regular weapon wheel and controller bindings remain available.
-        for (const int control:{157,158,160,164,165,159}) hook.invoke(0xFE99B66D079CF6BCULL,0,control,true);
+        for (const int control:{157,158,160,164,165,159,161,162,163}) hook.invoke(0xFE99B66D079CF6BCULL,0,control,true);
         const unsigned command=commands.exchange(0);
         if(command) {qa.fire_until=0;qa.creep_until=0;end_review();hud_until=now+6000;}
         scan_world(player,now);
         if (command&select_next) selected=(selected+1)%static_cast<int>(ergt::creatures.size());
         read_diagnostic_request(now);
         if (command&clear_all) clear();
+        else if(command&reset_encounter)request_encounter_reset(now);
         else if (command&spawn) begin_spawn(false,now);
         if (command&toggle_combat) {
             fighting=!fighting;
@@ -967,17 +992,25 @@ void run() {
             record(fighting?"combat_on":"combat_off");
         }
         if (command&helicopter) begin_spawn(true,now);
+        if(command&toggle_city){show.city=!show.city;if(!show.city)clear_responders();std::snprintf(notice,sizeof(notice),"City support %s (7).",show.city?"ON":"OFF");}
+        if(command&toggle_film){show.film=!show.film;if(!show.film)end_film_camera();}
+        if(command&cycle_camera){
+            const int view=(show.view+1)%4;end_film_camera();show.view=view;show.camera_until=now+20000;
+            std::snprintf(notice,sizeof(notice),"Camera %s. Movement, firing or 20 seconds restores gameplay.",view==0?"OFF":view==1?"WIDE":view==2?"SIDE":"DETAIL");
+        } else if(command)end_film_camera();
         if (command&loadout) {
             hook.invoke(0xBF0FD6E56C964FCBULL,player,hash("WEAPON_CARBINERIFLE"),360,false,true);
             hook.invoke(0xBF0FD6E56C964FCBULL,player,hash("WEAPON_RPG"),20,false,false);
             std::snprintf(notice,sizeof(notice),"Carbine and RPG supplied.");
         }
+        tick_encounter_reset(now);
         finish_spawn(player,now);
         tick_reference_probe(player,now);
         tick_diagnostics(player,now);
         const int vehicle=hook.invoke<int>(0x997ABD671D25CA0BULL,player,false)?hook.invoke<int>(0x9A9112A0FE9A4713ULL,player,false):0;
         for (auto& actor:actors) update_actor(actor,player,vehicle,now,dt);
-        if(now<hud_until || pending.active) {
+        if(!actors[0].entity){if(show.boss)clear_showcase();tick_fireballs(now,dt,false);}
+        if(!show.film && (now<hud_until || pending.active)) {
             char title[160];
             std::snprintf(title,sizeof(title),"ELDEN LOS SANTOS   |   %s   |   %s",ergt::creatures[selected].label,fighting?"AGGRESSIVE":"COMBAT PAUSED");
             text(0.025f,0.025f,title,0.32f);text(0.025f,0.055f,notice,0.28f);
@@ -987,7 +1020,7 @@ void run() {
         tick_encounter_review(player,now);
         tick_review_weapon(player,now);
         tick_review(now);
-        boss_hud();
+        tick_film(player,now);boss_hud();
         hook.wait(0);
     }
 }

@@ -2,7 +2,7 @@
 
 Original GTA V Story Mode mod code and a local conversion pipeline for owned Elden Ring creatures. Current characters: **Malenia, Starscourge Radahn, Fire Giant, Godfrey**.
 
-**Status: native gameplay mechanics tested on the M3, owner subjective review pending.** Malenia and the approximately60m Fire Giant received real car/weapon/attack/death/reset checks. Three complete Malenia kill cycles passed; giant mounted-weapon damage, an outgoing contact on the occupied Buzzard and defeat/reset were observed. Slow contact does not drainHP. Source alpha thresholds, mip coverage and Malenia's omitted hair-shadow atlas are now adapted. Radahn/Godfrey render, but have less encounter coverage. See [diagnosis](VISUAL-REPAIR-20261005.md), [coverage](encounter-coverage.json) and [owner guide](OWNER-TEST.md). Exact ER shaders, cloth, AI and full movesets are not imported.
+**Status: owner liked the previous playable build; the2026-10-06 single-player enhancement candidate needs owner testing.** Added source-cued travelling fireballs, gravity-thrown traffic, bounded police/SWAT/helicopter support, one custom phase2 transition per boss, filming cameras and anchored encounter reset. Co-op is excluded. The owner explicitly reserved this update's runtime testing: GTA was not opened. See [implementation boundaries](SPECTACLE-20261006.md), [coverage](encounter-coverage.json) and [owner test steps](OWNER-TEST.md). Exact ER shaders, cloth, AI and full movesets are not imported. Earlier car/weapon/attack/death/reset evidence remains tied to the earlier candidate.
 
 [ER Mario lessons and concrete application](ER-MARIO-LESSONS.md) records the reference review without claiming its engine hooks work in GTA.
 

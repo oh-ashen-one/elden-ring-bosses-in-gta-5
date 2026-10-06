@@ -8,7 +8,7 @@ An open source experiment in combining **MW2, Minecraft, Skate 3 and Skyrim** th
 
 ## GTA V × Elden Ring owner preview
 
-Original source and setup tools are now under [gta/](gta/README.md). A private local preview contains converted Elden Ring boss assets, custom GTA-side combat, and a reversible profile. **Actual M3 gameplay checks now cover imported animation-phase attacks, native car/gun/RPG/Buzzard damage, slow-contact filtering, source death and repeatable reset. Malenia completed three kill/reset cycles; the approximately60m Fire Giant took mounted-weapon damage, struck an occupied helicopter and was defeated/reset. Source hair/opacity mapping was improved. Rendering remains a GTA shader adaptation; final appearance/fun and whole-roster balance are not declared passed.** Read the [owner guide](gta/OWNER-TEST.md) for controls and known limits. Retail-derived assets and third-party runtime files are not distributed in this repository.
+Original source and setup tools are under [gta/](gta/README.md). The owner liked the previous playable build with imported bosses, source-timed attacks, GTA car/gun/Buzzard damage, defeat and reset. **The2026-10-06 candidate adds travelling fireballs, gravity traffic, police/SWAT/air support, custom second phases and filming/reset controls. These additions are built and checked offline; the owner will test them in GTA.** See the [feature boundaries](gta/SPECTACLE-20261006.md) and [owner guide](gta/OWNER-TEST.md). Rendering remains a GTA shader adaptation. Retail-derived assets, motion-enabled binaries and third-party runtime files are private.
 
 ## Mac setup preview
 

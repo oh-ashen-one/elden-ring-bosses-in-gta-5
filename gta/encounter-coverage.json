@@ -1,6 +1,6 @@
 {
-  "candidate": "20261005-seated-state",
-  "scope": "Bounded actual GTA mechanics verified for Malenia and Fire Giant; subjective acceptance and full roster balance pending",
+  "candidate": "20261006-city-spectacle",
+  "scope": "Five single-player enhancements; owner requested no runtime launch. Offline checks only for this candidate.",
   "bosses": [
     {
       "character": "c2120",
@@ -97,46 +97,16 @@
   "active_actor_limit": 1,
   "source_attack_events": "Original owned TAE AttackBehavior intervals; native phase contact sampling",
   "source_clips_per_boss": 5,
-  "ranged_attacks": false,
+  "ranged_attacks": "Implemented GTA fireballs and gravity traffic; runtime unverified",
   "technical_runtime_verified": false,
   "subjective_acceptance": false,
   "known_limits": [
-    "GTA renderer adaptations: hair/fur/ghost lighting and UV flattening differ from ER",
-    "No original AI, cloth physics, sounds, VFX, phase2 or full movesets",
-    "Coarse body collision; no pathfinding; large open area required for giant",
-    "Subjective controls, difficulty and video-quality acceptance pending",
-    "Radahn/Godfrey have rendered-spawn coverage; full encounter balance not verified"
+    "New native AI, projectile visuals, balance, camera and performance await owner playtest",
+    "Original Elden Ring AI/full movesets/cloth/VFX are not imported",
+    "Malenia phase2 changes cadence; no new source attacks",
+    "Giant has conservative collision movement, no building navigation/destruction",
+    "Two-sided cape correction is installed with this candidate but still needs visual review"
   ],
-  "technical_runtime_checks": {
-    "four_bosses_rendered": true,
-    "malenia_phase_driven_npc_blade_contacts": 4,
-    "malenia_stagger_playback": true,
-    "three_malenia_create_clear_cycles": true,
-    "giant_child_create_clear": true,
-    "giant_elevated_native_projectile_target_height_m": 47.84,
-    "giant_native_rifle_damage": 24,
-    "giant_native_rpg_applied_damage": 1600,
-    "complete_fight": "Technical incoming/outgoing contact, damage, defeat, cleanup and reset; no full original moveset claim",
-    "manual_vehicle_helicopter_combat": "Native engine vehicle/weapon actions plus keyboard throttle; no human balance verdict",
-    "death": "Source kneeling/collapse and settled bodies observed; giant standing collision cleanup verified by runtime event",
-    "performance_benchmark": "Bounded game-reported frame-time samples, not uncapped GPU performance",
-    "real_sultan_impact_damage": [
-      369.66,
-      39.85
-    ],
-    "real_creeping_contact_hp_loss": 0,
-    "real_creeping_speed_mps": 0.65,
-    "malenia_three_complete_kill_settle_reset_cycles": true,
-    "giant_mounted_weapons_damage": true,
-    "giant_mounted_rocket_defeat_and_reset": true,
-    "giant_final_corpse_settle_and_reset": true,
-    "giant_contact_on_occupied_buzzard": true,
-    "malenia_contact_on_player": true,
-    "native_mounted_gun_burst_damage": 2490,
-    "false_kinetic_events_during_final_gun_burst": 0,
-    "player_death_cleanup_observed": true,
-    "fxaa_live_capture": true
-  },
   "performance_samples": [
     {
       "candidate": "20261005-completion",
@@ -166,5 +136,53 @@
       "fxaa": true
     }
   ],
-  "performance_scope": "M3 Ultra; exclusive game;30-second native frame samples;1920x1080 captured window, launch override; saved VSync2/SamplingMode0; exact internal scaling not independently established"
+  "performance_scope": "M3 Ultra; exclusive game;30-second native frame samples;1920x1080 captured window, launch override; saved VSync2/SamplingMode0; exact internal scaling not independently established",
+  "previous_candidate": "20261005-seated-state",
+  "previous_owner_feedback": "Everything here looks great; requested enhancements after playing the earlier candidate.",
+  "baseline_technical_runtime_checks": {
+    "candidate": "20261005-seated-state",
+    "checks": {
+      "four_bosses_rendered": true,
+      "malenia_phase_driven_npc_blade_contacts": 4,
+      "malenia_stagger_playback": true,
+      "three_malenia_create_clear_cycles": true,
+      "giant_child_create_clear": true,
+      "giant_elevated_native_projectile_target_height_m": 47.84,
+      "giant_native_rifle_damage": 24,
+      "giant_native_rpg_applied_damage": 1600,
+      "complete_fight": "Technical incoming/outgoing contact, damage, defeat, cleanup and reset; no full original moveset claim",
+      "manual_vehicle_helicopter_combat": "Native engine vehicle/weapon actions plus keyboard throttle; no human balance verdict",
+      "death": "Source kneeling/collapse and settled bodies observed; giant standing collision cleanup verified by runtime event",
+      "performance_benchmark": "Bounded game-reported frame-time samples, not uncapped GPU performance",
+      "real_sultan_impact_damage": [
+        369.66,
+        39.85
+      ],
+      "real_creeping_contact_hp_loss": 0,
+      "real_creeping_speed_mps": 0.65,
+      "malenia_three_complete_kill_settle_reset_cycles": true,
+      "giant_mounted_weapons_damage": true,
+      "giant_mounted_rocket_defeat_and_reset": true,
+      "giant_final_corpse_settle_and_reset": true,
+      "giant_contact_on_occupied_buzzard": true,
+      "malenia_contact_on_player": true,
+      "native_mounted_gun_burst_damage": 2490,
+      "false_kinetic_events_during_final_gun_burst": 0,
+      "player_death_cleanup_observed": true,
+      "fxaa_live_capture": true
+    }
+  },
+  "enhancements": {
+    "fire_giant_projectiles": "source phase + swept collision",
+    "radahn_traffic": "source phase + ballistic velocity",
+    "city_support": {
+      "vehicles": 3,
+      "peds_max": 7,
+      "native_ai_verified_in_game": false
+    },
+    "second_phase": "custom GTA phase, existing source clips",
+    "filming": "HUD plus3 optional cameras",
+    "reset": "original spawn anchor, owned resources only",
+    "co_op": false
+  }
 }

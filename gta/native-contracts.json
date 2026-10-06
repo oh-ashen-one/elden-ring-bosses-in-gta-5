@@ -505,6 +505,106 @@
     "0xD3DBCE61A490BE02": {
       "name": "TASK_LEAVE_VEHICLE",
       "arguments": 3
+    },
+    "0xA7C4F2C6E744A550": {
+      "name": "GET_VEHICLE_MAX_NUMBER_OF_PASSENGERS",
+      "arguments": 1
+    },
+    "0x22AC59A870E6A669": {
+      "name": "IS_VEHICLE_SEAT_FREE",
+      "arguments": 3
+    },
+    "0x12534C348C6CB68B": {
+      "name": "IS_PED_A_PLAYER",
+      "arguments": 1
+    },
+    "0xF2A1B2771A01DBD4": {
+      "name": "DRAW_LIGHT_WITH_RANGE",
+      "arguments": 8
+    },
+    "0xB736A491E64A32CF": {
+      "name": "SET_ENTITY_AS_NO_LONGER_NEEDED",
+      "arguments": 1
+    },
+    "0xB6BA2444AB393DA2": {
+      "name": "REMOVE_RELATIONSHIP_GROUP",
+      "arguments": 1
+    },
+    "0x0A7B270912999B3C": {
+      "name": "IS_ENTITY_A_MISSION_ENTITY",
+      "arguments": 1
+    },
+    "0x7F6DB52EEFC96DF8": {
+      "name": "IS_THIS_MODEL_A_CAR",
+      "arguments": 1
+    },
+    "0xF372BC22FCB88606": {
+      "name": "ADD_RELATIONSHIP_GROUP",
+      "arguments": 2
+    },
+    "0xBF25EB89375A37AD": {
+      "name": "SET_RELATIONSHIP_BETWEEN_GROUPS",
+      "arguments": 3
+    },
+    "0xC80A74AC829DDD92": {
+      "name": "SET_PED_RELATIONSHIP_GROUP_HASH",
+      "arguments": 2
+    },
+    "0x971D38760FBC02EF": {
+      "name": "SET_PED_KEEP_TASK",
+      "arguments": 2
+    },
+    "0x7AEFB85C1D49DEB6": {
+      "name": "SET_PED_ACCURACY",
+      "arguments": 2
+    },
+    "0xC7622C0D36B2FDA8": {
+      "name": "SET_PED_COMBAT_ABILITY",
+      "arguments": 2
+    },
+    "0xFF071FB798B803B0": {
+      "name": "GET_CLOSEST_VEHICLE_NODE_WITH_HEADING",
+      "arguments": 8
+    },
+    "0xF4924635A19EB37D": {
+      "name": "SET_VEHICLE_SIREN",
+      "arguments": 2
+    },
+    "0x7DD959874C1FD534": {
+      "name": "CREATE_PED_INSIDE_VEHICLE",
+      "arguments": 6
+    },
+    "0x158BB33F920D360C": {
+      "name": "TASK_VEHICLE_DRIVE_TO_COORD_LONGRANGE",
+      "arguments": 8
+    },
+    "0xDAD029E187A2BEB4": {
+      "name": "TASK_HELI_MISSION",
+      "arguments": 15
+    },
+    "0x6A071245EB0D1882": {
+      "name": "TASK_GO_TO_ENTITY",
+      "arguments": 7
+    },
+    "0x08DA95E8298AE772": {
+      "name": "TASK_SHOOT_AT_ENTITY",
+      "arguments": 4
+    },
+    "0xF3A21BCD95725A4A": {
+      "name": "IS_CONTROL_PRESSED",
+      "arguments": 2
+    },
+    "0x719FF505F097FD20": {
+      "name": "HIDE_HUD_AND_RADAR_THIS_FRAME",
+      "arguments": 0
+    },
+    "0x7EE9F5D83DD4F90E": {
+      "name": "START_SHAPE_TEST_LOS_PROBE",
+      "arguments": 9
+    },
+    "0x1DD55701034110E5": {
+      "name": "GET_ENTITY_HEIGHT_ABOVE_GROUND",
+      "arguments": 1
     }
   }
 }

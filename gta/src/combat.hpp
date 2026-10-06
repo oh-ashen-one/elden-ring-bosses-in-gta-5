@@ -60,14 +60,14 @@ inline constexpr std::array<CreatureSpec, 4> creatures{{
     {"Malenia", "ergt_malenia", "ergt_malenia_anims", "a000_000020", "a000_002100", "a000_003000", "a000_010000",
      3600, 3.2f, 6.0f, 28, 1150, 1500, 2734, -0.005f,180.0f,"a000_008030",1334,false,.5f,2.8f,4.0f,.12f,nullptr,4.8f},
     {"Starscourge Radahn", "ergt_radahn", "ergt_radahn_anims", "a000_000020", "a000_002100", "a000_003000", "a000_010000",
-     6500,5.2f,9.0f,45,1833,2200,3934,-.04f,180.0f,"a000_008140",1234,false,2.5f,10.3f,12.0f,.45f},
+     6500,5.2f,9.0f,45,1833,2200,3934,-.04f,180.0f,"a000_008140",1234,true,2.5f,10.3f,12.0f,.45f},
     {"Fire Giant", "ergt_firegiant", "ergt_firegiant_anims", "a000_000020", "a000_002100", "a000_003000", "a000_010000",
-     14000,4.0f,46.8f,65,2833,3700,6667,-.598f,180.0f,"a000_008700",7000,false,10.4f,59.8f,67.6f,5.72f,"ergt_firegiant_part1"},
+     14000,4.0f,46.8f,65,2833,3700,6667,-.598f,180.0f,"a000_008700",7000,true,10.4f,59.8f,67.6f,5.72f,"ergt_firegiant_part1"},
     {"Godfrey, First Elden Lord", "ergt_godfrey", "ergt_godfrey_anims", "a000_000020", "a000_002100", "a000_003000", "a000_010000",
      5000,3.8f,5.5f,38,1100,1600,3834,-.04f,180.0f,"a000_008700",5334,false,.9f,6.5f,8.0f,.55f},
 }};
 
-enum class CombatState { idle, chasing, melee_windup, ranged_windup, recovering, staggered, defeated };
+enum class CombatState { idle, chasing, melee_windup, ranged_windup, recovering, staggered, defeated, phase_transition };
 enum class AnimationIntent { keep, idle, move, attack, stagger, death };
 inline AnimationIntent animation_intent(CombatState state) {
     switch(state) {
@@ -77,6 +77,7 @@ inline AnimationIntent animation_intent(CombatState state) {
     case CombatState::recovering: return AnimationIntent::keep;
     case CombatState::defeated: return AnimationIntent::death;
     case CombatState::staggered: return AnimationIntent::stagger;
+    case CombatState::phase_transition: return AnimationIntent::stagger;
     default: return AnimationIntent::idle;
     }
 }
@@ -105,10 +106,12 @@ public:
     float health() const { return health_; }
     float ratio() const { return std::clamp(health_ / spec_->maximum_health, 0.0f, 1.0f); }
     bool enraged() const { return ratio() <= 0.5f; }
+    bool second_phase() const { return second_phase_; }
+    float attack_rate() const { return second_phase_ ? 1.15f : 1.0f; }
     CombatState state() const { return state_; }
     unsigned reaction_generation() const { return reaction_generation_; }
     void cancel_attack() {
-        if (state_ != CombatState::defeated && state_ != CombatState::staggered) {
+        if (state_ != CombatState::defeated && state_ != CombatState::staggered && state_ != CombatState::phase_transition) {
             state_ = CombatState::idle; remaining_ms_ = 0;
         }
     }
@@ -117,7 +120,7 @@ public:
         if (!std::isfinite(value) || value <= 0 || state_ == CombatState::defeated) return;
         health_ = std::max(0.0f, health_ - value);
         if (health_ == 0) { state_ = CombatState::defeated; remaining_ms_ = 0; }
-        else if (value >= 250 && stagger_resist_ms_==0) {
+        else if (value >= 250 && stagger_resist_ms_==0 && state_!=CombatState::phase_transition) {
             state_ = CombatState::staggered; remaining_ms_ = spec_->stagger_ms;
             stagger_resist_ms_=spec_->stagger_ms+1500; ++reaction_generation_;
         }
@@ -130,9 +133,20 @@ public:
         if (dt == 0) return out;
         stagger_resist_ms_=std::max(0,stagger_resist_ms_-dt);
         if (remaining_ms_ > 0) remaining_ms_ = std::max(0, remaining_ms_ - dt);
+        if(!second_phase_ && enraged() && observation.target_alive && observation.combat_enabled &&
+           finite_vec(observation.actor) && finite_vec(observation.target)) {
+            second_phase_=true;state_=CombatState::phase_transition;
+            remaining_ms_=std::max(1500,spec_->stagger_ms);return out;
+        }
         // Physical hit reactions continue even with aggression paused or no
         // target. Pausing cancels attacks, not the source stagger animation.
         if(state_==CombatState::staggered){
+            if(remaining_ms_>0)return out;
+            state_=CombatState::idle;
+        }
+        // One explicit, vulnerable transition per encounter. The original
+        // reaction clip supplies the pose; these phases are GTA-side design.
+        if(state_==CombatState::phase_transition){
             if(remaining_ms_>0)return out;
             state_=CombatState::idle;
         }
@@ -143,7 +157,9 @@ public:
             out.aim = locked_target_; out.telegraph = remaining_ms_ > 0;
             if (remaining_ms_ == 0) {
                 out.ranged_strike = observation.line_of_sight;
-                state_ = CombatState::recovering; remaining_ms_ = std::max(2200, spec_->attack_clip_ms - 1500);
+                state_ = CombatState::recovering;
+                remaining_ms_ = std::max(static_cast<int>((spec_->attack_clip_ms-spec_->windup_ms)/attack_rate()),
+                    second_phase_?spec_->recovery_ms*3/4:spec_->recovery_ms);
             }
             return out;
         }
@@ -155,8 +171,8 @@ public:
                 state_ = CombatState::recovering;
                 // Let the native one-shot reach its end before another attack
                 // replaces it. Windup marks the hit, not the clip's endpoint.
-                remaining_ms_ = std::max(spec_->attack_clip_ms - spec_->windup_ms,
-                    enraged() ? spec_->recovery_ms * 3 / 4 : spec_->recovery_ms);
+                remaining_ms_ = std::max(static_cast<int>((spec_->attack_clip_ms-spec_->windup_ms)/attack_rate()),
+                    second_phase_ ? spec_->recovery_ms * 3 / 4 : spec_->recovery_ms);
             }
             return out;
         }
@@ -177,12 +193,12 @@ public:
             out.movement=distance>.01f?Vec3{(observation.actor.x-observation.target.x)/distance*step,(observation.actor.y-observation.target.y)/distance*step,0}:Vec3{step,0,0};
             return out;
         }
-        if (spec_->ranged_enabled && (observation.airborne_target || std::abs(observation.actor.z - observation.target.z) > 6.0f || distance > 28.0f)) {
+        if (spec_->ranged_enabled && (observation.airborne_target || std::abs(observation.actor.z - observation.target.z) > spec_->vertical_reach || distance > std::max(28.0f,spec_->melee_range+2.f))) {
             locked_target_ = observation.target;
-            state_ = CombatState::ranged_windup; remaining_ms_ = 1500;
+            state_ = CombatState::ranged_windup; remaining_ms_ = static_cast<int>(spec_->windup_ms/attack_rate());
             out.telegraph = true; out.aim = locked_target_;
         } else if (distance <= spec_->melee_range && std::abs(observation.actor.z-observation.target.z)<spec_->vertical_reach) {
-            state_ = CombatState::melee_windup; remaining_ms_ = spec_->windup_ms;
+            state_ = CombatState::melee_windup; remaining_ms_ = static_cast<int>(spec_->windup_ms/attack_rate());
         } else {
             state_ = CombatState::chasing;
             const float speed = spec_->speed * (enraged() ? 1.25f : 1.0f);
@@ -203,5 +219,6 @@ private:
     unsigned reaction_generation_ = 0;
     int stagger_resist_ms_=0;
     bool repositioning_=false;
+    bool second_phase_=false;
 };
 } // namespace ergt
