@@ -118,7 +118,7 @@ Under `SourceAssets/roster-20261005`:
 
 ## Launch / owner handoff
 
-- Actual shared coordinator `$HOME/sm2-n1/_scratch/gpu`; global hard cap2, GTA exclusive. Use the packaged guarded launcher,1920×1080 window/VSync. Foreign/emergency holds block. No automatic relaunch after crashes.
+- Use the single, live-verified shared coordinator directory used by every renderer; do not derive a separate namespace from the calling account's `$HOME`. Global hard cap2, GTA exclusive. Use the packaged guarded launcher,1920×1080 window/VSync. Foreign/emergency holds block. No automatic relaunch after crashes.
 - Completion run4 closed normally, its owned PAUSED marker was released under the shared perf lock. The final FXAA run also closed normally; only this thread's exact reservation is released under the shared lock after guard exit. Final private receipt records closure/release.
 - Controls:1 select,2 spawn,3 clear,4 aggression,5 carbine/RPG,6 Buzzard. Starts aggressive; one boss at a time. Key3 keeps the owner's usable helicopter. The technical review uses separately owned temporary vehicles.
 - All technical setup/firing requests must be consumed/cleared before handoff. No delayed run or reminder is authorized/queued.
